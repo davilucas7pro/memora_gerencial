@@ -31,7 +31,7 @@ jobs:
       - name: Build Debug APK
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --info
+          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee /tmp/build.log; BUILD_EXIT=${PIPESTATUS[0]}; grep -E "error:|ERROR|Exception|FAILED|at com\.memora" /tmp/build.log | head -80; exit $BUILD_EXIT
 
       - name: Find APK
         if: always()
