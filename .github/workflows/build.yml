@@ -21,18 +21,19 @@ jobs:
       - name: Install Android SDK components
         run: |
           export ANDROID_HOME=/usr/local/lib/android/sdk
-          export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
           yes | sdkmanager --licenses > /dev/null 2>&1 || true
-          sdkmanager "platforms;android-34" "build-tools;34.0.0" > /dev/null 2>&1
+          sdkmanager "platforms;android-34" "build-tools;34.0.0"
           echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-
-      - name: Create local.properties
-        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
 
       - name: Build Debug APK
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tail -60
+          ./gradlew assembleDebug --no-daemon --info
+
+      - name: Find APK
+        if: always()
+        run: find . -name "*.apk" 2>/dev/null || echo "Nenhum APK encontrado"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
