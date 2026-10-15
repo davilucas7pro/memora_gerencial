@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "970496536577",
+    "firebase_url": "https://memo-build-default-rtdb.firebaseio.com",
+    "project_id": "memo-build",
+    "storage_bucket": "memo-build.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:970496536577:android:96e6b233d689f5af4c5000",
+        "android_client_info": {
+          "package_name": "com.memora.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6m8zgtJPAsp93Sn56FdtwUrLJRnt0JJI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:970496536577:android:1721dc8cb8feb81f4c5000",
+        "android_client_info": {
+          "package_name": "com.memora.gerencial"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6m8zgtJPAsp93Sn56FdtwUrLJRnt0JJI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
