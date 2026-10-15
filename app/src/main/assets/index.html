@@ -1,0 +1,703 @@
+<title>Memora Gerencial</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>
+/* ── TOKENS ── */
+:root {
+  --bg: #f5f5f7; --surface: #fff; --surface-2: #f0f0f3;
+  --border: #e4e4e7; --border-2: #d0d0d5;
+  --text: #111; --text-muted: #6b7280;
+  --accent: #6366f1; --accent-dim: #eef2ff; --accent-2: #4f46e5;
+  --success: #22c55e; --warn: #f59e0b; --danger: #ef4444;
+  --info: #3b82f6; --purple: #8b5cf6;
+  --r: 10px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111113; --surface: #1c1c1e; --surface-2: #28282c;
+    --border: #2e2e33; --border-2: #3a3a40;
+    --text: #f2f2f7; --text-muted: #8e8e93;
+    --accent-dim: #1e1e3a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111113; --surface: #1c1c1e; --surface-2: #28282c;
+  --border: #2e2e33; --border-2: #3a3a40;
+  --text: #f2f2f7; --text-muted: #8e8e93;
+  --accent-dim: #1e1e3a; color-scheme: dark;
+}
+* { box-sizing: border-box; margin: 0; padding: 0 }
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size: 15px }
+
+/* ── LAYOUT ── */
+#app { display: flex; flex-direction: column; height: 100%; }
+#topbar {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 12px 16px env(safe-area-inset-top,0px);
+  display: flex; align-items: center; gap: 10px;
+  position: sticky; top: 0; z-index: 10;
+}
+#topbar h1 { font-size: 17px; font-weight: 700; flex: 1 }
+#content { flex: 1; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom,16px) }
+#navbar {
+  display: flex; background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom,0px);
+  position: sticky; bottom: 0; z-index: 10;
+}
+.nav-it {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 3px; padding: 8px 4px; border: none; background: none;
+  color: var(--text-muted); font-size: 10px; font-weight: 600;
+  cursor: pointer; font-family: inherit; letter-spacing: .03em;
+  position: relative; transition: color .15s;
+}
+.nav-it.on { color: var(--accent-2) }
+.nav-it svg { width: 22px; height: 22px }
+.nav-badge {
+  position: absolute; top: 5px; right: 18px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--danger); display: none;
+}
+
+/* ── TABS ── */
+.tab { display: none }
+.tab.on { display: block }
+
+/* ── SHARED CARDS ── */
+.section-head { padding: 18px 16px 10px; display: flex; align-items: center; justify-content: space-between }
+.section-title { font-size: 18px; font-weight: 800; color: var(--text) }
+.refresh-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 12px; border-radius: 20px;
+  border: 1.5px solid var(--border-2); background: var(--surface);
+  color: var(--text-muted); font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+}
+.stat-row { display: flex; gap: 10px; padding: 0 16px 14px; flex-wrap: wrap }
+.stat-card { flex: 1 1 auto; min-width: 0; padding: 12px 14px; border-radius: var(--r); background: var(--surface); border: 1px solid var(--border) }
+.stat-val { font-size: 26px; font-weight: 800; line-height: 1 }
+.stat-lbl { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); margin-top: 4px }
+.sec-group { margin-bottom: 20px }
+.sec-label { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-muted); padding: 0 16px 8px }
+.empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); font-size: 14px }
+
+/* ── CARDS ── */
+.card {
+  margin: 0 16px 8px; padding: 12px 14px; border-radius: var(--r);
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 3px solid var(--border-2);
+}
+.card.ok     { border-left-color: var(--success) }
+.card.warn   { border-left-color: var(--warn) }
+.card.breach { border-left-color: var(--danger) }
+.card.info   { border-left-color: var(--info) }
+.card.purple { border-left-color: var(--purple) }
+.card-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px }
+.card-name { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; min-width: 0 }
+.card-time { font-size: 13px; font-weight: 700; flex-shrink: 0 }
+.card-time.ok     { color: var(--success) }
+.card-time.warn   { color: var(--warn) }
+.card-time.breach { color: var(--danger) }
+.card-time.info   { color: var(--info) }
+.card-time.purple { color: var(--purple) }
+.card-meta { font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.5 }
+.card-notif { font-size: 11px; color: var(--text-muted); margin-top: 3px }
+.sla-bar { height: 3px; border-radius: 2px; background: var(--surface-2); margin-top: 8px; overflow: hidden }
+.sla-fill { height: 100%; border-radius: 2px; transition: width .3s }
+.rank { font-size: 18px; font-weight: 800; color: var(--text-muted); flex-shrink: 0; min-width: 24px }
+
+/* ── OBS FIELD ── */
+.obs-wrap { margin-top: 8px }
+.obs-label { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px }
+.obs-ta {
+  width: 100%; padding: 7px 9px; border: 1.5px solid var(--border); border-radius: var(--r);
+  background: var(--surface-2); color: var(--text); font-family: inherit;
+  font-size: 12px; line-height: 1.4; resize: vertical; min-height: 52px;
+  outline: none; transition: border-color .15s;
+}
+.obs-ta:focus { border-color: var(--accent) }
+.obs-save {
+  margin-top: 5px; padding: 4px 12px; border-radius: 20px;
+  border: 1.5px solid var(--accent); background: var(--accent-dim);
+  color: var(--accent-2); font-size: 11px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+}
+
+/* ── ANIM ── */
+@keyframes pulse-sla {
+  0%,100% { opacity: 1 } 50% { opacity: .6 }
+}
+.card.warn   { animation: pulse-sla 1.8s ease-in-out infinite }
+.card.breach { animation: pulse-sla 0.9s ease-in-out infinite }
+
+/* ── PULSE BADGE ── */
+@keyframes ping { 0%{transform:scale(1);opacity:.8} 75%,100%{transform:scale(2);opacity:0} }
+</style>
+
+<div id="app">
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <h1>📊 Memora Gerencial</h1>
+    <div id="fbStatus" style="font-size:11px;color:var(--text-muted)">Conectando…</div>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content">
+
+    <!-- TAB: ALERTAS -->
+    <div class="tab on" id="tab-alertas">
+      <div class="section-head">
+        <div class="section-title">Alertas SLA</div>
+        <button class="refresh-btn" onclick="renderAlertas()">↻ Atualizar</button>
+      </div>
+      <div id="alertasList"></div>
+    </div>
+
+    <!-- TAB: DASHBOARD -->
+    <div class="tab" id="tab-dashboard">
+      <div class="section-head">
+        <div class="section-title">Dashboard</div>
+        <button class="refresh-btn" onclick="renderDashboard()">↻ Atualizar</button>
+      </div>
+      <div id="dashContent"></div>
+    </div>
+
+    <!-- TAB: HISTÓRICO -->
+    <div class="tab" id="tab-historico">
+      <div class="section-head">
+        <div class="section-title">Histórico</div>
+        <button class="refresh-btn" onclick="renderHistorico()">↻ Atualizar</button>
+      </div>
+      <div id="histContent"></div>
+    </div>
+
+  </div>
+
+  <!-- NAV BAR -->
+  <div id="navbar">
+    <button class="nav-it on" id="nav-alertas" onclick="goTab('alertas',this)">
+      <span id="alertBadge" class="nav-badge"></span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      Alertas
+    </button>
+    <button class="nav-it" id="nav-dashboard" onclick="goTab('dashboard',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-it" id="nav-historico" onclick="goTab('historico',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="12 8 12 12 14 14"/><path d="M3.05 11a9 9 0 1 1 .5 4"/><polyline points="3 16 3 11 8 11"/></svg>
+      Histórico
+    </button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.1/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.1/firebase-database-compat.min.js"></script>
+<script>
+'use strict'
+
+/* ── FIREBASE ── */
+const firebaseConfig = {
+  apiKey: "AIzaSyArRSR87rQzOM5qQCVMA5RUdhumCY71P6c",
+  authDomain: "memo-build.firebaseapp.com",
+  databaseURL: "https://memo-build-default-rtdb.firebaseio.com",
+  storageBucket: "memo-build.firebasestorage.app"
+}
+const fbApp = firebase.initializeApp(firebaseConfig)
+const fbDb  = firebase.database()
+
+/* ── STORAGE ── */
+const S = {
+  get(k, def) { try { const v=localStorage.getItem(k); return v===null?def:JSON.parse(v) } catch(e){ return def } },
+  set(k, v)   { try { localStorage.setItem(k, JSON.stringify(v)) } catch(e){} }
+}
+
+/* ── SLA CONFIG ── */
+const TIPO_LABELS = {
+  urg1_retira:       '🚀 Ret. Urg.1',
+  nao_em_loja:       '🏪 Não em Loja',
+  entrega_2h:        '⚡ Entrega 2h',
+  entrega_dia:       '📦 Entrega Dia',
+  entrega_outro_dia: '🗓️ Outro Dia'
+}
+const TIPO_SLA = {
+  urg1_retira:       { alertMs:  5*60000, slaMs: 10*60000 },
+  nao_em_loja:       { alertMs:  5*60000, slaMs: 10*60000 },
+  entrega_2h:        { alertMs: 10*60000, slaMs: 20*60000 },
+  entrega_dia:       { alertMs: 10*60000, slaMs: 20*60000 },
+  entrega_outro_dia: null
+}
+const STATUS_LABELS = {
+  em_pedido:'Em Pedido', pedido_pronto:'Pedido Pronto', em_coleta:'Em Coleta',
+  validar_alteracao:'Validar Alteração', alterar_pedido:'Alterar Pedido',
+  coletado:'Coletado', em_expedicao:'Em Expedição', concluida:'Concluída'
+}
+const SLA_ACTIVE = new Set(['pedido_pronto','em_coleta','validar_alteracao','alterar_pedido','em_expedicao'])
+
+/* ── STATE ── */
+let allRequests  = {}   // token → { reqId → req }
+let contacts     = []
+let notifTs      = S.get('ger_notif_ts', {})
+let alertRecords = S.get('ger_alert_records', [])
+let curTab       = 'alertas'
+
+/* ── HELPERS ── */
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+const fmtMs = ms => { const m=Math.floor(ms/60000),s=Math.floor((ms%60000)/1000); return m>0?`${m}min`:s+'s' }
+const fmtTime = ts => new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})
+const fmtDate = ts => new Date(ts).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})
+
+function sendNotif(title, body) {
+  if (window.AndroidBridge) { try { AndroidBridge.showNotification(title, body) } catch(e){} }
+  else if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+    new Notification(title, { body })
+  }
+}
+
+/* ── NAVIGATION ── */
+function goTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'))
+  document.querySelectorAll('.nav-it').forEach(b=>b.classList.remove('on'))
+  document.getElementById('tab-'+name).classList.add('on')
+  if(btn) btn.classList.add('on')
+  curTab = name
+  if(name==='alertas')   renderAlertas()
+  if(name==='dashboard') renderDashboard()
+  if(name==='historico') renderHistorico()
+}
+
+/* ── FIREBASE SUBSCRIPTION ── */
+function subscribeData() {
+  // Subscribe to owner contacts list
+  fbDb.ref('owner/contacts').on('value', snap => {
+    contacts = []
+    snap.forEach(child => {
+      const c = child.val()
+      if(c && c.token) contacts.push({...c, key: child.key})
+    })
+    document.getElementById('fbStatus').textContent = `${contacts.length} contatos`
+    contacts.forEach(c => subscribeContact(c.token))
+    syncPipelineToAndroid()
+    checkSlaNotifs()
+    if(curTab==='alertas')   renderAlertas()
+    if(curTab==='dashboard') renderDashboard()
+    if(curTab==='historico') renderHistorico()
+  })
+}
+
+function subscribeContact(token) {
+  fbDb.ref(`contacts/${token}/requests`).on('value', snap => {
+    const reqs = snap.val()
+    allRequests[token] = reqs || {}
+    syncPipelineToAndroid()
+    checkSlaNotifs()
+    if(curTab==='alertas')   renderAlertas()
+    if(curTab==='dashboard') renderDashboard()
+    if(curTab==='historico') renderHistorico()
+  })
+}
+
+/* ── SYNC PIPELINE TO ANDROID ── */
+function syncPipelineToAndroid() {
+  if(!window.AndroidBridge) return
+  const active = []
+  Object.entries(allRequests).forEach(([token, reqs]) => {
+    if(!reqs) return
+    Object.entries(reqs).forEach(([reqId, r]) => {
+      if(!r) return
+      const s = r.status||'em_pedido'
+      if(!SLA_ACTIVE.has(s) || !r.tipo || !TIPO_SLA[r.tipo]) return
+      active.push({ id:reqId, token, title:r.title||reqId, status:s, tipo:r.tipo,
+        statusChangedAt: r.statusChangedAt||r.createdAt||0, createdAt: r.createdAt||0 })
+    })
+  })
+  try { AndroidBridge.savePipelineRequests(JSON.stringify(active)) } catch(e){}
+}
+
+/* ── SLA NOTIFICATION CHECK ── */
+function checkSlaNotifs() {
+  const nowMs = Date.now()
+  let changed = false
+
+  Object.entries(allRequests).forEach(([token, reqs]) => {
+    if(!reqs) return
+    Object.entries(reqs).forEach(([reqId, r]) => {
+      if(!r) return
+      const s = r.status||'em_pedido'
+      if(!SLA_ACTIVE.has(s) || !r.tipo || !TIPO_SLA[r.tipo]) return
+      const cfg = TIPO_SLA[r.tipo]; if(!cfg) return
+
+      const changedAt = r.statusChangedAt||r.createdAt||0
+      const elapsed   = nowMs - changedAt
+      const slaKey    = 'sla_'+reqId
+      const lastFired = notifTs[slaKey]||0
+
+      if(elapsed >= cfg.alertMs && lastFired < changedAt) {
+        const elMin    = Math.floor(elapsed/60000)
+        const slaMin   = cfg.slaMs/60000
+        const isBreach = elapsed >= cfg.slaMs
+        const icon     = isBreach ? '🔴' : '⚠️'
+        const status   = STATUS_LABELS[s]||s
+        const tipo     = TIPO_LABELS[r.tipo]||r.tipo
+        const timeStr  = fmtTime(Date.now())
+        sendNotif(
+          `${icon} ${timeStr} — ${isBreach?'SLA Estourado!':'Pedido Parado'}`,
+          `"${r.title}" — ${status} há ${elMin}min (${tipo}, SLA: ${slaMin}min)`
+        )
+        // Save alert record
+        const contact = contacts.find(c=>c.token===token)
+        alertRecords.unshift({
+          id: `${Date.now()}_${reqId}`,
+          reqId, token, reqTitle: r.title||reqId,
+          contactName: contact?contact.name:token,
+          tipo: r.tipo, status: s,
+          changedAt, firedAt: Date.now(), elapsedMs: elapsed, isBreach, obs: ''
+        })
+        if(alertRecords.length > 200) alertRecords = alertRecords.slice(0,200)
+        S.set('ger_alert_records', alertRecords)
+        if(window.AndroidBridge) try{ AndroidBridge.saveAlertRecords(JSON.stringify(alertRecords)) }catch(e){}
+
+        notifTs[slaKey] = changedAt
+        changed = true
+      }
+    })
+  })
+
+  if(changed) {
+    S.set('ger_notif_ts', notifTs)
+    if(window.AndroidBridge) try{ AndroidBridge.saveNotifTs(JSON.stringify(notifTs)) }catch(e){}
+  }
+
+  // Badge
+  const nAlert = Object.values(alertRecords).filter(a => {
+    // only alerts fired in the last 60 min
+    return Date.now() - a.firedAt < 60*60000
+  }).length
+  const badge = document.getElementById('alertBadge')
+  if(badge) badge.style.display = nAlert>0 ? 'block' : 'none'
+}
+
+/* ── SAVE OBS ── */
+function saveObs(alertId, obs) {
+  const rec = alertRecords.find(a=>a.id===alertId)
+  if(rec) {
+    rec.obs = obs
+    S.set('ger_alert_records', alertRecords)
+    if(window.AndroidBridge) try{ AndroidBridge.saveAlertRecords(JSON.stringify(alertRecords)) }catch(e){}
+  }
+}
+
+/* ══════════════════════════════════
+   RENDER: ALERTAS
+══════════════════════════════════ */
+function renderAlertas() {
+  const el = document.getElementById('alertasList')
+  if(!el) return
+
+  if(!alertRecords.length) {
+    el.innerHTML = `<div class="empty-state">🔔 Nenhum alerta registrado ainda.<br><small>Os alertas aparecem aqui quando pedidos ultrapassam o tempo SLA.</small></div>`
+    return
+  }
+
+  const nBreach = alertRecords.filter(a=>a.isBreach).length
+  const nWarn   = alertRecords.length - nBreach
+  const nObs    = alertRecords.filter(a=>a.obs&&a.obs.trim()).length
+
+  const cards = alertRecords.map(a => {
+    const cls  = a.isBreach ? 'breach' : 'warn'
+    const icon = a.isBreach ? '🔴' : '⚠️'
+    const slaMin = (a.tipo&&TIPO_SLA[a.tipo]) ? TIPO_SLA[a.tipo].slaMs/60000 : null
+    const safeId = a.id.replace(/[^a-zA-Z0-9_]/g,'_')
+    return `<div class="card ${cls}">
+      <div class="card-row">
+        <div class="card-name">${icon} ${esc(a.reqTitle)}</div>
+        <div class="card-time ${cls}">${fmtMs(a.elapsedMs)}</div>
+      </div>
+      <div class="card-meta">
+        <strong>${STATUS_LABELS[a.status]||a.status}</strong> · ${esc(a.contactName)}
+        ${a.tipo ? ` · ${TIPO_LABELS[a.tipo]||a.tipo}` : ''}
+        ${slaMin ? ` · SLA ${slaMin}min` : ''}
+      </div>
+      <div class="card-notif">🔔 ${fmtDate(a.firedAt)} às ${fmtTime(a.firedAt)}</div>
+      <div class="obs-wrap">
+        <div class="obs-label">Observação / Justificativa</div>
+        <textarea class="obs-ta" id="obs-${safeId}" rows="2"
+          placeholder="Ex: separador estava em outro pedido, falta de peça…">${esc(a.obs||'')}</textarea>
+        <button class="obs-save"
+          onclick="saveObs('${a.id}',document.getElementById('obs-${safeId}').value);this.textContent='✓ Salvo!'">
+          Salvar obs.
+        </button>
+      </div>
+    </div>`
+  }).join('')
+
+  el.innerHTML = `
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-val" style="color:var(--danger)">${nBreach}</div><div class="stat-lbl">Estourados</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--warn)">${nWarn}</div><div class="stat-lbl">Alertas</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--success)">${nObs}</div><div class="stat-lbl">Justificados</div></div>
+    </div>
+    <div class="sec-group">
+      <div class="sec-label">Registros (${alertRecords.length})</div>
+      ${cards}
+    </div>`
+}
+
+/* ══════════════════════════════════
+   RENDER: DASHBOARD
+══════════════════════════════════ */
+function renderDashboard() {
+  const el = document.getElementById('dashContent')
+  if(!el) return
+  const nowMs = Date.now()
+
+  // Gather all active pipeline items
+  const active = []
+  Object.entries(allRequests).forEach(([token, reqs]) => {
+    if(!reqs) return
+    const contact = contacts.find(c=>c.token===token)
+    const cName   = contact?contact.name:token
+    Object.entries(reqs).forEach(([reqId, r]) => {
+      if(!r) return
+      const s = r.status||'em_pedido'
+      if(s==='concluida') return
+      active.push({...r, id:reqId, token, cName})
+    })
+  })
+
+  // ── Parados (SLA active statuses sorted by elapsed) ──
+  const parados = active
+    .filter(r => SLA_ACTIVE.has(r.status||'em_pedido'))
+    .map(r => {
+      const elapsed = nowMs - (r.statusChangedAt||r.createdAt||0)
+      const cfg = (r.tipo&&TIPO_SLA[r.tipo])||null
+      const state = !cfg ? 'ok' : elapsed>=cfg.slaMs?'breach':elapsed>=cfg.alertMs?'warn':'ok'
+      return {...r, elapsed, cfg, state}
+    })
+    .sort((a,b)=>b.elapsed-a.elapsed)
+
+  // ── Separação (time in em_coleta) ──
+  const separacao = []
+  Object.entries(allRequests).forEach(([token, reqs]) => {
+    if(!reqs) return
+    const contact = contacts.find(c=>c.token===token)
+    const cName   = contact?contact.name:token
+    Object.entries(reqs).forEach(([reqId, r]) => {
+      if(!r) return
+      let ms = 0
+      const hist = Array.isArray(r.statusHistory)?r.statusHistory:[]
+      for(let i=0;i<hist.length;i++) {
+        if(hist[i].status==='em_coleta') {
+          const start=hist[i].changedAt||0, end=hist[i+1]?(hist[i+1].changedAt||nowMs):nowMs
+          ms += end-start
+        }
+      }
+      if((r.status||'')==='em_coleta') { const s=r.statusChangedAt||0; if(s) ms+=nowMs-s }
+      if(ms>0) separacao.push({...r,id:reqId,token,cName,colMs:ms})
+    })
+  })
+  separacao.sort((a,b)=>b.colMs-a.colMs)
+
+  // ── SKU (desvio times) ──
+  const skuItems = []
+  const devSet = new Set(['validar_alteracao','alterar_pedido'])
+  Object.entries(allRequests).forEach(([token, reqs]) => {
+    if(!reqs) return
+    const contact = contacts.find(c=>c.token===token)
+    const cName   = contact?contact.name:token
+    Object.entries(reqs).forEach(([reqId, r]) => {
+      if(!r) return
+      let ms=0, ct=0
+      const hist=Array.isArray(r.statusHistory)?r.statusHistory:[]
+      for(let i=0;i<hist.length;i++) {
+        if(devSet.has(hist[i].status)) {
+          const start=hist[i].changedAt||0, end=hist[i+1]?(hist[i+1].changedAt||nowMs):nowMs
+          ms+=end-start; ct++
+        }
+      }
+      if(devSet.has(r.status||'')) { const s=r.statusChangedAt||0; if(s){ ms+=nowMs-s; ct++ } }
+      if(ms>0) skuItems.push({...r,id:reqId,token,cName,devMs:ms,devCount:ct})
+    })
+  })
+  skuItems.sort((a,b)=>b.devMs-a.devMs)
+
+  // ── Stats ──
+  const nBreach = parados.filter(r=>r.state==='breach').length
+  const nWarn   = parados.filter(r=>r.state==='warn').length
+  const avgSep  = separacao.length ? Math.round(separacao.reduce((acc,r)=>acc+r.colMs,0)/separacao.length) : 0
+  const avgSku  = skuItems.length  ? Math.round(skuItems.reduce((acc,r)=>acc+r.devMs,0)/skuItems.length) : 0
+
+  const renderParadoCard = (r, i) => {
+    const s = r.status||'em_pedido'
+    const fillColor = r.state==='breach'?'var(--danger)':r.state==='warn'?'var(--warn)':'var(--success)'
+    const pct = r.cfg ? Math.min(100,(r.elapsed/r.cfg.slaMs)*100) : 0
+    return `<div class="card ${r.state}">
+      <div class="card-row">
+        <div class="rank">#${i+1}</div>
+        <div class="card-name" style="margin-left:6px">${esc(r.title)}</div>
+        <div class="card-time ${r.state}">${fmtMs(r.elapsed)}</div>
+      </div>
+      <div class="card-meta">
+        <strong>${STATUS_LABELS[s]||s}</strong> · ${esc(r.cName)}
+        ${r.tipo?` · ${TIPO_LABELS[r.tipo]||r.tipo}`:''}
+        ${r.cfg?` · SLA ${r.cfg.slaMs/60000}min`:''}
+      </div>
+      ${r.cfg?`<div class="sla-bar"><div class="sla-fill" style="width:${pct}%;background:${fillColor}"></div></div>`:''}
+    </div>`
+  }
+
+  const renderSepCard = (r, i) => `<div class="card info">
+    <div class="card-row">
+      <div class="rank">#${i+1}</div>
+      <div class="card-name" style="margin-left:6px">${esc(r.title)}</div>
+      <div class="card-time info">${fmtMs(r.colMs)}</div>
+    </div>
+    <div class="card-meta">${esc(r.cName)}${r.tipo?` · ${TIPO_LABELS[r.tipo]||r.tipo}`:''}</div>
+    <div class="sla-bar"><div class="sla-fill" style="width:${Math.min(100,(r.colMs/(separacao[0]?.colMs||1))*100)}%;background:var(--info)"></div></div>
+  </div>`
+
+  const renderSkuCard = (r, i) => {
+    const s = r.status||'em_pedido'
+    return `<div class="card purple">
+      <div class="card-row">
+        <div class="rank">#${i+1}</div>
+        <div class="card-name" style="margin-left:6px">${esc(r.title)}</div>
+        <div class="card-time purple">${fmtMs(r.devMs)}</div>
+      </div>
+      <div class="card-meta">
+        ${esc(r.cName)}${r.tipo?` · ${TIPO_LABELS[r.tipo]||r.tipo}`:''}
+        · <strong>${r.devCount}x desvio</strong> · ${STATUS_LABELS[s]||s}
+      </div>
+      <div class="sla-bar"><div class="sla-fill" style="width:${Math.min(100,(r.devMs/(skuItems[0]?.devMs||1))*100)}%;background:var(--purple)"></div></div>
+    </div>`
+  }
+
+  const section = (title, list, fn) => list.length ? `
+    <div class="sec-group">
+      <div class="sec-label">${title} (${list.length})</div>
+      ${list.slice(0,10).map(fn).join('')}
+    </div>` : ''
+
+  el.innerHTML = `
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-val" style="color:var(--danger)">${nBreach}</div><div class="stat-lbl">SLA Estourado</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--warn)">${nWarn}</div><div class="stat-lbl">Em Alerta</div></div>
+      <div class="stat-card"><div class="stat-val">${active.length}</div><div class="stat-lbl">Em Andamento</div></div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-val" style="color:var(--info)">${avgSep?fmtMs(avgSep):'—'}</div><div class="stat-lbl">Média Separação</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--purple)">${avgSku?fmtMs(avgSku):'—'}</div><div class="stat-lbl">Média Desvio SKU</div></div>
+    </div>
+    ${section('⏸ Mais Parados', parados, renderParadoCard)}
+    ${section('✂️ Maior Tempo em Separação', separacao.slice(0,5), renderSepCard)}
+    ${section('🔍 Maior Desvio SKU', skuItems.slice(0,5), renderSkuCard)}
+    ${!active.length?'<div class="empty-state">✅ Nenhum pedido ativo no momento</div>':''}`
+}
+
+/* ══════════════════════════════════
+   RENDER: HISTÓRICO
+══════════════════════════════════ */
+function renderHistorico() {
+  const el = document.getElementById('histContent')
+  if(!el) return
+  const nowMs = Date.now()
+
+  const done = []
+  Object.entries(allRequests).forEach(([token, reqs]) => {
+    if(!reqs) return
+    const contact = contacts.find(c=>c.token===token)
+    const cName   = contact?contact.name:token
+    Object.entries(reqs).forEach(([reqId, r]) => {
+      if(!r) return
+      if((r.status||'')==='concluida') {
+        // Total time: from createdAt to last statusHistory entry or statusChangedAt
+        const hist = Array.isArray(r.statusHistory)?r.statusHistory:[]
+        const endTs = r.statusChangedAt || (hist.length?hist[hist.length-1].changedAt:0) || 0
+        const start = r.createdAt||0
+        const totalMs = endTs&&start ? endTs-start : 0
+
+        // Time in each stage
+        let colMs=0, devMs=0, devCount=0
+        const devSet = new Set(['validar_alteracao','alterar_pedido'])
+        for(let i=0;i<hist.length;i++){
+          const s=hist[i].status, t0=hist[i].changedAt||0
+          const t1=hist[i+1]?(hist[i+1].changedAt||endTs):endTs
+          if(s==='em_coleta') colMs+=t1-t0
+          if(devSet.has(s)){ devMs+=t1-t0; devCount++ }
+        }
+        done.push({...r,id:reqId,token,cName,totalMs,colMs,devMs,devCount,endTs})
+      }
+    })
+  })
+  done.sort((a,b)=>(b.endTs||0)-(a.endTs||0))
+
+  if(!done.length){
+    el.innerHTML = `<div class="empty-state">📦 Nenhum pedido concluído ainda</div>`
+    return
+  }
+
+  const avgTotal = done.reduce((acc,r)=>acc+r.totalMs,0)/done.length
+  const avgCol   = done.filter(r=>r.colMs>0).reduce((acc,r)=>acc+r.colMs,0)/(done.filter(r=>r.colMs>0).length||1)
+  const nDev     = done.filter(r=>r.devCount>0).length
+
+  const cards = done.map(r => {
+    const hist = Array.isArray(r.statusHistory)?r.statusHistory:[]
+    const histHtml = hist.map(h=>`<span style="color:var(--text-muted)">${STATUS_LABELS[h.status]||h.status}</span>`).join(' → ')
+    return `<div class="card ok">
+      <div class="card-row">
+        <div class="card-name">✅ ${esc(r.title)}</div>
+        <div class="card-time ok">${r.totalMs?fmtMs(r.totalMs):'?'}</div>
+      </div>
+      <div class="card-meta">
+        ${esc(r.cName)}${r.tipo?` · ${TIPO_LABELS[r.tipo]||r.tipo}`:''}
+        ${r.endTs?` · Concluído ${fmtDate(r.endTs)} ${fmtTime(r.endTs)}`:''}
+      </div>
+      <div class="card-meta" style="margin-top:4px">
+        ${r.colMs?`✂️ Separação: ${fmtMs(r.colMs)}`:''}
+        ${r.devCount?`  🔍 Desvios: ${r.devCount}x (${fmtMs(r.devMs)})`:''}
+      </div>
+      ${histHtml?`<div class="card-meta" style="margin-top:4px;font-size:10px">${histHtml}</div>`:''}
+    </div>`
+  }).join('')
+
+  el.innerHTML = `
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-val" style="color:var(--success)">${done.length}</div><div class="stat-lbl">Concluídos</div></div>
+      <div class="stat-card"><div class="stat-val">${avgTotal?fmtMs(Math.round(avgTotal)):'—'}</div><div class="stat-lbl">Tempo Médio</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--danger)">${nDev}</div><div class="stat-lbl">Com Desvio</div></div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-val" style="color:var(--info)">${avgCol?fmtMs(Math.round(avgCol)):'—'}</div><div class="stat-lbl">Média Separação</div></div>
+    </div>
+    <div class="sec-group">
+      <div class="sec-label">Pedidos Concluídos (${done.length})</div>
+      ${cards}
+    </div>`
+}
+
+/* ── INIT ── */
+// Load persisted records from Android SharedPrefs if available
+if(window.AndroidBridge) {
+  try {
+    const saved = AndroidBridge.getAlertRecords()
+    if(saved && saved !== '[]') alertRecords = JSON.parse(saved)
+  } catch(e){}
+  try {
+    const savedTs = AndroidBridge.getNotifTs()
+    if(savedTs && savedTs !== '{}') notifTs = JSON.parse(savedTs)
+  } catch(e){}
+}
+
+// Check notifications permission
+if(typeof Notification !== 'undefined' && Notification.permission === 'default') {
+  Notification.requestPermission()
+}
+
+subscribeData()
+renderAlertas()
+setInterval(()=>{ checkSlaNotifs() }, 30000)
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState==='visible') checkSlaNotifs()
+})
+</script>
