@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Memora Gerencial</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
@@ -130,7 +132,7 @@ body {
 .tab {
   display: none; flex-direction: column;
   height: 100%; overflow-y: auto;
-  padding-bottom: calc(var(--nav-h) + 12px);
+  padding-bottom: 12px;  /* the bottom nav sits below .main, not over it */
 }
 .tab.on { display: flex }
 .tab::-webkit-scrollbar { width: 6px }
@@ -286,6 +288,34 @@ body {
 .ger-stat-lbl { font-size: 13px; color: var(--text-muted) }
 .ger-stat-val { font-size: 22px; line-height: 1.3; font-weight: 600; color: var(--text); margin-top: 2px }
 .ger-stat-row.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) }
+
+/* ── KANBAN BOARD (Torque "Acompanhamento"): 280px columns side by side ── */
+.board {
+  display: flex; gap: 12px; align-items: stretch;
+  overflow-x: auto; overflow-y: hidden; padding: 0 16px 12px;
+  scroll-snap-type: x proximity; scroll-padding-inline: 16px; -webkit-overflow-scrolling: touch;
+  flex: 1 0 360px; min-height: 360px;
+}
+/* the board takes whatever height is left under the title and tabs */
+#gerList { flex: 1 0 auto; display: flex; flex-direction: column; min-height: 0 }
+.board::-webkit-scrollbar { height: 6px }
+.board::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px }
+.board .ger-section {
+  flex: 0 0 min(280px, 82vw); margin: 0; scroll-snap-align: start;
+  display: flex; flex-direction: column; min-height: 0;
+  border: 1px solid var(--card-border); border-top-width: 3px;
+}
+.board .ger-section.c-ok { border-top-color: var(--edge-ok) }
+.board .ger-section.c-warn { border-top-color: var(--edge-warn) }
+.board .ger-section.c-breach { border-top-color: var(--edge-breach) }
+.board .ger-section.c-info { border-top-color: var(--edge-info) }
+.board .ger-section.c-volcano { border-top-color: #fa541c }
+.board .ger-section:not([class*="c-"]) { border-top-color: #8c8c8c }
+.board .ger-section-title { flex-shrink: 0 }
+.board .ger-col-body { flex: 1; min-height: 0; overflow-y: auto; padding-top: 2px }
+.board .ger-col-body::-webkit-scrollbar { width: 4px }
+.board .ger-col-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px }
+.board .ger-empty { padding: 32px 12px }
 .ger-stat-sub { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 
 /* ── BOTTOM NAV (Torque menu colors) ── */
@@ -410,7 +440,7 @@ body {
         <button class="ger-tab-btn"    id="gTab-separacao" onclick="goGerTab('separacao')">Separação</button>
         <button class="ger-tab-btn"    id="gTab-sku"       onclick="goGerTab('sku')">SKU</button>
       </div>
-      <div id="gerList" style="padding-bottom:40px"></div>
+      <div id="gerList"></div>
     </div>
   </main>
 
@@ -540,7 +570,11 @@ const EMPTY_SVG = '<svg viewBox="0 0 64 41" xmlns="http://www.w3.org/2000/svg"><
 const emptyState = msg => `<div class="ger-empty">${EMPTY_SVG}${msg}</div>`
 // Board-style column: colored top edge + uppercase tag + count
 const column = (title, tone, edge, count, body) =>
-  `<div class="ger-section ${edge}"><div class="ger-section-title"><span class="tq-tag head ${tone}">${title}</span><span class="ger-count">${count}</span></div>${body}</div>`
+  `<div class="ger-section ${edge}"><div class="ger-section-title"><span class="tq-tag head ${tone}">${title}</span><span class="ger-count">${count}</span></div><div class="ger-col-body">${body}</div></div>`
+// Kanban like Torque's "Acompanhamento": columns side by side, each scrolling on its own
+const board = cols => `<div class="board">${cols.join('')}</div>`
+// column top-edge color for a status tag tone
+const EDGE_OF = { 't-proc':'c-info', 't-blue':'c-info', 't-warn':'c-warn', 't-err':'c-breach', 't-volcano':'c-volcano', 't-ok':'c-ok', 't-cyan':'c-info', 't-default':'' }
 // Card body lines as on the Torque board: bold title, customer (user icon), seller, then branch
 const ICON_USER = '<svg viewBox="64 64 896 896" fill="currentColor" aria-hidden="true"><path d="M858.5 763.6a374 374 0 00-80.6-119.5 375.63 375.63 0 00-119.5-80.6c-.4-.2-.8-.3-1.2-.5C719.5 518 760 444.7 760 362c0-137-111-248-248-248S264 225 264 362c0 82.7 40.5 156 102.8 201.1-.4.2-.8.3-1.2.5-44.8 18.9-85 46-119.5 80.6a375.63 375.63 0 00-80.6 119.5A371.7 371.7 0 00136 901.8a8 8 0 008 8.2h60c4.4 0 7.9-3.5 8-7.8 2-77.2 33-149.5 87.8-204.3 56.7-56.7 132-87.9 212.2-87.9s155.5 31.2 212.2 87.9C779 752.7 810 825 812 902.2c.1 4.4 3.6 7.8 8 7.8h60a8 8 0 008-8.2c-1-47.8-10.9-94.3-29.5-138.2zM512 534c-45.9 0-89.1-17.9-121.6-50.4S340 407.9 340 362c0-45.9 17.9-89.1 50.4-121.6S466.1 190 512 190s89.1 17.9 121.6 50.4S684 316.1 684 362c0 45.9-17.9 89.1-50.4 121.6S557.9 534 512 534z"/></svg>'
 const cardWho = r => `<strong class="ger-name">${esc(r.title)}</strong>
@@ -702,12 +736,8 @@ function renderGerParados(el){
   })
   items.sort((a,b)=>b.elapsed-a.elapsed)
 
-  if(!items.length){
-    el.innerHTML = column('Pedidos parados', 't-ok', 'c-ok', 0, emptyState('Nenhum pedido parado no fluxo'))
-    return
-  }
   const edge = { ok:'var(--edge-ok)', warn:'var(--edge-warn)', breach:'var(--edge-breach)' }
-  const cards = items.map((r,i)=>{
+  const card = (r,i) => {
     const s = r.status||'em_pedido'
     const pct = r.cfg ? Math.min(100,(r.elapsed/r.cfg.slaMs)*100) : 0
     return `<div class="ger-card ${r.slaState} clickable" onclick="openAudit('${r.token}','${r.id}')">
@@ -719,11 +749,17 @@ function renderGerParados(el){
         ${r.cfg ? `<div class="ger-sla-bar"><div class="ger-sla-fill" style="width:${pct}%;background:${edge[r.slaState]}"></div></div>` : ''}
       </div>
     </div>`
-  }).join('')
-  const nBreach = items.filter(r=>r.slaState==='breach').length
-  const nWarn = items.filter(r=>r.slaState==='warn').length
-  const tone = nBreach ? ['t-err','c-breach'] : nWarn ? ['t-warn','c-warn'] : ['t-ok','c-ok']
-  el.innerHTML = column('Pedidos mais parados', tone[0], tone[1], items.length, cards)
+  }
+  // one column per board status, in the Torque board order
+  const order = ['pedido_pronto','em_coleta','coletado','em_expedicao','validar_alteracao','alterar_pedido']
+    .filter(s => SLA_ACTIVE.has(s))
+  const cols = order.map(s => {
+    const list = items.filter(r => (r.status||'') === s)
+    const tone = STATUS_TAG[s] || 't-default'
+    return column(STATUS_LABELS[s] || s, tone, EDGE_OF[tone] || '', list.length,
+      list.length ? list.map(card).join('') : emptyState('Nenhum pedido'))
+  })
+  el.innerHTML = board(cols)
 }
 
 /* ── GERENCIAL: SEPARAÇÃO ──
@@ -810,7 +846,7 @@ function renderGerSeparacao(el){
     cols.push(column(m.title, m.tone, m.edge, items.length, cards || emptyState('Nenhum pedido nesta etapa hoje')))
   })
 
-  el.innerHTML = `<div class="ger-stat-row grid2">${stats.join('')}</div>${cols.join('')}`
+  el.innerHTML = `<div class="ger-stat-row grid2">${stats.join('')}</div>${board(cols)}`
 }
 
 /* ── GERENCIAL: SKU ── */
