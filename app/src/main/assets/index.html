@@ -304,6 +304,7 @@ body {
 .ger-card.breach  { border-left-color: var(--edge-breach) }
 .ger-card.neutral { border-left-color: var(--edge-info) }
 .ger-card.purple  { border-left-color: #722ed1 }
+.ger-card.err     { border-left-color: var(--edge-breach) }
 .ger-card-head {
   display: flex; justify-content: space-between; align-items: center; gap: 8px;
   min-height: 37px; padding: 0 12px; border-bottom: 1px solid var(--card-border);
@@ -884,11 +885,12 @@ function renderGerParados(el){
 }
 
 /* ── GERENCIAL: SEPARAÇÃO ──
-   Four times per order, from the Torque status history (same data as the Auditoria):
+   Five times per order, from the Torque status history (same data as the Auditoria):
    - Espera em Pedido pronto: time sitting in "Pedido pronto"
    - Coleta: from "Em coleta" until it reaches "Coletado"
    - Espera em Coletado: time sitting in "Coletado"
-   - Expedição: from "Em expedição" until "Pronto" (entrega, retira or transportadora = ORDER_PACKAGED) */
+   - Expedição: from "Em expedição" until "Pronto" (entrega, retira or transportadora = ORDER_PACKAGED)
+   - Validar alteração: time sitting in "Validar alteração" */
 const SEP_READY = new Set(['ORDER_READY','READY_TO_COLLECT'])
 // statuses an unfinished span may still be in (an alteration happens inside the phase)
 const SEP_IN_COLETA = new Set(['COLLECTING','NEEDS_CHANGE','ORDER_CHANGE'])
@@ -898,7 +900,7 @@ function sepTimes(r){
   const ev = (r.audit || []).filter(e => e.at).slice().sort((a,b) => a.at - b.at)
   const now = Date.now()
   const cur = ev.length ? ev[ev.length-1].to : ''
-  const t = { pronto:0, prontoOpen:false, coleta:0, coletaOpen:false, coletado:0, coletadoOpen:false, exped:0, expedOpen:false }
+  const t = { pronto:0, prontoOpen:false, coleta:0, coletaOpen:false, coletado:0, coletadoOpen:false, exped:0, expedOpen:false, validar:0, validarOpen:false }
   // span: first entry into start → next arrival at end (alterations in between count, as on the board)
   const span = (start, end, key, inPhase) => {
     let open = null
@@ -921,6 +923,7 @@ function sepTimes(r){
   span(new Set(['COLLECTING']), new Set(['COLLECTED']), 'coleta', SEP_IN_COLETA)
   stay(new Set(['COLLECTED']), 'coletado')
   span(new Set(['IN_EXPEDITION']), new Set(['ORDER_PACKAGED']), 'exped', SEP_IN_EXPED)
+  stay(new Set(['NEEDS_CHANGE']), 'validar')
   return t
 }
 
@@ -928,7 +931,8 @@ const SEP_METRICS = [
   { key:'pronto',   title:'Espera em Pedido pronto', box:'Parado em Pedido pronto', tone:'t-proc', edge:'c-info',  card:'neutral', bar:'var(--edge-info)' },
   { key:'coleta',   title:'Coleta',                  box:'Coleta',                  tone:'t-warn', edge:'c-warn',  card:'warn',    bar:'var(--edge-warn)' },
   { key:'coletado', title:'Espera em Coletado',      box:'Parado em Coletado',      tone:'t-ok',   edge:'c-ok',    card:'ok',      bar:'var(--edge-ok)' },
-  { key:'exped',    title:'Expedição',               box:'Expedição',               tone:'t-proc', edge:'c-info',  card:'neutral', bar:'var(--edge-info)' }
+  { key:'exped',    title:'Expedição',               box:'Expedição',               tone:'t-proc', edge:'c-info',  card:'neutral', bar:'var(--edge-info)' },
+  { key:'validar',  title:'Validar alteração',       box:'Parado em Validar alteração', tone:'t-err', edge:'c-breach', card:'err', bar:'var(--edge-breach)', stat:'Maior espera em Validar alteração' }
 ]
 const SEP_TOP = 10
 
@@ -949,7 +953,7 @@ function renderGerSeparacao(el){
     const top = items[0]
     const avg = items.length ? items.reduce((s,r) => s + r.t[m.key], 0) / items.length : 0
     stats.push(`<div class="ger-stat">
-      <div class="ger-stat-lbl">Maior ${m.title.charAt(0).toLowerCase() + m.title.slice(1)}</div>
+      <div class="ger-stat-lbl">${m.stat || 'Maior ' + m.title.charAt(0).toLowerCase() + m.title.slice(1)}</div>
       <div class="ger-stat-val">${top ? fmtDur(top.t[m.key]) : '—'}</div>
       <div class="ger-stat-sub">${top ? esc(top.title) : 'Sem registros no período'}</div>
       <div class="ger-stat-sub">Média ${items.length ? fmtDur(Math.round(avg)) : '—'} · ${items.length} pedido${items.length===1?'':'s'}</div>
