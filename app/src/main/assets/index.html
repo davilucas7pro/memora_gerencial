@@ -285,6 +285,8 @@ body {
 }
 .ger-stat-lbl { font-size: 13px; color: var(--text-muted) }
 .ger-stat-val { font-size: 22px; line-height: 1.3; font-weight: 600; color: var(--text); margin-top: 2px }
+.ger-stat-row.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) }
+.ger-stat-sub { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 
 /* ── BOTTOM NAV (Torque menu colors) ── */
 .bot-nav {
@@ -724,59 +726,91 @@ function renderGerParados(el){
   el.innerHTML = column('Pedidos mais parados', tone[0], tone[1], items.length, cards)
 }
 
-/* ── GERENCIAL: SEPARAÇÃO ── */
+/* ── GERENCIAL: SEPARAÇÃO ──
+   Four times per order, from the Torque status history (same data as the Auditoria):
+   - Espera em Pedido pronto: time sitting in "Pedido pronto"
+   - Coleta: from "Em coleta" until it reaches "Coletado"
+   - Espera em Coletado: time sitting in "Coletado"
+   - Expedição: from "Em expedição" until "Pronto" (entrega, retira or transportadora = ORDER_PACKAGED) */
+const SEP_READY = new Set(['ORDER_READY','READY_TO_COLLECT'])
+// statuses an unfinished span may still be in (an alteration happens inside the phase)
+const SEP_IN_COLETA = new Set(['COLLECTING','NEEDS_CHANGE','ORDER_CHANGE'])
+const SEP_IN_EXPED  = new Set(['IN_EXPEDITION','NEEDS_CHANGE','ORDER_CHANGE','COLLECTED'])
+
+function sepTimes(r){
+  const ev = (r.audit || []).filter(e => e.at).slice().sort((a,b) => a.at - b.at)
+  const now = Date.now()
+  const cur = ev.length ? ev[ev.length-1].to : ''
+  const t = { pronto:0, prontoOpen:false, coleta:0, coletaOpen:false, coletado:0, coletadoOpen:false, exped:0, expedOpen:false }
+  // span: first entry into start → next arrival at end (alterations in between count, as on the board)
+  const span = (start, end, key, inPhase) => {
+    let open = null
+    ev.forEach(e => {
+      if(open === null && start.has(e.to)) open = e.at
+      else if(open !== null && end.has(e.to)){ t[key] += e.at - open; open = null }
+    })
+    if(open !== null && inPhase.has(cur)){ t[key] += now - open; t[key+'Open'] = true }
+  }
+  // stay: every period spent in the column, until the next move (or now, if still there)
+  const stay = (set, key) => {
+    ev.forEach((e, i) => {
+      if(!set.has(e.to)) return
+      const next = ev[i+1]
+      t[key] += (next ? next.at : now) - e.at
+      if(!next) t[key+'Open'] = true
+    })
+  }
+  stay(SEP_READY, 'pronto')
+  span(new Set(['COLLECTING']), new Set(['COLLECTED']), 'coleta', SEP_IN_COLETA)
+  stay(new Set(['COLLECTED']), 'coletado')
+  span(new Set(['IN_EXPEDITION']), new Set(['ORDER_PACKAGED']), 'exped', SEP_IN_EXPED)
+  return t
+}
+
+const SEP_METRICS = [
+  { key:'pronto',   title:'Espera em Pedido pronto', box:'Parado em Pedido pronto', tone:'t-proc', edge:'c-info',  card:'neutral', bar:'var(--edge-info)' },
+  { key:'coleta',   title:'Coleta',                  box:'Coleta',                  tone:'t-warn', edge:'c-warn',  card:'warn',    bar:'var(--edge-warn)' },
+  { key:'coletado', title:'Espera em Coletado',      box:'Parado em Coletado',      tone:'t-ok',   edge:'c-ok',    card:'ok',      bar:'var(--edge-ok)' },
+  { key:'exped',    title:'Expedição',               box:'Expedição',               tone:'t-proc', edge:'c-info',  card:'neutral', bar:'var(--edge-info)' }
+]
+const SEP_TOP = 10
+
 function renderGerSeparacao(el){
-  const items = []
+  const all = []
   Object.entries(allRequests).forEach(([token, reqs])=>{
     if(!reqs) return
     const contact = contacts.find(c=>c.token===token)
     const contactName = contact ? contact.name : token
     Object.entries(reqs).forEach(([reqId, r])=>{
-      if(!r) return
-      if(!r.statusHistory) return
-      let colMs = 0
-      const hist = Array.isArray(r.statusHistory) ? r.statusHistory : []
-      for(let i=0;i<hist.length;i++){
-        if(hist[i].status==='em_coleta'){
-          const start = hist[i].changedAt||0
-          const end   = hist[i+1] ? (hist[i+1].changedAt||Date.now()) : Date.now()
-          colMs += end - start
-        }
-      }
-      if((r.status||'')==='em_coleta'){
-        const start = r.statusChangedAt||0
-        if(start) colMs += Date.now() - start
-      }
-      if(colMs>0) items.push({...r, id:reqId, token, contactName, colMs})
+      if(r) all.push({ ...r, id:reqId, token, contactName, t: sepTimes(r) })
     })
   })
-  items.sort((a,b)=>b.colMs-a.colMs)
 
-  if(!items.length){
-    el.innerHTML = column('Em coleta', 't-warn', 'c-warn', 0, emptyState('Nenhum pedido com tempo de separação registrado'))
-    return
-  }
-  const avgMs = items.reduce((acc,r)=>acc+r.colMs,0)/items.length
-  const maxMs = items[0].colMs
-  const cards = items.map((r,i)=>{
-    const pct = Math.min(100,(r.colMs/maxMs)*100)
-    return `<div class="ger-card neutral clickable" onclick="openAudit('${r.token}','${r.id}')">
+  const stats = [], cols = []
+  SEP_METRICS.forEach(m => {
+    const items = all.filter(r => r.t[m.key] > 0).sort((a,b) => b.t[m.key] - a.t[m.key])
+    const top = items[0]
+    const avg = items.length ? items.reduce((s,r) => s + r.t[m.key], 0) / items.length : 0
+    stats.push(`<div class="ger-stat">
+      <div class="ger-stat-lbl">Maior ${m.title.charAt(0).toLowerCase() + m.title.slice(1)}</div>
+      <div class="ger-stat-val">${top ? fmtDur(top.t[m.key]) : '—'}</div>
+      <div class="ger-stat-sub">${top ? esc(top.title) : 'Sem registros hoje'}</div>
+      <div class="ger-stat-sub">Média ${items.length ? fmtDur(Math.round(avg)) : '—'} · ${items.length} pedido${items.length===1?'':'s'}</div>
+    </div>`)
+    const max = top ? top.t[m.key] : 1
+    const cards = items.slice(0, SEP_TOP).map((r,i) => `<div class="ger-card ${m.card} clickable" onclick="openAudit('${r.token}','${r.id}')">
       <div class="ger-card-head">${statusTag(r.status||'em_pedido')}<span class="ger-rank">#${i+1}</span></div>
       <div class="ger-card-body">
         ${cardWho(r)}
         ${tipoTag(r.tipo)}
-        <span class="tq-box t-proc">Tempo em coleta: ${fmtDur(r.colMs)}</span>
-        <div class="ger-sla-bar"><div class="ger-sla-fill" style="width:${pct}%;background:var(--edge-info)"></div></div>
+        <div class="ger-tags"><span class="tq-box ${m.tone}">${m.box}: ${fmtDur(r.t[m.key])}</span>${r.t[m.key+'Open'] ? '<span class="tq-tag t-warn">em andamento</span>' : ''}</div>
+        <div class="ger-sla-bar"><div class="ger-sla-fill" style="width:${Math.min(100, r.t[m.key]/max*100)}%;background:${m.bar}"></div></div>
       </div>
-    </div>`
-  }).join('')
-  el.innerHTML = `
-    <div class="ger-stat-row">
-      <div class="ger-stat"><div class="ger-stat-lbl">Maior tempo</div><div class="ger-stat-val" style="color:var(--t-blue-fg)">${fmtDur(maxMs)}</div></div>
-      <div class="ger-stat"><div class="ger-stat-lbl">Média</div><div class="ger-stat-val">${fmtDur(Math.round(avgMs))}</div></div>
-      <div class="ger-stat"><div class="ger-stat-lbl">Pedidos</div><div class="ger-stat-val">${items.length}</div></div>
-    </div>
-    ${column('Tempo em coleta', 't-warn', 'c-warn', items.length, cards)}`
+    </div>`).join('')
+    cols.push(column(m.title, m.tone, m.edge, items.length, cards || emptyState('Nenhum pedido nesta etapa hoje')))
+  })
+
+  el.innerHTML = `<div class="ger-stat-row grid2">${stats.join('')}</div>${cols.join('')}`
 }
 
 /* ── GERENCIAL: SKU ── */
