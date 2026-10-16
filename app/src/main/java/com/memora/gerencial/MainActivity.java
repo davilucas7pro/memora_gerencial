@@ -102,6 +102,31 @@ public class MainActivity extends AppCompatActivity {
                     .getString("alertRecords", "[]");
             }
 
+            /** Save the note and move the alert to "Justificados" */
+            @JavascriptInterface
+            public boolean resolveAlert(String alertId, String obs) {
+                return SlaMonitorService.resolveAlert(MainActivity.this, alertId, obs);
+            }
+
+            @JavascriptInterface
+            public String getJustifiedAlerts() {
+                return getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                    .getString("alertJustified", "[]");
+            }
+
+            /** Health of the background monitor, shown on the Alertas page */
+            @JavascriptInterface
+            public String getMonitorStatus() {
+                return getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                    .getString("svcStatus", "");
+            }
+
+            /** Restart the monitor (e.g. right after signing in) */
+            @JavascriptInterface
+            public void startMonitor() {
+                SlaMonitorService.start(MainActivity.this);
+            }
+
             /** Open the real Torque login page; its session is then reused by this WebView */
             @JavascriptInterface
             public void openTorqueLogin() {

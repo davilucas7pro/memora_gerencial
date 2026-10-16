@@ -305,6 +305,12 @@ body {
 .ger-card.neutral { border-left-color: var(--edge-info) }
 .ger-card.purple  { border-left-color: #722ed1 }
 .ger-card.err     { border-left-color: var(--edge-breach) }
+/* monitor health line on the Alertas page + saved notes */
+.mon { margin: -4px 16px 12px; padding: 6px 10px; border-radius: var(--r); font-size: 12px; border: 1px solid; flex-shrink: 0 }
+.c-ok-box   { color: var(--t-ok-fg);   background: var(--t-ok-bg);   border-color: var(--t-ok-bd) }
+.c-warn-box { color: var(--t-warn-fg); background: var(--t-warn-bg); border-color: var(--t-warn-bd) }
+.c-err-box  { color: var(--t-err-fg);  background: var(--t-err-bg);  border-color: var(--t-err-bd) }
+.ger-obs-saved { white-space: pre-wrap; font-size: 12px; color: var(--text); background: var(--surface-2); border-left: 3px solid var(--edge-ok); border-radius: var(--r-sm); padding: 6px 8px; margin-bottom: 4px }
 .ger-card-head {
   display: flex; justify-content: space-between; align-items: center; gap: 8px;
   min-height: 37px; padding: 0 12px; border-bottom: 1px solid var(--card-border);
@@ -706,6 +712,8 @@ let allRequests  = {}
 let contacts     = []
 let notifTs      = S.get('ger_notif_ts', {})
 let slaAlerts    = S.get('ger_alert_records', [])
+let justAlerts   = S.get('ger_alert_justified', [])   // alerts with a saved note ("Justificados")
+let monitorStatus = null                              // health of the background monitor (phone only)
 let curGerTab    = 'alertas'
 let seenTs       = {}
 
@@ -795,45 +803,83 @@ function renderGerencial(){
 }
 
 /* ── GERENCIAL: ALERTAS ── */
-function renderGerAlertas(el){
-  const list = slaAlerts.filter(a => inRange(a.firedAt))
-  if(!list.length){
-    el.innerHTML = column('Registros de alerta', 't-default', '', 0, emptyState('Nenhum alerta de SLA no período'))
-    return
-  }
-  const cards = list.map(a => {
-    const cls     = a.isBreach ? 'breach' : 'warn'
-    const slaMin  = (a.tipo && TIPO_SLA[a.tipo]) ? TIPO_SLA[a.tipo].slaMs/60000 : null
-    const safeId  = a.id.replace(/[^a-zA-Z0-9_]/g,'_')
-    return `<div class="ger-card ${cls}">
-      <div class="ger-card-head">
+// Phone: alert records + notes live in the app storage, written by the background monitor
+function loadAlertStores(){
+  if(!window.AndroidBridge) return
+  try{ slaAlerts = JSON.parse(AndroidBridge.getAlertRecords() || '[]') }catch(e){}
+  try{ if(AndroidBridge.getJustifiedAlerts) justAlerts = JSON.parse(AndroidBridge.getJustifiedAlerts() || '[]') }catch(e){}
+  try{ if(AndroidBridge.getMonitorStatus){ const s = AndroidBridge.getMonitorStatus(); monitorStatus = s ? JSON.parse(s) : null } }catch(e){}
+}
+
+// One line telling whether the monitor that creates the alerts is working
+function monitorLine(){
+  if(!window.AndroidBridge) return ''
+  const s = monitorStatus
+  if(!s) return `<div class="mon c-warn-box">O monitor de alertas ainda não rodou. Feche e abra o app; se continuar assim, me avise.</div>`
+  const when = fmtTime(s.at)
+  if(Date.now() - s.at > 5*60000) return `<div class="mon c-err-box">Monitor parado desde ${fmtDate(s.at)} às ${when}. Abra o app para religar e permita "não otimizar bateria".</div>`
+  if(s.state === 'nosession') return `<div class="mon c-err-box">Monitor sem acesso ao Torque (${when}). Toque em Sair e entre de novo com o Torque.</div>`
+  if(s.state === 'error') return `<div class="mon c-err-box">Erro no monitor às ${when}: ${esc(s.error)}</div>`
+  return `<div class="mon c-ok-box">Monitor ativo · ${s.watched} pedido${s.watched===1?'':'s'} vigiado${s.watched===1?'':'s'} · verificado às ${when}</div>`
+}
+
+function alertCardHead(a, tag){
+  return `<div class="ger-card-head">
         ${statusTag(a.status)}
-        <span class="ger-head-right"><span class="tq-tag strong ${a.isBreach?'t-err':'t-warn'}">${a.isBreach?'SLA estourado':'Em alerta'}</span><button class="ger-link" onclick="openAudit('${a.token}','${a.reqId}')">Auditoria</button></span>
-      </div>
-      <div class="ger-card-body">
-        <strong class="ger-name">${esc(a.reqTitle)}</strong>
+        <span class="ger-head-right">${tag}<button class="ger-link" onclick="openAudit('${a.token}','${a.reqId}')">Auditoria</button></span>
+      </div>`
+}
+function alertCardFacts(a){
+  const cls    = a.isBreach ? 'breach' : 'warn'
+  const slaMin = (a.tipo && TIPO_SLA[a.tipo]) ? TIPO_SLA[a.tipo].slaMs/60000 : null
+  return `<strong class="ger-name">${esc(a.reqTitle)}</strong>
         <span class="ger-sec">${esc(a.contactName)}</span>
         ${tipoTag(a.tipo)}
         <span class="tq-box ${SLA_TONE[cls]}">Tempo no status: ${fmtDur(a.elapsedMs)}${slaMin?` · SLA ${slaMin}m`:''}</span>
-        <span class="ger-notif-time">Notificado em ${fmtDate(a.firedAt)} às ${fmtTime(a.firedAt)}</span>
+        <span class="ger-notif-time">Notificado em ${fmtDate(a.firedAt)} às ${fmtTime(a.firedAt)}</span>`
+}
+
+function renderGerAlertas(el){
+  const open = slaAlerts.filter(a => inRange(a.firedAt))
+  const done = justAlerts.filter(a => inRange(a.firedAt))
+  const openCards = open.map(a => {
+    const safeId = a.id.replace(/[^a-zA-Z0-9_]/g,'_')
+    return `<div class="ger-card ${a.isBreach ? 'breach' : 'warn'}">
+      ${alertCardHead(a, `<span class="tq-tag strong ${a.isBreach?'t-err':'t-warn'}">${a.isBreach?'SLA estourado':'Em alerta'}</span>`)}
+      <div class="ger-card-body">
+        ${alertCardFacts(a)}
         <div class="ger-obs-wrap">
           <div class="ger-obs-label">Observação / justificativa</div>
-          <textarea class="ger-obs-ta" id="obs-${safeId}" rows="2" placeholder="Ex: separador estava ocupado em outro pedido…">${esc(a.obs||'')}</textarea>
-          <button class="ger-obs-save" onclick="saveAlertObs('${a.id}',document.getElementById('obs-${safeId}').value);toast('Observação salva')">Salvar observação</button>
+          <textarea class="ger-obs-ta" id="obs-${safeId}" rows="2" placeholder="Ex: separador estava ocupado em outro pedido…"></textarea>
+          <button class="ger-obs-save" onclick="saveAlertObs('${a.id}',document.getElementById('obs-${safeId}').value)">Salvar e justificar</button>
         </div>
       </div>
     </div>`
   }).join('')
-  const total   = list.length
-  const nBreach = list.filter(a=>a.isBreach).length
-  const nWarn   = total - nBreach
+  const doneCards = done.map(a => `<div class="ger-card ok">
+      ${alertCardHead(a, '<span class="tq-tag strong t-ok">Justificado</span>')}
+      <div class="ger-card-body">
+        ${alertCardFacts(a)}
+        <div class="ger-obs-wrap">
+          <div class="ger-obs-label">Observação</div>
+          <div class="ger-obs-saved">${esc(a.obs || '')}</div>
+          ${a.resolvedAt ? `<span class="ger-notif-time">Justificado em ${fmtDate(a.resolvedAt)} às ${fmtTime(a.resolvedAt)}</span>` : ''}
+        </div>
+      </div>
+    </div>`).join('')
+  const nBreach = open.filter(a=>a.isBreach).length
   el.innerHTML = `
+    ${monitorLine()}
     <div class="ger-stat-row">
       <div class="ger-stat"><div class="ger-stat-lbl">SLA estourado</div><div class="ger-stat-val" style="color:var(--t-err-fg)">${nBreach}</div></div>
-      <div class="ger-stat"><div class="ger-stat-lbl">Em alerta</div><div class="ger-stat-val" style="color:var(--t-warn-fg)">${nWarn}</div></div>
-      <div class="ger-stat"><div class="ger-stat-lbl">Total</div><div class="ger-stat-val">${total}</div></div>
+      <div class="ger-stat"><div class="ger-stat-lbl">Em alerta</div><div class="ger-stat-val" style="color:var(--t-warn-fg)">${open.length - nBreach}</div></div>
+      <div class="ger-stat"><div class="ger-stat-lbl">Justificados</div><div class="ger-stat-val" style="color:var(--t-ok-fg)">${done.length}</div></div>
     </div>
-    ${column('Registros de alerta', nBreach?'t-err':'t-warn', nBreach?'c-breach':'c-warn', total, cards)}`
+    ${board([
+      column('Registros de alerta', nBreach ? 't-err' : 't-warn', nBreach ? 'c-breach' : 'c-warn', open.length,
+        openCards || emptyState('Nenhum alerta pendente no período')),
+      column('Justificados', 't-ok', 'c-ok', done.length, doneCards || emptyState('Nenhum alerta justificado no período'))
+    ])}`
 }
 
 /* ── GERENCIAL: PARADOS ── */
@@ -1063,15 +1109,27 @@ function renderGerSku(el){
 }
 
 /* ── SAVE OBS ── */
+// Saving the note justifies the alert: it leaves "Registros de alerta" and goes to "Justificados"
 function saveAlertObs(alertId, obs){
-  // the background monitor may have added records since the page loaded them
-  if(window.AndroidBridge){ try{ slaAlerts = JSON.parse(AndroidBridge.getAlertRecords() || '[]') }catch(e){} }
-  const rec = slaAlerts.find(a=>a.id===alertId)
-  if(rec){
-    rec.obs = obs
+  obs = String(obs || '').trim()
+  if(!obs){ toast('Escreva a observação antes de salvar'); return }
+  if(window.AndroidBridge && AndroidBridge.resolveAlert){
+    let ok = false
+    try{ ok = AndroidBridge.resolveAlert(alertId, obs) }catch(e){}
+    if(!ok){ toast('Não foi possível salvar a observação. Tente de novo.'); return }
+    loadAlertStores()
+  }else{
+    const i = slaAlerts.findIndex(a => a.id === alertId)
+    if(i < 0) return
+    const rec = slaAlerts.splice(i, 1)[0]
+    rec.obs = obs; rec.resolvedAt = Date.now()
+    justAlerts = [rec].concat(justAlerts).slice(0, 1000)
     S.set('ger_alert_records', slaAlerts)
-    if(window.AndroidBridge) try{ AndroidBridge.saveAlertRecords(JSON.stringify(slaAlerts)) }catch(e){}
+    S.set('ger_alert_justified', justAlerts)
   }
+  toast('Observação salva — alerta movido para Justificados')
+  updateAlertPip()
+  renderGerencial()
 }
 
 /* ── SYNC PIPELINE TO ANDROID ── */
@@ -1106,9 +1164,11 @@ function checkSlaNotifs(){
   // On the phone the background monitor (SlaMonitorService) sends the notifications and
   // writes the alert records, app open or closed; the page only shows them.
   if(window.AndroidBridge){
-    try{ slaAlerts = JSON.parse(AndroidBridge.getAlertRecords() || '[]') }catch(e){}
+    loadAlertStores()
     updateAlertPip()
-    if(curGerTab==='alertas' && !document.querySelector('.ger-obs-ta:focus')) renderGerencial()
+    // do not redraw over a note being typed
+    const typing = [...document.querySelectorAll('.ger-obs-ta')].some(t => t === document.activeElement || t.value.trim())
+    if(curGerTab==='alertas' && !typing) renderGerencial()
     return
   }
   const nowMs = Date.now()
@@ -1509,6 +1569,8 @@ async function tqRefresh(manual){
 
 function tqStart(){
   document.getElementById('login').hidden = true
+  // signed in: make sure the background monitor (alerts) is running with this session
+  if(window.AndroidBridge && AndroidBridge.startMonitor){ try{ AndroidBridge.startMonitor() }catch(e){} }
   tqRefresh()
   clearInterval(tqTimer)
   tqTimer = setInterval(() => tqRefresh(), TQ.pollMs)
@@ -1561,7 +1623,7 @@ document.addEventListener('visibilitychange', () => {
 
 /* ── INIT ── */
 if(window.AndroidBridge){
-  try{ const s=AndroidBridge.getAlertRecords(); if(s&&s!=='[]') slaAlerts=JSON.parse(s) }catch(e){}
+  loadAlertStores()
   try{ const s=AndroidBridge.getNotifTs(); if(s&&s!=='{}') notifTs=JSON.parse(s) }catch(e){}
 }
 

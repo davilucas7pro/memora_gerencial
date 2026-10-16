@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.webkit.CookieManager;
 import androidx.core.app.NotificationCompat;
@@ -35,6 +36,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Foreground service that checks the Torque orders every 30 s, with the app open or closed,
@@ -107,6 +110,7 @@ public class SlaMonitorService extends Service {
             } catch (Exception e) {
                 e.printStackTrace();
                 updateForeground("Sem conexão com o Torque · " + hhmm(System.currentTimeMillis()));
+                writeStatus(SlaMonitorService.this, "error", 0, e.getClass().getSimpleName() + ": " + e.getMessage());
             } finally {
                 if (wake.isHeld()) wake.release();
             }
@@ -118,7 +122,7 @@ public class SlaMonitorService extends Service {
 
     private void check() throws Exception {
         SharedPreferences prefs = getSharedPreferences(MainActivity.PREFS_NAME, MODE_PRIVATE);
-        String cookie = CookieManager.getInstance().getCookie(HOST);
+        String cookie = readCookie();
         if (cookie == null || cookie.isEmpty()) {
             sessionMissing(prefs);
             return;
@@ -157,7 +161,7 @@ public class SlaMonitorService extends Service {
         }
 
         JSONObject fired = new JSONObject(prefs.getString("svcFired", "{}"));
-        JSONArray records = new JSONArray(prefs.getString("alertRecords", "[]"));
+        List<JSONObject> newRecords = new ArrayList<>();
         Set<String> live = new HashSet<>();
         long now = System.currentTimeMillis();
         int watched = 0;
@@ -184,7 +188,7 @@ public class SlaMonitorService extends Service {
             if (level > done) {
                 String title = o.optString("displayCode", o.optString("title", id));
                 notifyOrder(title, status, priority, elapsed, sla[1], level == 2, key.hashCode());
-                records = prepend(records, alertRecord(o, title, status, priority, changedAt, now, elapsed, level == 2));
+                newRecords.add(alertRecord(o, title, status, priority, changedAt, now, elapsed, level == 2));
                 fired.put(key, level);
                 changed = true;
             }
@@ -195,15 +199,72 @@ public class SlaMonitorService extends Service {
         while (it.hasNext()) { String k = it.next(); if (!live.contains(k)) stale.add(k); }
         for (String k : stale) { fired.remove(k); changed = true; }
 
-        if (changed) {
-            prefs.edit().putString("svcFired", fired.toString()).putString("alertRecords", records.toString()).apply();
+        if (changed) prefs.edit().putString("svcFired", fired.toString()).apply();
+        if (!newRecords.isEmpty()) {
+            synchronized (LOCK) {   // the page may be moving a record to "Justificados" at the same time
+                JSONArray records = new JSONArray(prefs.getString("alertRecords", "[]"));
+                for (JSONObject r : newRecords) records = prepend(records, r, 200);
+                prefs.edit().putString("alertRecords", records.toString()).commit();
+            }
         }
         updateForeground("Monitorando " + watched + " pedido" + (watched == 1 ? "" : "s")
             + " · verificado às " + hhmm(now));
+        writeStatus(this, "ok", watched, "");
+    }
+
+    // ── shared state with the page (MainActivity bridge) ─────────────────────
+
+    static final Object LOCK = new Object();
+
+    /** Monitor health shown in the Alertas page: state ok / nosession / error, when, how many orders watched */
+    static void writeStatus(Context c, String state, int watched, String error) {
+        try {
+            JSONObject s = new JSONObject();
+            s.put("state", state);
+            s.put("at", System.currentTimeMillis());
+            s.put("watched", watched);
+            s.put("error", error == null ? "" : error);
+            c.getSharedPreferences(MainActivity.PREFS_NAME, MODE_PRIVATE).edit().putString("svcStatus", s.toString()).apply();
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    /** Move an alert from "Registros de alerta" to "Justificados", keeping the user's note */
+    static boolean resolveAlert(Context c, String alertId, String obs) {
+        synchronized (LOCK) {
+            try {
+                SharedPreferences p = c.getSharedPreferences(MainActivity.PREFS_NAME, MODE_PRIVATE);
+                JSONArray open = new JSONArray(p.getString("alertRecords", "[]"));
+                JSONArray keep = new JSONArray();
+                JSONObject found = null;
+                for (int i = 0; i < open.length(); i++) {
+                    JSONObject a = open.getJSONObject(i);
+                    if (found == null && alertId.equals(a.optString("id"))) found = a; else keep.put(a);
+                }
+                if (found == null) return false;
+                found.put("obs", obs);
+                found.put("resolvedAt", System.currentTimeMillis());
+                JSONArray done = prepend(new JSONArray(p.getString("alertJustified", "[]")), found, 1000);
+                p.edit().putString("alertRecords", keep.toString()).putString("alertJustified", done.toString()).commit();
+                return true;
+            } catch (Exception e) { e.printStackTrace(); return false; }
+        }
+    }
+
+    /** The WebView cookie store is read on the main thread (safe even before any WebView exists) */
+    private String readCookie() {
+        final String[] out = new String[1];
+        final CountDownLatch done = new CountDownLatch(1);
+        new Handler(Looper.getMainLooper()).post(() -> {
+            try { out[0] = CookieManager.getInstance().getCookie(HOST); } catch (Exception e) { out[0] = null; }
+            done.countDown();
+        });
+        try { done.await(5, TimeUnit.SECONDS); } catch (InterruptedException ignored) { }
+        return out[0];
     }
 
     private void sessionMissing(SharedPreferences prefs) {
         updateForeground("Entre com o Torque no app para monitorar os pedidos");
+        writeStatus(this, "nosession", 0, "");
         if (!prefs.getBoolean("sessionWarned", false)) {
             prefs.edit().putBoolean("sessionWarned", true).apply();
             post("Memora Gerencial sem acesso ao Torque",
@@ -345,10 +406,10 @@ public class SlaMonitorService extends Service {
         return a;
     }
 
-    private static JSONArray prepend(JSONArray list, JSONObject item) throws Exception {
+    private static JSONArray prepend(JSONArray list, JSONObject item, int max) throws Exception {
         JSONArray out = new JSONArray();
         out.put(item);
-        for (int i = 0; i < list.length() && out.length() < 200; i++) out.put(list.get(i));
+        for (int i = 0; i < list.length() && out.length() < max; i++) out.put(list.get(i));
         return out;
     }
 
