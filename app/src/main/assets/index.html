@@ -1,50 +1,68 @@
 <title>Memora Gerencial</title>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap">
 <style>
-/* ── TOKENS — warm notebook dark ── */
+/* ─────────────────────────────────────────────────────
+   DESIGN TOKENS — warm notebook dark-first
+   ───────────────────────────────────────────────────── */
 :root {
-  --bg: #131210; --surface: #1d1b17; --surface-2: #272420; --surface-3: #322f29;
-  --border: #3a3730; --border-2: #4a4740;
-  --accent: #e8920c; --accent-2: #f0a830;
-  --accent-dim: rgba(232,146,12,.13); --accent-dim-2: rgba(232,146,12,.22);
-  --text: #f0ece2; --text-2: #c4bfb0; --text-muted: #8a8474; --text-ghost: #5a5650;
-  --success: #4ade80; --success-dim: rgba(74,222,128,.14);
-  --danger: #f87171;  --danger-dim: rgba(248,113,113,.13);
-  --warn: #fbbf24;    --warn-dim: rgba(251,191,36,.13);
-  --info: #60a5fa;    --info-dim: rgba(96,165,250,.12);
-  --purple: #c084fc;  --purple-dim: rgba(192,132,252,.14);
+  --bg: #131210;
+  --surface: #1d1b17;
+  --surface-2: #272420;
+  --surface-3: #322f29;
+  --border: #3a3730;
+  --border-2: #4a4740;
+  --accent: #e8920c;
+  --accent-2: #f0a830;
+  --accent-dim: rgba(232,146,12,.13);
+  --accent-dim-2: rgba(232,146,12,.22);
+  --text: #f0ece2;
+  --text-2: #c4bfb0;
+  --text-muted: #8a8474;
+  --text-ghost: #5a5650;
+  --success: #4ade80;
+  --success-dim: rgba(74,222,128,.14);
+  --danger: #f87171;
+  --danger-dim: rgba(248,113,113,.13);
+  --warn: #fbbf24;
+  --warn-dim: rgba(251,191,36,.13);
+  --info: #60a5fa;
+  --info-dim: rgba(96,165,250,.12);
+  --purple: #c084fc;
+  --purple-dim: rgba(192,132,252,.14);
   --r-sm: 6px; --r: 10px; --r-lg: 14px; --r-xl: 20px;
-  --nav-h: 64px; --head-h: 60px;
+  --nav-h: 64px;
+  --head-h: 60px;
   color-scheme: dark;
 }
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
-    --bg: #faf8f2; --surface: #fff; --surface-2: #f4f1e8; --surface-3: #ece9dc;
-    --border: #e0dace; --border-2: #ccc7b7;
+    --bg: #faf8f2; --surface: #ffffff; --surface-2: #f4f1e8;
+    --surface-3: #ece9dc; --border: #e0dace; --border-2: #ccc7b7;
     --accent: #c07600; --accent-2: #d98800;
     --accent-dim: rgba(192,118,0,.1); --accent-dim-2: rgba(192,118,0,.18);
-    --text: #1a1714; --text-2: #4a4540; --text-muted: #7a7060; --text-ghost: #b0a898;
-    --success: #16a34a; --success-dim: rgba(22,163,74,.12);
-    --danger: #dc2626;  --danger-dim: rgba(220,38,38,.1);
-    --warn: #d97706;    --warn-dim: rgba(217,119,6,.1);
-    --info: #2563eb;    --info-dim: rgba(37,99,235,.1);
-    --purple: #9333ea;  --purple-dim: rgba(147,51,234,.12);
+    --text: #1a1714; --text-2: #4a4540; --text-muted: #7a7060;
+    --text-ghost: #b0a898; --success: #16a34a;
+    --success-dim: rgba(22,163,74,.12); --danger: #dc2626;
+    --danger-dim: rgba(220,38,38,.1); --warn: #d97706;
+    --warn-dim: rgba(217,119,6,.1); --info: #2563eb;
+    --info-dim: rgba(37,99,235,.1);
+    --purple: #9333ea; --purple-dim: rgba(147,51,234,.12);
     color-scheme: light;
   }
 }
 :root[data-theme="light"] {
-  --bg: #faf8f2; --surface: #fff; --surface-2: #f4f1e8; --surface-3: #ece9dc;
-  --border: #e0dace; --border-2: #ccc7b7;
+  --bg: #faf8f2; --surface: #ffffff; --surface-2: #f4f1e8;
+  --surface-3: #ece9dc; --border: #e0dace; --border-2: #ccc7b7;
   --accent: #c07600; --accent-2: #d98800;
   --accent-dim: rgba(192,118,0,.1); --accent-dim-2: rgba(192,118,0,.18);
-  --text: #1a1714; --text-2: #4a4540; --text-muted: #7a7060; --text-ghost: #b0a898;
-  --success: #16a34a; --success-dim: rgba(22,163,74,.12);
-  --danger: #dc2626;  --danger-dim: rgba(220,38,38,.1);
-  --warn: #d97706;    --warn-dim: rgba(217,119,6,.1);
-  --info: #2563eb;    --info-dim: rgba(37,99,235,.1);
-  --purple: #9333ea;  --purple-dim: rgba(147,51,234,.12);
+  --text: #1a1714; --text-2: #4a4540; --text-muted: #7a7060;
+  --text-ghost: #b0a898; --success: #16a34a;
+  --success-dim: rgba(22,163,74,.12); --danger: #dc2626;
+  --danger-dim: rgba(220,38,38,.1); --warn: #d97706;
+  --warn-dim: rgba(217,119,6,.1); --info: #2563eb;
+  --info-dim: rgba(37,99,235,.1);
+  --purple: #9333ea; --purple-dim: rgba(147,51,234,.12);
   color-scheme: light;
 }
 
@@ -57,22 +75,30 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── APP SHELL ── */
-#app { display: flex; flex-direction: column; height: 100%; max-width: 640px; margin: 0 auto }
+#app {
+  display: flex; flex-direction: column;
+  height: 100%; max-width: 640px;
+  margin: 0 auto; position: relative;
+}
 
 /* ── HEADER ── */
 .hdr {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; align-items: center;
+  justify-content: space-between;
   padding: 0 14px; height: var(--head-h);
-  background: var(--bg); border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
   flex-shrink: 0;
-  padding-top: env(safe-area-inset-top, 0px);
-  height: calc(var(--head-h) + env(safe-area-inset-top, 0px));
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 10;
 }
 .logo {
   font-family: 'Outfit', sans-serif;
-  font-size: 17px; font-weight: 800; color: var(--accent);
-  letter-spacing: -.4px; display: flex; align-items: center; gap: 9px; flex-shrink: 0;
+  font-size: 18px; font-weight: 800;
+  color: var(--accent); letter-spacing: -.5px;
+  display: flex; align-items: center; gap: 8px;
+  flex-shrink: 0;
 }
 .logo-mark {
   width: 34px; height: 34px; border-radius: 9px;
@@ -80,16 +106,26 @@ body {
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; box-shadow: 0 2px 8px rgba(232,146,12,.35);
 }
-.logo-mark svg { width: 17px; height: 17px; color: #fff }
-.logo em { color: var(--text); font-style: normal; font-weight: 500; font-size: 15px }
-#fbStatus { font-size: 11px; color: var(--text-ghost); font-family: 'DM Sans', sans-serif }
+.logo-mark svg { width: 18px; height: 18px; color: #fff }
+.logo em { color: var(--text); font-style: normal; font-weight: 500; font-size: 16px }
+.hdr-btns { display: flex; gap: 6px; align-items: center }
+.icn-btn {
+  width: 36px; height: 36px; border-radius: var(--r);
+  border: 1px solid var(--border);
+  background: var(--surface); color: var(--text-muted);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .15s; flex-shrink: 0;
+}
+.icn-btn:hover { background: var(--surface-2); color: var(--text) }
+.icn-btn:active { transform: scale(.93) }
+.icn-btn.lit { color: var(--accent); border-color: var(--accent) }
 
-/* ── CONTENT / TABS ── */
+/* ── TABS ── */
 .main { flex: 1; overflow: hidden; position: relative }
 .tab {
   display: none; flex-direction: column;
   height: 100%; overflow-y: auto;
-  padding-bottom: calc(var(--nav-h) + 8px);
+  padding-bottom: calc(var(--nav-h) + 12px);
 }
 .tab.on { display: flex }
 .tab::-webkit-scrollbar { width: 3px }
@@ -98,7 +134,8 @@ body {
 /* ── BOTTOM NAV ── */
 .bot-nav {
   display: flex; height: var(--nav-h);
-  background: var(--surface); border-top: 1px solid var(--border);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   flex-shrink: 0;
 }
@@ -107,243 +144,191 @@ body {
   align-items: center; justify-content: center;
   gap: 3px; cursor: pointer; color: var(--text-muted);
   transition: color .15s; border: none; background: none;
-  padding: 8px 4px; font-family: 'DM Sans', sans-serif; position: relative;
+  padding: 8px 4px;
 }
 .nav-it.on { color: var(--accent) }
 .nav-it svg { width: 22px; height: 22px }
 .nav-label { font-size: 11px; font-weight: 500 }
-.nav-badge {
-  min-width: 16px; height: 16px; border-radius: 8px;
-  background: var(--danger); color: #fff;
-  font-size: 10px; font-weight: 700;
-  display: none; align-items: center; justify-content: center;
-  padding: 0 4px; margin-top: -2px;
+.nav-pip {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--accent); margin-top: -2px;
 }
 
 /* ── SECTION HEADER ── */
 .sec-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 16px 10px; flex-shrink: 0; flex-wrap: wrap; gap: 8px;
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 10px;
+  flex-shrink: 0;
+  flex-wrap: wrap; gap: 8px;
 }
 .sec-title {
   font-family: 'Outfit', sans-serif;
-  font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -.4px;
-}
-.refresh-btn {
-  display: flex; align-items: center; gap: 5px;
-  padding: 6px 12px; border-radius: 100px;
-  border: 1px solid var(--border-2); background: var(--surface-2);
-  color: var(--text-muted); font-size: 12px; font-weight: 500;
-  cursor: pointer; font-family: 'DM Sans', sans-serif;
-  transition: all .15s;
-}
-.refresh-btn:hover { border-color: var(--accent); color: var(--accent) }
-
-/* ── STAT TILES ── */
-.stat-row { display: flex; gap: 8px; padding: 0 16px 12px; flex-wrap: wrap }
-.stat-card {
-  flex: 1 1 auto; min-width: 0; padding: 11px 13px;
-  border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--border);
-}
-.stat-val {
-  font-family: 'Outfit', sans-serif;
-  font-size: 28px; font-weight: 800; color: var(--accent);
-  line-height: 1; font-variant-numeric: tabular-nums;
-}
-.stat-lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px }
-
-/* ── GROUPS ── */
-.sec-group { margin-bottom: 16px }
-.sec-label {
-  font-size: 11px; font-weight: 600; letter-spacing: .07em;
-  text-transform: uppercase; color: var(--text-muted);
-  padding: 0 16px 8px;
-}
-.empty-state {
-  text-align: center; padding: 52px 24px;
-  color: var(--text-muted); font-size: 14px; line-height: 1.6;
+  font-size: 22px; font-weight: 800;
+  color: var(--text); letter-spacing: -.4px;
 }
 
-/* ── TASK CARDS (torque-style) ── */
-.task-card {
-  padding: 13px 14px;
-  border-radius: var(--r-lg);
+/* ── BUTTONS ── */
+.add-btn {
+  display: flex; align-items: center; gap: 4px;
+  padding: 7px 12px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: var(--r);
+  font-size: 13px; font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer; transition: all .15s;
+  white-space: nowrap; flex-shrink: 0;
+}
+.add-btn:hover { background: var(--accent-2) }
+.add-btn:active { transform: scale(.96) }
+.add-btn svg { width: 14px; height: 14px }
+
+/* ── TOASTS ── */
+.toasts {
+  position: fixed;
+  top: calc(var(--head-h) + 8px + env(safe-area-inset-top, 0px));
+  left: 50%; transform: translateX(-50%);
+  z-index: 300; display: flex; flex-direction: column;
+  gap: 6px; pointer-events: none;
+  width: min(calc(100% - 24px), 400px);
+}
+.toast {
+  background: var(--surface-3); border: 1px solid var(--border-2);
+  border-radius: var(--r-lg); padding: 11px 14px;
+  font-size: 14px; color: var(--text);
+  box-shadow: 0 4px 20px rgba(0,0,0,.35);
+  animation: tin .28s cubic-bezier(.34,1.56,.64,1) forwards;
+  display: flex; align-items: center; gap: 10px;
+  pointer-events: all;
+}
+@keyframes tin {
+  from { opacity:0; transform:translateY(-6px) scale(.96) }
+  to   { opacity:1; transform:translateY(0)    scale(1)   }
+}
+
+/* ── Gerencial tab ── */
+.ger-tabs { display: flex; gap: 0; border-bottom: 1.5px solid var(--border); margin-bottom: 14px; padding: 0 16px }
+.ger-tab-btn {
+  flex: 1; padding: 9px 4px 8px; font-size: 11px; font-weight: 700;
+  color: var(--text-muted); background: none; border: none;
+  border-bottom: 2px solid transparent; margin-bottom: -1.5px;
+  cursor: pointer; font-family: inherit; letter-spacing: .03em; transition: all .15s;
+}
+.ger-tab-btn.on { color: var(--accent-2); border-bottom-color: var(--accent-2) }
+.ger-section { margin-bottom: 20px }
+.ger-section-title { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-muted); padding: 0 16px 8px }
+.ger-empty { text-align: center; padding: 48px 24px; color: var(--text-muted); font-size: 14px }
+.ger-card {
+  margin: 0 16px 8px; padding: 12px 14px; border-radius: var(--r);
   background: var(--surface); border: 1px solid var(--border);
   border-left: 3px solid var(--border-2);
-  transition: border-color .15s;
 }
-.task-card.ok     { border-left-color: var(--success) }
-.task-card.warn   { border-left-color: var(--warn) }
-.task-card.breach { border-left-color: var(--danger) }
-.task-card.due    { border-left-color: var(--warn) }
-.task-card.over   { border-left-color: var(--danger) }
-.task-card.info   { border-left-color: var(--info) }
-.task-card.purple { border-left-color: var(--purple) }
-.task-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px }
-.task-title {
-  font-size: 14px; font-weight: 600; color: var(--text);
-  flex: 1; min-width: 0; word-break: break-word;
-}
-.task-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.5 }
-.badge { font-size: 12px; font-weight: 700; flex-shrink: 0; font-variant-numeric: tabular-nums; padding: 2px 7px; border-radius: 6px; background: var(--surface-2) }
-.badge.ok     { color: var(--success) }
-.badge.warn   { color: var(--warn) }
-.badge.breach { color: var(--danger) }
-.badge.info   { color: var(--info) }
-.badge.purple { color: var(--purple) }
-.card-notif { font-size: 11px; color: var(--text-ghost); margin-top: 3px }
-
-/* backward compat */
-.card { padding: 13px 14px; border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--border-2) }
-.card.ok { border-left-color: var(--success) }
-.card.warn { border-left-color: var(--warn) }
-.card.breach { border-left-color: var(--danger) }
-.card-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px }
-.card-name { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; min-width: 0 }
-.card-time { font-size: 13px; font-weight: 700; flex-shrink: 0 }
-.card-time.ok { color: var(--success) } .card-time.warn { color: var(--warn) } .card-time.breach { color: var(--danger) }
-.card-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.5 }
-.sla-bar { height: 3px; border-radius: 2px; background: var(--surface-2); margin-top: 9px; overflow: hidden }
-.sla-fill { height: 100%; border-radius: 2px; transition: width .3s }
-.rank {
-  font-family: 'Outfit', sans-serif;
-  font-size: 18px; font-weight: 800;
-  color: var(--text-muted); flex-shrink: 0; min-width: 24px;
-}
-
-/* ── OBS FIELD ── */
-.obs-wrap { margin-top: 10px }
-.obs-label {
-  font-size: 10px; font-weight: 700; letter-spacing: .07em;
-  text-transform: uppercase; color: var(--text-ghost); margin-bottom: 5px;
-}
-.obs-ta {
-  width: 100%; padding: 8px 10px;
+.ger-card.ok     { border-left-color: var(--success) }
+.ger-card.warn   { border-left-color: #f59e0b; animation: pulse-sla 1.8s ease-in-out infinite }
+.ger-card.breach { border-left-color: var(--danger); animation: pulse-sla 0.9s ease-in-out infinite }
+.ger-card.neutral { border-left-color: var(--info); animation: none }
+.ger-card-clickable { cursor: pointer }
+.ger-row  { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px }
+.ger-name { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; min-width: 0 }
+.ger-time { font-size: 13px; font-weight: 700; flex-shrink: 0 }
+.ger-time.ok     { color: var(--success) }
+.ger-time.warn   { color: #f59e0b }
+.ger-time.breach { color: var(--danger) }
+.ger-time.neutral { color: var(--info) }
+.ger-meta { font-size: 11px; color: var(--text-muted); margin-top: 4px }
+.ger-sla-bar { height: 3px; border-radius: 2px; background: var(--surface-2); margin-top: 8px; overflow: hidden }
+.ger-sla-fill { height: 100%; border-radius: 2px; transition: width .3s }
+.ger-notif-time { font-size: 11px; color: var(--text-muted); margin-top: 3px }
+.ger-obs-wrap { margin-top: 8px }
+.ger-obs-label { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px }
+.ger-obs-ta {
+  width: 100%; box-sizing: border-box; padding: 7px 9px;
   border: 1.5px solid var(--border); border-radius: var(--r);
-  background: var(--surface-2); color: var(--text); font-family: 'DM Sans', sans-serif;
-  font-size: 13px; line-height: 1.4; resize: vertical; min-height: 52px;
-  outline: none; transition: border-color .15s;
+  background: var(--surface-2); color: var(--text);
+  font-family: inherit; font-size: 12px; line-height: 1.4; resize: vertical;
+  min-height: 52px; outline: none; transition: border-color .15s;
 }
-.obs-ta:focus { border-color: var(--accent) }
-.obs-save {
-  margin-top: 6px; padding: 5px 14px; border-radius: 100px;
+.ger-obs-ta:focus { border-color: var(--accent) }
+.ger-obs-save {
+  margin-top: 5px; padding: 4px 12px; border-radius: 20px;
   border: 1.5px solid var(--accent); background: var(--accent-dim);
-  color: var(--accent); font-size: 12px; font-weight: 600;
-  cursor: pointer; font-family: 'DM Sans', sans-serif;
-  transition: all .15s;
+  color: var(--accent-2); font-size: 11px; font-weight: 700;
+  cursor: pointer; font-family: inherit; transition: all .15s;
 }
-.obs-save:hover { background: var(--accent-dim-2) }
+.ger-obs-save:active { opacity: .7 }
+.ger-rank { font-size: 18px; font-weight: 800; color: var(--text-muted); flex-shrink: 0; min-width: 24px }
+.ger-stat-row { display: flex; gap: 10px; margin: 0 16px 14px; flex-wrap: wrap }
+.ger-stat { flex: 1 1 auto; min-width: 0; padding: 10px 14px; border-radius: var(--r); background: var(--surface); border: 1px solid var(--border) }
+.ger-stat-val { font-size: 22px; font-weight: 800; color: var(--text) }
+.ger-stat-lbl { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); margin-top: 2px }
 
-
-/* ── STATS (torque-style) ── */
-.stats { display: flex; gap: 8px; padding: 0 16px 10px; flex-shrink: 0 }
-.stat { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 11px 13px }
-.stat-n { font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 800; color: var(--accent); line-height: 1; font-variant-numeric: tabular-nums }
-.stat-n.red { color: var(--danger) }
-.stat-n.grn { color: var(--success) }
-.stat-n.ylw { color: var(--warn) }
-.stat-l { font-size: 12px; color: var(--text-muted); margin-top: 2px }
-
-/* ── CARDS (list style) ── */
-.list { padding: 0 16px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0 }
-
-/* ── EMPTY STATE (torque-style) ── */
-.empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 44px 20px; text-align: center; gap: 10px }
-.empty-ico { font-size: 44px; opacity: .45; line-height: 1 }
-.empty-t { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; color: var(--text-2) }
-.empty-s { font-size: 14px; color: var(--text-muted); max-width: 240px; line-height: 1.6 }
-
-/* ── NAV PIP ── */
-.nav-pip { display: none; width: 4px; height: 4px; border-radius: 50%; background: var(--accent); margin-top: -1px }
-.nav-it.on .nav-pip { display: block }
-
-/* ── ICN BTN (header) ── */
-.icn-btn {
-  width: 36px; height: 36px; border-radius: var(--r);
-  border: 1px solid var(--border); background: var(--surface);
-  color: var(--text-muted); display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: all .15s; flex-shrink: 0;
-}
-.icn-btn:hover { background: var(--surface-2); color: var(--text) }
-.icn-btn:active { transform: scale(.93) }
-.hdr-btns { display: flex; gap: 6px; align-items: center }
-
-/* ── ANIMATIONS ── */
-@keyframes pulse-sla {
-  0%,100% { opacity: 1 } 50% { opacity: .65 }
-}
-.card.warn   { animation: pulse-sla 1.8s ease-in-out infinite }
-.card.breach { animation: pulse-sla 0.9s ease-in-out infinite }
+@keyframes pulse-sla { 0%,100%{opacity:1} 50%{opacity:.55} }
 </style>
 
 <div id="app">
-  <!-- HEADER -->
-  <div class="hdr">
+  <!-- Header -->
+  <header class="hdr">
     <div class="logo">
       <div class="logo-mark">
-        <img src="data:image/png;base64,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" alt="logo" style="width:34px;height:34px;border-radius:9px;display:block;">
+        <img src="data:image/png;base64,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" alt="logo" style="width:34px;height:34px;border-radius:9px;display:block;">
       </div>
       Memora <em>Gerencial</em>
     </div>
     <div class="hdr-btns">
       <div id="fbStatus" style="font-size:11px;color:var(--text-ghost)">Conectando…</div>
-      <button class="icn-btn" onclick="cycleTheme()" title="Alternar tema" id="themeBtn">
-        <svg id="themeIco" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <button class="icn-btn" onclick="cycleTheme()" title="Alternar tema">
+        <svg id="themeIco" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
       </button>
     </div>
-  </div>
+  </header>
 
-  <!-- CONTENT -->
-  <div class="main">
-
-    <!-- TAB: ALERTAS -->
-    <div class="tab on" id="tab-alertas">
+  <!-- Main -->
+  <main class="main">
+    <div class="tab on" id="tab-gerencial">
       <div class="sec-head">
-        <div class="sec-title">Alertas SLA</div>
-        <button class="refresh-btn" onclick="renderAlertas()">↻ Atualizar</button>
+        <h1 class="sec-title">Gerencial</h1>
+        <button class="add-btn" style="padding:6px 11px;font-size:13px" onclick="renderGerencial()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.63"/></svg>
+          Atualizar
+        </button>
       </div>
-      <div id="alertasList"></div>
-    </div>
-
-    <!-- TAB: DASHBOARD -->
-    <div class="tab" id="tab-dashboard">
-      <div class="sec-head">
-        <div class="sec-title">Dashboard</div>
-        <button class="refresh-btn" onclick="renderDashboard()">↻ Atualizar</button>
+      <div class="ger-tabs">
+        <button class="ger-tab-btn on" id="gTab-alertas"   onclick="goGerTab('alertas')">🔔 Alertas</button>
+        <button class="ger-tab-btn"    id="gTab-parados"   onclick="goGerTab('parados')">⏸ Parados</button>
+        <button class="ger-tab-btn"    id="gTab-separacao" onclick="goGerTab('separacao')">✂️ Separação</button>
+        <button class="ger-tab-btn"    id="gTab-sku"       onclick="goGerTab('sku')">🔍 SKU</button>
       </div>
-      <div id="dashContent"></div>
+      <div id="gerList" style="padding-bottom:40px"></div>
     </div>
+  </main>
 
-    <!-- TAB: HISTÓRICO -->
-    <div class="tab" id="tab-historico">
-      <div class="sec-head">
-        <div class="sec-title">Histórico</div>
-        <button class="refresh-btn" onclick="renderHistorico()">↻ Atualizar</button>
-      </div>
-      <div id="histContent"></div>
-    </div>
-
-  </div>
-
-  <!-- BOTTOM NAV -->
-  <div class="bot-nav">
-    <button class="nav-it on" id="nav-alertas" onclick="goTab('alertas',this)">
-      <div id="alertBadge" class="nav-badge"></div>
+  <!-- Bottom Nav -->
+  <nav class="bot-nav">
+    <button class="nav-it on" onclick="goGerTab('alertas')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <span class="nav-label">Alertas</span>
-      <span class="nav-pip"></span>
+      <div class="nav-pip" id="alertPip" style="display:none"></div>
     </button>
-    <button class="nav-it" id="nav-dashboard" onclick="goTab('dashboard',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-      <span class="nav-label">Dashboard</span>
-      <span class="nav-pip"></span>
+    <button class="nav-it" onclick="goGerTab('parados')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      <span class="nav-label">Parados</span>
+      <div class="nav-pip" id="paradosPip" style="display:none"></div>
     </button>
-    <button class="nav-it" id="nav-historico" onclick="goTab('historico',this)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="12 8 12 12 14 14"/><path d="M3.05 11a9 9 0 1 1 .5 4"/><polyline points="3 16 3 11 8 11"/></svg>
-      <span class="nav-label">Histórico</span>
-      <span class="nav-pip"></span>
+    <button class="nav-it" onclick="goGerTab('separacao')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+      <span class="nav-label">Separação</span>
+      <div class="nav-pip" style="display:none"></div>
     </button>
-  </div>
+    <button class="nav-it" onclick="goGerTab('sku')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span class="nav-label">SKU</span>
+      <div class="nav-pip" style="display:none"></div>
+    </button>
+  </nav>
+
+  <div class="toasts" id="toasts"></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.1/firebase-app-compat.min.js"></script>
@@ -358,8 +343,8 @@ const firebaseConfig = {
   databaseURL: "https://memo-build-default-rtdb.firebaseio.com",
   storageBucket: "memo-build.firebasestorage.app"
 }
-const fbApp = firebase.initializeApp(firebaseConfig)
-const fbDb  = firebase.database()
+firebase.initializeApp(firebaseConfig)
+const fbDb = firebase.database()
 
 /* ── STORAGE ── */
 const S = {
@@ -390,22 +375,29 @@ const STATUS_LABELS = {
 const SLA_ACTIVE = new Set(['pedido_pronto','em_coleta','validar_alteracao','alterar_pedido','em_expedicao'])
 
 /* ── STATE ── */
-let allRequests  = {}   // token → { reqId → req }
+let allRequests  = {}
 let contacts     = []
 let notifTs      = S.get('ger_notif_ts', {})
-let alertRecords = S.get('ger_alert_records', [])
-let curTab       = 'alertas'
-let seenTs       = {}   // 'reqId_status' → timestamp quando vimos pela primeira vez nesse status
+let slaAlerts    = S.get('ger_alert_records', [])
+let curGerTab    = 'alertas'
+let seenTs       = {}
 
 /* ── HELPERS ── */
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
-const fmtMs = ms => { const m=Math.floor(ms/60000),s=Math.floor((ms%60000)/1000); return m>0?`${m}min`:s+'s' }
+const fmtMs  = ms => { const m=Math.floor(ms/60000), s=Math.floor((ms%60000)/1000); return m>0?`${m}min ${s}s`:s+'s' }
 const fmtTime = ts => new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})
 const fmtDate = ts => new Date(ts).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})
 
+function toast(msg){
+  const c=document.getElementById('toasts')
+  const el=document.createElement('div')
+  el.className='toast'; el.textContent=msg
+  c.appendChild(el); setTimeout(()=>el.remove(),3400)
+}
+
 function sendNotif(title, body) {
-  if (window.AndroidBridge) { try { AndroidBridge.showNotification(title, body) } catch(e){} }
-  else if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+  if(window.AndroidBridge){ try{ AndroidBridge.showNotification(title, body) }catch(e){} }
+  else if(typeof Notification!=='undefined' && Notification.permission==='granted'){
     new Notification(title, { body })
   }
 }
@@ -413,124 +405,324 @@ function sendNotif(title, body) {
 /* ── THEME ── */
 const THEMES = ['dark','light','']
 let _themeIdx = 0
-function cycleTheme() {
-  _themeIdx = (_themeIdx + 1) % THEMES.length
+function cycleTheme(){
+  _themeIdx = (_themeIdx+1) % THEMES.length
   const t = THEMES[_themeIdx]
   if(t) document.documentElement.setAttribute('data-theme', t)
   else   document.documentElement.removeAttribute('data-theme')
   const ico = document.getElementById('themeIco')
-  if(ico) {
+  if(ico){
     const icons = [
-      // moon (dark)
       '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
-      // sun (light)
       '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
-      // auto (system)
       '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'
     ]
     ico.innerHTML = icons[_themeIdx]
   }
-  try { localStorage.setItem('ger_theme', _themeIdx) } catch(e){}
+  try{ localStorage.setItem('ger_theme', _themeIdx) }catch(e){}
 }
 ;(function initTheme(){
-  try {
+  try{
     const saved = parseInt(localStorage.getItem('ger_theme')||'0')
-    if(saved && THEMES[saved]) {
+    if(saved && THEMES[saved]){
       _themeIdx = saved
       document.documentElement.setAttribute('data-theme', THEMES[saved])
     }
-  } catch(e){}
+  }catch(e){}
 })()
 
-/* ── NAVIGATION ── */
-function goTab(name, btn) {
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'))
+/* ── GERENCIAL SUB-NAV ── */
+function goGerTab(tab){
+  curGerTab = tab
+  document.querySelectorAll('.ger-tab-btn').forEach(b=>b.classList.remove('on'))
   document.querySelectorAll('.nav-it').forEach(b=>b.classList.remove('on'))
-  document.getElementById('tab-'+name).classList.add('on')
+  const btn = document.getElementById('gTab-'+tab)
   if(btn) btn.classList.add('on')
-  curTab = name
-  if(name==='alertas')   renderAlertas()
-  if(name==='dashboard') renderDashboard()
-  if(name==='historico') renderHistorico()
+  // Also highlight bottom nav
+  const navBtns = document.querySelectorAll('.nav-it')
+  const tabOrder = ['alertas','parados','separacao','sku']
+  const idx = tabOrder.indexOf(tab)
+  if(idx>=0 && navBtns[idx]) navBtns[idx].classList.add('on')
+  renderGerencial()
 }
 
-/* ── FIREBASE SUBSCRIPTION ── */
-function subscribeData() {
-  // Subscribe to owner contacts list
-  fbDb.ref('owner/contacts').on('value', snap => {
-    contacts = []
-    snap.forEach(child => {
-      const c = child.val()
-      if(c && c.token) contacts.push({...c, key: child.key})
+function renderGerencial(){
+  const el = document.getElementById('gerList')
+  if(!el) return
+  if(curGerTab==='alertas')   renderGerAlertas(el)
+  else if(curGerTab==='parados')   renderGerParados(el)
+  else if(curGerTab==='separacao') renderGerSeparacao(el)
+  else if(curGerTab==='sku')       renderGerSku(el)
+}
+
+/* ── GERENCIAL: ALERTAS ── */
+function renderGerAlertas(el){
+  if(!slaAlerts.length){
+    el.innerHTML = `<div class="ger-empty">🔔 Nenhum alerta SLA registrado ainda</div>`
+    return
+  }
+  const cards = slaAlerts.map(a => {
+    const cls   = a.isBreach ? 'breach' : 'warn'
+    const icon  = a.isBreach ? '🔴' : '⚠️'
+    const timeStr = fmtTime(a.firedAt)
+    const dateStr = fmtDate(a.firedAt)
+    const slaMin  = (a.tipo && TIPO_SLA[a.tipo]) ? TIPO_SLA[a.tipo].slaMs/60000 : null
+    const safeId  = a.id.replace(/[^a-zA-Z0-9_]/g,'_')
+    return `<div class="ger-card ${cls}">
+      <div class="ger-row">
+        <div class="ger-name">${icon} ${esc(a.reqTitle)}</div>
+        <div class="ger-time ${cls}">${fmtMs(a.elapsedMs)}</div>
+      </div>
+      <div class="ger-meta">
+        <strong>${STATUS_LABELS[a.status]||a.status}</strong> · ${esc(a.contactName)}
+        ${a.tipo ? ` · ${TIPO_LABELS[a.tipo]||a.tipo}` : ''}
+        ${slaMin ? ` · SLA ${slaMin}min` : ''}
+      </div>
+      <div class="ger-notif-time">🔔 Notificado em ${dateStr} às ${timeStr}</div>
+      <div class="ger-obs-wrap">
+        <div class="ger-obs-label">Observação / Justificativa</div>
+        <textarea class="ger-obs-ta" id="obs-${safeId}" rows="2" placeholder="Ex: separador estava ocupado em outro pedido…">${esc(a.obs||'')}</textarea>
+        <button class="ger-obs-save" onclick="saveAlertObs('${a.id}',document.getElementById('obs-${safeId}').value);toast('Observação salva')">Salvar obs.</button>
+      </div>
+    </div>`
+  }).join('')
+  const total   = slaAlerts.length
+  const nBreach = slaAlerts.filter(a=>a.isBreach).length
+  const nWarn   = total - nBreach
+  el.innerHTML = `
+    <div class="ger-stat-row">
+      <div class="ger-stat"><div class="ger-stat-val" style="color:var(--danger)">${nBreach}</div><div class="ger-stat-lbl">SLA Estourado</div></div>
+      <div class="ger-stat"><div class="ger-stat-val" style="color:#f59e0b">${nWarn}</div><div class="ger-stat-lbl">Em Alerta</div></div>
+      <div class="ger-stat"><div class="ger-stat-val">${total}</div><div class="ger-stat-lbl">Total Registros</div></div>
+    </div>
+    <div class="ger-section">
+      <div class="ger-section-title">Registros de Alerta (${total})</div>
+      ${cards}
+    </div>`
+}
+
+/* ── GERENCIAL: PARADOS ── */
+function renderGerParados(el){
+  const nowMs = Date.now()
+  const items = []
+  Object.entries(allRequests).forEach(([token, reqs])=>{
+    if(!reqs) return
+    const contact = contacts.find(c=>c.token===token)
+    const contactName = contact ? contact.name : token
+    Object.entries(reqs).forEach(([reqId, r])=>{
+      if(!r) return
+      const s = r.status||'em_pedido'
+      if(s==='concluida') return
+      if(!SLA_ACTIVE.has(s)) return
+      const changedAt = r.statusChangedAt||r.createdAt||0
+      const elapsed   = nowMs - changedAt
+      const cfg       = (r.tipo && TIPO_SLA[r.tipo]) || null
+      const slaState  = !cfg ? 'ok' : elapsed>=cfg.slaMs?'breach':elapsed>=cfg.alertMs?'warn':'ok'
+      items.push({...r, id:reqId, token, contactName, elapsed, slaState, cfg})
     })
-    document.getElementById('fbStatus').textContent = `${contacts.length} contatos`
-    contacts.forEach(c => subscribeContact(c.token))
-    syncPipelineToAndroid()
-    checkSlaNotifs()
-    if(curTab==='alertas')   renderAlertas()
-    if(curTab==='dashboard') renderDashboard()
-    if(curTab==='historico') renderHistorico()
   })
+  items.sort((a,b)=>b.elapsed-a.elapsed)
+
+  if(!items.length){
+    el.innerHTML = `<div class="ger-empty">✅ Nenhum pedido parado no pipeline</div>`
+    return
+  }
+  const fmt = ms => { const m=Math.floor(ms/60000); return m+'min' }
+  const cards = items.map((r,i)=>{
+    const s = r.status||'em_pedido'
+    const fillColor = r.slaState==='breach'?'var(--danger)':r.slaState==='warn'?'#f59e0b':'var(--success)'
+    const pct = r.cfg ? Math.min(100,(r.elapsed/r.cfg.slaMs)*100) : 0
+    return `<div class="ger-card ${r.slaState}">
+      <div class="ger-row">
+        <div class="ger-rank">#${i+1}</div>
+        <div class="ger-name" style="margin-left:6px">${esc(r.title)}</div>
+        <div class="ger-time ${r.slaState}">${fmt(r.elapsed)}</div>
+      </div>
+      <div class="ger-meta">
+        <strong>${STATUS_LABELS[s]||s}</strong> · ${esc(r.contactName)}
+        ${r.tipo ? ` · ${TIPO_LABELS[r.tipo]||r.tipo}` : ''}
+        ${r.cfg ? ` · SLA ${r.cfg.slaMs/60000}min` : ''}
+      </div>
+      ${r.cfg ? `<div class="ger-sla-bar"><div class="ger-sla-fill" style="width:${pct}%;background:${fillColor}"></div></div>` : ''}
+    </div>`
+  }).join('')
+  el.innerHTML = `<div class="ger-section"><div class="ger-section-title">Pedidos mais parados (${items.length})</div>${cards}</div>`
 }
 
-function subscribeContact(token) {
-  fbDb.ref(`contacts/${token}/requests`).on('value', snap => {
-    const reqs = snap.val()
-    allRequests[token] = reqs || {}
-    syncPipelineToAndroid()
-    checkSlaNotifs()
-    if(curTab==='alertas')   renderAlertas()
-    if(curTab==='dashboard') renderDashboard()
-    if(curTab==='historico') renderHistorico()
+/* ── GERENCIAL: SEPARAÇÃO ── */
+function renderGerSeparacao(el){
+  const items = []
+  Object.entries(allRequests).forEach(([token, reqs])=>{
+    if(!reqs) return
+    const contact = contacts.find(c=>c.token===token)
+    const contactName = contact ? contact.name : token
+    Object.entries(reqs).forEach(([reqId, r])=>{
+      if(!r) return
+      if(!r.statusHistory) return
+      let colMs = 0
+      const hist = Array.isArray(r.statusHistory) ? r.statusHistory : []
+      for(let i=0;i<hist.length;i++){
+        if(hist[i].status==='em_coleta'){
+          const start = hist[i].changedAt||0
+          const end   = hist[i+1] ? (hist[i+1].changedAt||Date.now()) : Date.now()
+          colMs += end - start
+        }
+      }
+      if((r.status||'')==='em_coleta'){
+        const start = r.statusChangedAt||0
+        if(start) colMs += Date.now() - start
+      }
+      if(colMs>0) items.push({...r, id:reqId, token, contactName, colMs})
+    })
   })
+  items.sort((a,b)=>b.colMs-a.colMs)
+
+  if(!items.length){
+    el.innerHTML = `<div class="ger-empty">✂️ Nenhum pedido com tempo de separação registrado</div>`
+    return
+  }
+  const fmt = ms => { const m=Math.floor(ms/60000), s=Math.floor((ms%60000)/1000); return m>0?`${m}min`:s+'s' }
+  const avgMs = items.reduce((acc,r)=>acc+r.colMs,0)/items.length
+  const maxMs = items[0].colMs
+  const cards = items.map((r,i)=>{
+    const pct = Math.min(100,(r.colMs/maxMs)*100)
+    return `<div class="ger-card neutral">
+      <div class="ger-row">
+        <div class="ger-rank">#${i+1}</div>
+        <div class="ger-name" style="margin-left:6px">${esc(r.title)}</div>
+        <div class="ger-time neutral">${fmt(r.colMs)}</div>
+      </div>
+      <div class="ger-meta">${esc(r.contactName)}${r.tipo?` · ${TIPO_LABELS[r.tipo]||r.tipo}`:''}</div>
+      <div class="ger-sla-bar"><div class="ger-sla-fill" style="width:${pct}%;background:var(--info)"></div></div>
+    </div>`
+  }).join('')
+  el.innerHTML = `
+    <div class="ger-stat-row">
+      <div class="ger-stat"><div class="ger-stat-val" style="color:var(--info)">${fmt(maxMs)}</div><div class="ger-stat-lbl">Maior tempo</div></div>
+      <div class="ger-stat"><div class="ger-stat-val">${fmt(Math.round(avgMs))}</div><div class="ger-stat-lbl">Média</div></div>
+      <div class="ger-stat"><div class="ger-stat-val">${items.length}</div><div class="ger-stat-lbl">Pedidos</div></div>
+    </div>
+    <div class="ger-section"><div class="ger-section-title">Tempo em Separação (em_coleta)</div>${cards}</div>`
+}
+
+/* ── GERENCIAL: SKU ── */
+function renderGerSku(el){
+  const items = []
+  const deviationStatuses = new Set(['validar_alteracao','alterar_pedido'])
+  Object.entries(allRequests).forEach(([token, reqs])=>{
+    if(!reqs) return
+    const contact = contacts.find(c=>c.token===token)
+    const contactName = contact ? contact.name : token
+    Object.entries(reqs).forEach(([reqId, r])=>{
+      if(!r) return
+      let devMs=0, devCount=0
+      const hist = Array.isArray(r.statusHistory) ? r.statusHistory : []
+      for(let i=0;i<hist.length;i++){
+        if(deviationStatuses.has(hist[i].status)){
+          const start=hist[i].changedAt||0
+          const end=hist[i+1]?(hist[i+1].changedAt||Date.now()):Date.now()
+          devMs+=end-start; devCount++
+        }
+      }
+      if(deviationStatuses.has(r.status||'')){
+        const start=r.statusChangedAt||0
+        if(start){ devMs+=Date.now()-start; devCount++ }
+      }
+      if(devMs>0) items.push({...r, id:reqId, token, contactName, devMs, devCount})
+    })
+  })
+  items.sort((a,b)=>b.devMs-a.devMs)
+
+  if(!items.length){
+    el.innerHTML = `<div class="ger-empty">🔍 Nenhum pedido com desvio de SKU registrado</div>`
+    return
+  }
+  const fmt = ms => { const m=Math.floor(ms/60000), s=Math.floor((ms%60000)/1000); return m>0?`${m}min`:s+'s' }
+  const avgMs = items.reduce((acc,r)=>acc+r.devMs,0)/items.length
+  const maxMs = items[0].devMs
+  const totalDev = items.reduce((acc,r)=>acc+r.devCount,0)
+  const cards = items.map((r,i)=>{
+    const pct = Math.min(100,(r.devMs/maxMs)*100)
+    const s = r.status||'em_pedido'
+    return `<div class="ger-card neutral">
+      <div class="ger-row">
+        <div class="ger-rank">#${i+1}</div>
+        <div class="ger-name" style="margin-left:6px">${esc(r.title)}</div>
+        <div class="ger-time neutral">${fmt(r.devMs)}</div>
+      </div>
+      <div class="ger-meta">
+        ${esc(r.contactName)}${r.tipo?` · ${TIPO_LABELS[r.tipo]||r.tipo}`:''}
+        · <strong>${r.devCount}x desvio</strong>
+        · status atual: ${STATUS_LABELS[s]||s}
+      </div>
+      <div class="ger-sla-bar"><div class="ger-sla-fill" style="width:${pct}%;background:var(--purple)"></div></div>
+    </div>`
+  }).join('')
+  el.innerHTML = `
+    <div class="ger-stat-row">
+      <div class="ger-stat"><div class="ger-stat-val" style="color:var(--purple)">${fmt(maxMs)}</div><div class="ger-stat-lbl">Maior desvio</div></div>
+      <div class="ger-stat"><div class="ger-stat-val">${fmt(Math.round(avgMs))}</div><div class="ger-stat-lbl">Média</div></div>
+      <div class="ger-stat"><div class="ger-stat-val">${totalDev}</div><div class="ger-stat-lbl">Total desvios</div></div>
+    </div>
+    <div class="ger-section"><div class="ger-section-title">Velocidade de SKU — pedidos com desvio</div>${cards}</div>`
+}
+
+/* ── SAVE OBS ── */
+function saveAlertObs(alertId, obs){
+  const rec = slaAlerts.find(a=>a.id===alertId)
+  if(rec){
+    rec.obs = obs
+    S.set('ger_alert_records', slaAlerts)
+    if(window.AndroidBridge) try{ AndroidBridge.saveAlertRecords(JSON.stringify(slaAlerts)) }catch(e){}
+  }
 }
 
 /* ── SYNC PIPELINE TO ANDROID ── */
-function syncPipelineToAndroid() {
+function syncPipelineToAndroid(){
   if(!window.AndroidBridge) return
   const active = []
-  Object.entries(allRequests).forEach(([token, reqs]) => {
+  Object.entries(allRequests).forEach(([token, reqs])=>{
     if(!reqs) return
-    Object.entries(reqs).forEach(([reqId, r]) => {
+    Object.entries(reqs).forEach(([reqId, r])=>{
       if(!r) return
       const s = r.status||'em_pedido'
-      if(!SLA_ACTIVE.has(s) || !r.tipo || !TIPO_SLA[r.tipo]) return
+      if(!SLA_ACTIVE.has(s)||!r.tipo||!TIPO_SLA[r.tipo]) return
       const rawTs = r.statusChangedAt||r.createdAt||0
       const seenKey = reqId+'_'+s
       if(!seenTs[seenKey]) seenTs[seenKey] = Date.now()
-      const effectiveChangedAt = rawTs > 0 ? rawTs : seenTs[seenKey]
+      const effectiveChangedAt = rawTs>0 ? rawTs : seenTs[seenKey]
       active.push({ id:reqId, token, title:r.title||reqId, status:s, tipo:r.tipo,
         statusChangedAt: effectiveChangedAt, createdAt: r.createdAt||0 })
     })
   })
-  try { AndroidBridge.savePipelineRequests(JSON.stringify(active)) } catch(e){}
+  try{ AndroidBridge.savePipelineRequests(JSON.stringify(active)) }catch(e){}
 }
 
 /* ── SLA NOTIFICATION CHECK ── */
-function checkSlaNotifs() {
+function checkSlaNotifs(){
   const nowMs = Date.now()
   let changed = false
 
-  Object.entries(allRequests).forEach(([token, reqs]) => {
+  Object.entries(allRequests).forEach(([token, reqs])=>{
     if(!reqs) return
-    Object.entries(reqs).forEach(([reqId, r]) => {
+    Object.entries(reqs).forEach(([reqId, r])=>{
       if(!r) return
       const s = r.status||'em_pedido'
-      if(!SLA_ACTIVE.has(s) || !r.tipo || !TIPO_SLA[r.tipo]) return
+      if(!SLA_ACTIVE.has(s)||!r.tipo||!TIPO_SLA[r.tipo]) return
       const cfg = TIPO_SLA[r.tipo]; if(!cfg) return
 
       const rawChangedAt = r.statusChangedAt||r.createdAt||0
-      const seenKey2 = reqId+'_'+s
-      if(!seenTs[seenKey2]) seenTs[seenKey2] = nowMs
-      const changedAt = rawChangedAt > 0 ? rawChangedAt : seenTs[seenKey2]
+      const seenKey = reqId+'_'+s
+      if(!seenTs[seenKey]) seenTs[seenKey] = nowMs
+      const changedAt = rawChangedAt>0 ? rawChangedAt : seenTs[seenKey]
       const elapsed   = nowMs - changedAt
       const slaKey    = 'sla_'+reqId
       const lastFired = notifTs[slaKey]||0
 
-      if(changedAt > 0 && elapsed >= cfg.alertMs && lastFired < changedAt) {
+      if(changedAt>0 && elapsed>=cfg.alertMs && lastFired<changedAt){
         const elMin    = Math.floor(elapsed/60000)
         const slaMin   = cfg.slaMs/60000
-        const isBreach = elapsed >= cfg.slaMs
+        const isBreach = elapsed>=cfg.slaMs
         const icon     = isBreach ? '🔴' : '⚠️'
         const status   = STATUS_LABELS[s]||s
         const tipo     = TIPO_LABELS[r.tipo]||r.tipo
@@ -539,381 +731,87 @@ function checkSlaNotifs() {
           `${icon} ${timeStr} — ${isBreach?'SLA Estourado!':'Pedido Parado'}`,
           `"${r.title}" — ${status} há ${elMin}min (${tipo}, SLA: ${slaMin}min)`
         )
-        // Save alert record
         const contact = contacts.find(c=>c.token===token)
-        alertRecords.unshift({
+        slaAlerts.unshift({
           id: `${Date.now()}_${reqId}`,
           reqId, token, reqTitle: r.title||reqId,
           contactName: contact?contact.name:token,
           tipo: r.tipo, status: s,
           changedAt, firedAt: Date.now(), elapsedMs: elapsed, isBreach, obs: ''
         })
-        if(alertRecords.length > 200) alertRecords = alertRecords.slice(0,200)
-        S.set('ger_alert_records', alertRecords)
-        if(window.AndroidBridge) try{ AndroidBridge.saveAlertRecords(JSON.stringify(alertRecords)) }catch(e){}
-
+        if(slaAlerts.length>200) slaAlerts = slaAlerts.slice(0,200)
+        S.set('ger_alert_records', slaAlerts)
+        if(window.AndroidBridge) try{ AndroidBridge.saveAlertRecords(JSON.stringify(slaAlerts)) }catch(e){}
         notifTs[slaKey] = changedAt
         changed = true
       }
     })
   })
 
-  if(changed) {
+  if(changed){
     S.set('ger_notif_ts', notifTs)
     if(window.AndroidBridge) try{ AndroidBridge.saveNotifTs(JSON.stringify(notifTs)) }catch(e){}
   }
 
-  // Limpar seenTs de pedidos que não estão mais ativos (evitar memory leak)
+  // Cleanup seenTs
   const activeKeys = new Set()
-  Object.entries(allRequests).forEach(([,reqs]) => {
+  Object.entries(allRequests).forEach(([,reqs])=>{
     if(!reqs) return
-    Object.entries(reqs).forEach(([reqId, r]) => {
+    Object.entries(reqs).forEach(([reqId, r])=>{
       if(r && SLA_ACTIVE.has(r.status||'')) activeKeys.add(reqId+'_'+(r.status||''))
     })
   })
-  Object.keys(seenTs).forEach(k => { if(!activeKeys.has(k)) delete seenTs[k] })
+  Object.keys(seenTs).forEach(k=>{ if(!activeKeys.has(k)) delete seenTs[k] })
 
-  // Badge
-  const nAlert = Object.values(alertRecords).filter(a => {
-    // only alerts fired in the last 60 min
-    return Date.now() - a.firedAt < 60*60000
-  }).length
-  const badge = document.getElementById('alertBadge')
-  if(badge) badge.style.display = nAlert>0 ? 'block' : 'none'
+  // Alert pip
+  const nRecent = slaAlerts.filter(a=>Date.now()-a.firedAt<60*60000).length
+  const pip = document.getElementById('alertPip')
+  if(pip) pip.style.display = nRecent>0?'block':'none'
 }
 
-/* ── SAVE OBS ── */
-function saveObs(alertId, obs) {
-  const rec = alertRecords.find(a=>a.id===alertId)
-  if(rec) {
-    rec.obs = obs
-    S.set('ger_alert_records', alertRecords)
-    if(window.AndroidBridge) try{ AndroidBridge.saveAlertRecords(JSON.stringify(alertRecords)) }catch(e){}
-  }
+/* ── FIREBASE SUBSCRIPTION ── */
+function subscribeData(){
+  fbDb.ref('owner/contacts').on('value', snap=>{
+    contacts = []
+    snap.forEach(child=>{
+      const c = child.val()
+      if(c && c.token) contacts.push({...c, key: child.key})
+    })
+    const fbEl = document.getElementById('fbStatus')
+    if(fbEl) fbEl.textContent = `${contacts.length} contatos`
+    contacts.forEach(c=>subscribeContact(c.token))
+    syncPipelineToAndroid()
+    checkSlaNotifs()
+    renderGerencial()
+  })
 }
 
-/* ══════════════════════════════════
-   RENDER: ALERTAS
-══════════════════════════════════ */
-function renderAlertas() {
-  const el = document.getElementById('alertasList')
-  if(!el) return
-
-  if(!alertRecords.length) {
-    el.innerHTML = `<div class="empty">
-      <div class="empty-ico">🔔</div>
-      <div class="empty-t">Sem alertas</div>
-      <div class="empty-s">Os alertas aparecem aqui quando pedidos ultrapassam o tempo SLA.</div>
-    </div>`
-    return
-  }
-
-  const nBreach = alertRecords.filter(a=>a.isBreach).length
-  const nWarn   = alertRecords.length - nBreach
-  const nObs    = alertRecords.filter(a=>a.obs&&a.obs.trim()).length
-
-  const cards = alertRecords.map(a => {
-    const cls  = a.isBreach ? 'breach' : 'warn'
-    const icon = a.isBreach ? '🔴' : '⚠️'
-    const slaMin = (a.tipo&&TIPO_SLA[a.tipo]) ? TIPO_SLA[a.tipo].slaMs/60000 : null
-    const safeId = a.id.replace(/[^a-zA-Z0-9_]/g,'_')
-    return `<div class="task-card ${cls}">
-      <div class="task-row">
-        <div class="task-title">${icon} ${esc(a.reqTitle)}</div>
-        <div class="badge ${cls}">${fmtMs(a.elapsedMs)}</div>
-      </div>
-      <div class="task-meta">
-        <strong>${STATUS_LABELS[a.status]||a.status}</strong> · ${esc(a.contactName)}
-        ${a.tipo ? ` · ${TIPO_LABELS[a.tipo]||a.tipo}` : ''}
-        ${slaMin ? ` · SLA ${slaMin}min` : ''}
-      </div>
-      <div class="card-notif">🔔 ${fmtDate(a.firedAt)} às ${fmtTime(a.firedAt)}</div>
-      <div class="obs-wrap">
-        <div class="obs-label">Observação / Justificativa</div>
-        <textarea class="obs-ta" id="obs-${safeId}" rows="2"
-          placeholder="Ex: separador estava em outro pedido, falta de peça…">${esc(a.obs||'')}</textarea>
-        <button class="obs-save"
-          onclick="saveObs('${a.id}',document.getElementById('obs-${safeId}').value);this.textContent='✓ Salvo!'">
-          Salvar obs.
-        </button>
-      </div>
-    </div>`
-  }).join('')
-
-  el.innerHTML = `
-    <div class="stats">
-      <div class="stat"><div class="stat-n red">${nBreach}</div><div class="stat-l">Estourados</div></div>
-      <div class="stat"><div class="stat-n ylw">${nWarn}</div><div class="stat-l">Alertas</div></div>
-      <div class="stat"><div class="stat-n grn">${nObs}</div><div class="stat-l">Justificados</div></div>
-    </div>
-    <div class="sec-group">
-      <div class="sec-label">Registros (${alertRecords.length})</div>
-      <div class="list">${cards}</div>
-    </div>`
-}
-
-/* ══════════════════════════════════
-   RENDER: DASHBOARD
-══════════════════════════════════ */
-function renderDashboard() {
-  const el = document.getElementById('dashContent')
-  if(!el) return
-  const nowMs = Date.now()
-
-  // Gather all active pipeline items
-  const active = []
-  Object.entries(allRequests).forEach(([token, reqs]) => {
-    if(!reqs) return
-    const contact = contacts.find(c=>c.token===token)
-    const cName   = contact?contact.name:token
-    Object.entries(reqs).forEach(([reqId, r]) => {
-      if(!r) return
-      const s = r.status||'em_pedido'
-      if(s==='concluida') return
-      active.push({...r, id:reqId, token, cName})
-    })
+function subscribeContact(token){
+  fbDb.ref(`contacts/${token}/requests`).on('value', snap=>{
+    allRequests[token] = snap.val()||{}
+    syncPipelineToAndroid()
+    checkSlaNotifs()
+    renderGerencial()
   })
-
-  // ── Parados (SLA active statuses sorted by elapsed) ──
-  const parados = active
-    .filter(r => SLA_ACTIVE.has(r.status||'em_pedido'))
-    .map(r => {
-      const elapsed = nowMs - (r.statusChangedAt||r.createdAt||0)
-      const cfg = (r.tipo&&TIPO_SLA[r.tipo])||null
-      const state = !cfg ? 'ok' : elapsed>=cfg.slaMs?'breach':elapsed>=cfg.alertMs?'warn':'ok'
-      return {...r, elapsed, cfg, state}
-    })
-    .sort((a,b)=>b.elapsed-a.elapsed)
-
-  // ── Separação (time in em_coleta) ──
-  const separacao = []
-  Object.entries(allRequests).forEach(([token, reqs]) => {
-    if(!reqs) return
-    const contact = contacts.find(c=>c.token===token)
-    const cName   = contact?contact.name:token
-    Object.entries(reqs).forEach(([reqId, r]) => {
-      if(!r) return
-      let ms = 0
-      const hist = Array.isArray(r.statusHistory)?r.statusHistory:[]
-      for(let i=0;i<hist.length;i++) {
-        if(hist[i].status==='em_coleta') {
-          const start=hist[i].changedAt||0, end=hist[i+1]?(hist[i+1].changedAt||nowMs):nowMs
-          ms += end-start
-        }
-      }
-      if((r.status||'')==='em_coleta') { const s=r.statusChangedAt||0; if(s) ms+=nowMs-s }
-      if(ms>0) separacao.push({...r,id:reqId,token,cName,colMs:ms})
-    })
-  })
-  separacao.sort((a,b)=>b.colMs-a.colMs)
-
-  // ── SKU (desvio times) ──
-  const skuItems = []
-  const devSet = new Set(['validar_alteracao','alterar_pedido'])
-  Object.entries(allRequests).forEach(([token, reqs]) => {
-    if(!reqs) return
-    const contact = contacts.find(c=>c.token===token)
-    const cName   = contact?contact.name:token
-    Object.entries(reqs).forEach(([reqId, r]) => {
-      if(!r) return
-      let ms=0, ct=0
-      const hist=Array.isArray(r.statusHistory)?r.statusHistory:[]
-      for(let i=0;i<hist.length;i++) {
-        if(devSet.has(hist[i].status)) {
-          const start=hist[i].changedAt||0, end=hist[i+1]?(hist[i+1].changedAt||nowMs):nowMs
-          ms+=end-start; ct++
-        }
-      }
-      if(devSet.has(r.status||'')) { const s=r.statusChangedAt||0; if(s){ ms+=nowMs-s; ct++ } }
-      if(ms>0) skuItems.push({...r,id:reqId,token,cName,devMs:ms,devCount:ct})
-    })
-  })
-  skuItems.sort((a,b)=>b.devMs-a.devMs)
-
-  // ── Stats ──
-  const nBreach = parados.filter(r=>r.state==='breach').length
-  const nWarn   = parados.filter(r=>r.state==='warn').length
-  const avgSep  = separacao.length ? Math.round(separacao.reduce((acc,r)=>acc+r.colMs,0)/separacao.length) : 0
-  const avgSku  = skuItems.length  ? Math.round(skuItems.reduce((acc,r)=>acc+r.devMs,0)/skuItems.length) : 0
-
-  const renderParadoCard = (r, i) => {
-    const s = r.status||'em_pedido'
-    const fillColor = r.state==='breach'?'var(--danger)':r.state==='warn'?'var(--warn)':'var(--success)'
-    const pct = r.cfg ? Math.min(100,(r.elapsed/r.cfg.slaMs)*100) : 0
-    return `<div class="task-card ${r.state}">
-      <div class="task-row">
-        <div class="rank">#${i+1}</div>
-        <div class="task-title" style="margin-left:6px">${esc(r.title)}</div>
-        <div class="badge ${r.state}">${fmtMs(r.elapsed)}</div>
-      </div>
-      <div class="task-meta">
-        <strong>${STATUS_LABELS[s]||s}</strong> · ${esc(r.cName)}
-        ${r.tipo?` · ${TIPO_LABELS[r.tipo]||r.tipo}`:''}
-        ${r.cfg?` · SLA ${r.cfg.slaMs/60000}min`:''}
-      </div>
-      ${r.cfg?`<div class="sla-bar"><div class="sla-fill" style="width:${pct}%;background:${fillColor}"></div></div>`:''}
-    </div>`
-  }
-
-  const renderSepCard = (r, i) => `<div class="task-card info">
-    <div class="task-row">
-      <div class="rank">#${i+1}</div>
-      <div class="task-title" style="margin-left:6px">${esc(r.title)}</div>
-      <div class="badge info">${fmtMs(r.colMs)}</div>
-    </div>
-    <div class="task-meta">${esc(r.cName)}${r.tipo?` · ${TIPO_LABELS[r.tipo]||r.tipo}`:''}</div>
-    <div class="sla-bar"><div class="sla-fill" style="width:${Math.min(100,(r.colMs/(separacao[0]?.colMs||1))*100)}%;background:var(--info)"></div></div>
-  </div>`
-
-  const renderSkuCard = (r, i) => {
-    const s = r.status||'em_pedido'
-    return `<div class="task-card purple">
-      <div class="task-row">
-        <div class="rank">#${i+1}</div>
-        <div class="task-title" style="margin-left:6px">${esc(r.title)}</div>
-        <div class="badge purple">${fmtMs(r.devMs)}</div>
-      </div>
-      <div class="task-meta">
-        ${esc(r.cName)}${r.tipo?` · ${TIPO_LABELS[r.tipo]||r.tipo}`:''}
-        · <strong>${r.devCount}x desvio</strong> · ${STATUS_LABELS[s]||s}
-      </div>
-      <div class="sla-bar"><div class="sla-fill" style="width:${Math.min(100,(r.devMs/(skuItems[0]?.devMs||1))*100)}%;background:var(--purple)"></div></div>
-    </div>`
-  }
-
-  const section = (title, list, fn) => list.length ? `
-    <div class="sec-group">
-      <div class="sec-label">${title} (${list.length})</div>
-      <div class="list">${list.slice(0,10).map(fn).join('')}</div>
-    </div>` : ''
-
-  el.innerHTML = `
-    <div class="stats">
-      <div class="stat"><div class="stat-n red">${nBreach}</div><div class="stat-l">SLA Estourado</div></div>
-      <div class="stat"><div class="stat-n ylw">${nWarn}</div><div class="stat-l">Em Alerta</div></div>
-      <div class="stat"><div class="stat-n">${active.length}</div><div class="stat-l">Em Andamento</div></div>
-    </div>
-    <div class="stats" style="padding-top:0">
-      <div class="stat"><div class="stat-n" style="color:var(--info)">${avgSep?fmtMs(avgSep):'—'}</div><div class="stat-l">Média Separação</div></div>
-      <div class="stat"><div class="stat-n" style="color:var(--purple)">${avgSku?fmtMs(avgSku):'—'}</div><div class="stat-l">Média Desvio SKU</div></div>
-    </div>
-    ${section('⏸ Mais Parados', parados, renderParadoCard)}
-    ${section('✂️ Maior Tempo em Separação', separacao.slice(0,5), renderSepCard)}
-    ${section('🔍 Maior Desvio SKU', skuItems.slice(0,5), renderSkuCard)}
-    ${!active.length?`<div class="empty">
-      <div class="empty-ico">✅</div>
-      <div class="empty-t">Tudo em dia</div>
-      <div class="empty-s">Nenhum pedido ativo no momento.</div>
-    </div>`:''}`
-}
-
-/* ══════════════════════════════════
-   RENDER: HISTÓRICO
-══════════════════════════════════ */
-function renderHistorico() {
-  const el = document.getElementById('histContent')
-  if(!el) return
-  const nowMs = Date.now()
-
-  const done = []
-  Object.entries(allRequests).forEach(([token, reqs]) => {
-    if(!reqs) return
-    const contact = contacts.find(c=>c.token===token)
-    const cName   = contact?contact.name:token
-    Object.entries(reqs).forEach(([reqId, r]) => {
-      if(!r) return
-      if((r.status||'')==='concluida') {
-        // Total time: from createdAt to last statusHistory entry or statusChangedAt
-        const hist = Array.isArray(r.statusHistory)?r.statusHistory:[]
-        const endTs = r.statusChangedAt || (hist.length?hist[hist.length-1].changedAt:0) || 0
-        const start = r.createdAt||0
-        const totalMs = endTs&&start ? endTs-start : 0
-
-        // Time in each stage
-        let colMs=0, devMs=0, devCount=0
-        const devSet = new Set(['validar_alteracao','alterar_pedido'])
-        for(let i=0;i<hist.length;i++){
-          const s=hist[i].status, t0=hist[i].changedAt||0
-          const t1=hist[i+1]?(hist[i+1].changedAt||endTs):endTs
-          if(s==='em_coleta') colMs+=t1-t0
-          if(devSet.has(s)){ devMs+=t1-t0; devCount++ }
-        }
-        done.push({...r,id:reqId,token,cName,totalMs,colMs,devMs,devCount,endTs})
-      }
-    })
-  })
-  done.sort((a,b)=>(b.endTs||0)-(a.endTs||0))
-
-  if(!done.length){
-    el.innerHTML = `<div class="empty">
-      <div class="empty-ico">📦</div>
-      <div class="empty-t">Sem histórico</div>
-      <div class="empty-s">Os pedidos concluídos aparecerão aqui.</div>
-    </div>`
-    return
-  }
-
-  const avgTotal = done.reduce((acc,r)=>acc+r.totalMs,0)/done.length
-  const avgCol   = done.filter(r=>r.colMs>0).reduce((acc,r)=>acc+r.colMs,0)/(done.filter(r=>r.colMs>0).length||1)
-  const nDev     = done.filter(r=>r.devCount>0).length
-
-  const cards = done.map(r => {
-    const hist = Array.isArray(r.statusHistory)?r.statusHistory:[]
-    const histHtml = hist.map(h=>`<span style="color:var(--text-muted)">${STATUS_LABELS[h.status]||h.status}</span>`).join(' → ')
-    return `<div class="task-card ok">
-      <div class="task-row">
-        <div class="task-title">✅ ${esc(r.title)}</div>
-        <div class="badge ok">${r.totalMs?fmtMs(r.totalMs):'?'}</div>
-      </div>
-      <div class="task-meta">
-        ${esc(r.cName)}${r.tipo?` · ${TIPO_LABELS[r.tipo]||r.tipo}`:''}
-        ${r.endTs?` · Concluído ${fmtDate(r.endTs)} ${fmtTime(r.endTs)}`:''}
-      </div>
-      <div class="task-meta" style="margin-top:4px">
-        ${r.colMs?`✂️ Separação: ${fmtMs(r.colMs)}`:''}
-        ${r.devCount?`  🔍 Desvios: ${r.devCount}x (${fmtMs(r.devMs)})`:''}
-      </div>
-      ${histHtml?`<div class="task-meta" style="margin-top:4px;font-size:10px">${histHtml}</div>`:''}
-    </div>`
-  }).join('')
-
-  el.innerHTML = `
-    <div class="stats">
-      <div class="stat"><div class="stat-n grn">${done.length}</div><div class="stat-l">Concluídos</div></div>
-      <div class="stat"><div class="stat-n">${avgTotal?fmtMs(Math.round(avgTotal)):'—'}</div><div class="stat-l">Tempo Médio</div></div>
-      <div class="stat"><div class="stat-n red">${nDev}</div><div class="stat-l">Com Desvio</div></div>
-    </div>
-    <div class="stats" style="padding-top:0">
-      <div class="stat"><div class="stat-n" style="color:var(--info)">${avgCol?fmtMs(Math.round(avgCol)):'—'}</div><div class="stat-l">Média Separação</div></div>
-    </div>
-    <div class="sec-group">
-      <div class="sec-label">Pedidos Concluídos (${done.length})</div>
-      <div class="list">${cards}</div>
-    </div>`
 }
 
 /* ── INIT ── */
-// Load persisted records from Android SharedPrefs if available
-if(window.AndroidBridge) {
-  try {
-    const saved = AndroidBridge.getAlertRecords()
-    if(saved && saved !== '[]') alertRecords = JSON.parse(saved)
-  } catch(e){}
-  try {
-    const savedTs = AndroidBridge.getNotifTs()
-    if(savedTs && savedTs !== '{}') notifTs = JSON.parse(savedTs)
-  } catch(e){}
+if(window.AndroidBridge){
+  try{ const s=AndroidBridge.getAlertRecords(); if(s&&s!=='[]') slaAlerts=JSON.parse(s) }catch(e){}
+  try{ const s=AndroidBridge.getNotifTs(); if(s&&s!=='{}') notifTs=JSON.parse(s) }catch(e){}
 }
 
-// Check notifications permission
-if(typeof Notification !== 'undefined' && Notification.permission === 'default') {
+if(typeof Notification!=='undefined' && Notification.permission==='default'){
   Notification.requestPermission()
 }
 
+// Set initial active nav button
+document.querySelectorAll('.nav-it')[0].classList.add('on')
+
 subscribeData()
-renderAlertas()
+renderGerencial()
 setInterval(()=>{ checkSlaNotifs() }, 30000)
-document.addEventListener('visibilitychange', ()=>{
+document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible') checkSlaNotifs()
 })
 </script>
