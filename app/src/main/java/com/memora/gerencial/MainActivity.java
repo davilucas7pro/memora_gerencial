@@ -6,8 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
@@ -31,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
 
         SlaAlarmReceiver.createChannel(this);
         requestNotificationPermission();
+        requestBatteryExemption();
+        SlaMonitorService.start(this);
         scheduleAlarm(this);
 
         web = findViewById(R.id.webview);
@@ -123,7 +128,24 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == REQ_TORQUE_LOGIN && web != null) {
             // Signed in (or closed): let the page check the session and start loading orders
             web.evaluateJavascript("tqInit()", null);
+            SlaMonitorService.start(this);  // check right away with the new session
         }
+    }
+
+    /** Ask Android not to pause the monitor to save battery (asked again at most once a day) */
+    private void requestBatteryExemption() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return;
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        if (pm.isIgnoringBatteryOptimizations(getPackageName())) return;
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        long last = prefs.getLong("batteryAskedAt", 0);
+        if (System.currentTimeMillis() - last < 24 * 60 * 60_000L) return;
+        prefs.edit().putLong("batteryAskedAt", System.currentTimeMillis()).apply();
+        try {
+            Intent i = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+            i.setData(Uri.parse("package:" + getPackageName()));
+            startActivity(i);
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     private void requestNotificationPermission() {

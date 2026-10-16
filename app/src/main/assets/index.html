@@ -837,6 +837,8 @@ function renderGerSku(el){
 
 /* ── SAVE OBS ── */
 function saveAlertObs(alertId, obs){
+  // the background monitor may have added records since the page loaded them
+  if(window.AndroidBridge){ try{ slaAlerts = JSON.parse(AndroidBridge.getAlertRecords() || '[]') }catch(e){} }
   const rec = slaAlerts.find(a=>a.id===alertId)
   if(rec){
     rec.obs = obs
@@ -867,7 +869,21 @@ function syncPipelineToAndroid(){
 }
 
 /* ── SLA NOTIFICATION CHECK ── */
+function updateAlertPip(){
+  const nRecent = slaAlerts.filter(a=>Date.now()-a.firedAt<60*60000).length
+  const pip = document.getElementById('alertPip')
+  if(pip) pip.style.display = nRecent>0?'block':'none'
+}
+
 function checkSlaNotifs(){
+  // On the phone the background monitor (SlaMonitorService) sends the notifications and
+  // writes the alert records, app open or closed; the page only shows them.
+  if(window.AndroidBridge){
+    try{ slaAlerts = JSON.parse(AndroidBridge.getAlertRecords() || '[]') }catch(e){}
+    updateAlertPip()
+    if(curGerTab==='alertas' && !document.querySelector('.ger-obs-ta:focus')) renderGerencial()
+    return
+  }
   const nowMs = Date.now()
   let changed = false
 
@@ -931,10 +947,7 @@ function checkSlaNotifs(){
   })
   Object.keys(seenTs).forEach(k=>{ if(!activeKeys.has(k)) delete seenTs[k] })
 
-  // Alert pip
-  const nRecent = slaAlerts.filter(a=>Date.now()-a.firedAt<60*60000).length
-  const pip = document.getElementById('alertPip')
-  if(pip) pip.style.display = nRecent>0?'block':'none'
+  updateAlertPip()
 }
 
 /* ── TORQUE API ── */
