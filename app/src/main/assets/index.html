@@ -87,10 +87,53 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-#app {
-  display: flex; flex-direction: column;
-  height: 100%; max-width: 640px;
-  margin: 0 auto; position: relative;
+/* Layout: Torque sidebar on the left, top bar + page on the right */
+#app { display: flex; height: 100%; position: relative }
+.content { flex: 1; min-width: 0; display: flex; flex-direction: column; height: 100% }
+
+/* ── SIDEBAR (Torque Sider + Menu) ── */
+:root { --sider-w: 220px; --sider-w-min: 64px; --sider-bg: #ffffff }
+:root[data-theme="dark"] { --sider-bg: #141414 }
+.sider {
+  width: var(--sider-w); flex-shrink: 0; display: flex; flex-direction: column;
+  background: var(--sider-bg); border-right: 1px solid var(--border-red);
+  transition: width .2s; z-index: 30; overflow: hidden;
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.sider.collapsed { width: var(--sider-w-min) }
+.sider-logo { height: var(--head-h); display: flex; align-items: center; gap: 10px; padding: 0 16px; flex-shrink: 0; white-space: nowrap }
+.sider-title { font-size: 15px; font-weight: 600; color: var(--text) }
+.sider-title em { color: var(--primary-text); font-style: normal }
+.sider-menu { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 8px; display: flex; flex-direction: column; gap: 4px }
+.menu-it {
+  position: relative; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 40px; padding: 0 16px;
+  border: 0; border-radius: var(--r); background: none; color: var(--text);
+  font: 400 14px 'Inter', 'Segoe UI', system-ui, sans-serif; text-align: left; white-space: nowrap; cursor: pointer;
+  transition: color .2s, background .2s;
+}
+.menu-it svg { width: 16px; height: 16px; flex-shrink: 0 }
+.menu-it:hover { color: var(--primary-text); background: rgba(216,0,1,.04) }
+:root[data-theme="dark"] .menu-it:hover { background: rgba(216,0,1,.06) }
+.menu-it.on { color: var(--primary-text); background: rgba(216,0,1,.06); box-shadow: inset 3px 0 0 var(--primary) }
+:root[data-theme="dark"] .menu-it.on { background: rgba(216,0,1,.10) }
+.menu-it .nav-pip { position: absolute; left: 26px; top: 9px }
+.sider.collapsed .menu-it { justify-content: center; padding: 0 }
+.sider.collapsed .menu-label, .sider.collapsed .sider-title { display: none }
+.sider.collapsed .sider-logo { justify-content: center; padding: 0 }
+.sider.collapsed .menu-it .nav-pip { left: auto; right: 14px }
+.sider-toggle {
+  height: 48px; flex-shrink: 0; border: 0; border-top: 1px solid var(--border-red); background: none;
+  color: var(--primary-text); display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.sider-toggle svg { width: 16px; height: 16px; transition: transform .2s }
+.sider.collapsed .sider-toggle svg { transform: rotate(180deg) }
+.sider-mask { display: none }
+/* phones: the collapsed bar keeps its place; opened, it slides over the page */
+@media (max-width: 700px) {
+  .sider { position: absolute; top: 0; bottom: 0; left: 0; box-shadow: 6px 0 16px rgba(0,0,0,.2) }
+  .sider.collapsed { box-shadow: none }
+  .content { margin-left: var(--sider-w-min) }
+  .sider:not(.collapsed) + .sider-mask { display: block; position: absolute; inset: 0; z-index: 25; background: rgba(0,0,0,.45) }
 }
 
 /* ── HEADER (Torque top bar) ── */
@@ -116,7 +159,7 @@ body {
 .logo-mark svg { width: 20px; height: 20px }
 .logo em { color: var(--primary-text); font-style: normal; font-weight: 600 }
 .hdr-btns { display: flex; gap: 4px; align-items: center; min-width: 0 }
-.hdr-status { font-size: 12px; color: var(--text-ghost); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 4px }
+.hdr-status { font: 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--text-ghost); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0 }
 .icn-btn {
   width: 32px; height: 32px; border-radius: var(--r);
   border: 0; background: transparent; color: var(--text);
@@ -289,32 +332,50 @@ body {
 .ger-stat-val { font-size: 22px; line-height: 1.3; font-weight: 600; color: var(--text); margin-top: 2px }
 .ger-stat-row.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) }
 
-/* ── PERIOD FILTER (Ant Design Segmented + DatePicker, Torque overrides) ── */
-.ger-filter { margin: -4px 16px 14px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0 }
-.seg-track {
-  display: flex; gap: 2px; padding: 2px; border-radius: var(--r);
-  background: rgba(0,0,0,.03); overflow-x: auto; scrollbar-width: none; align-self: flex-start; max-width: 100%;
-}
-.seg-track::-webkit-scrollbar { display: none }
-:root[data-theme="dark"] .seg-track { background: rgba(255,255,255,.04) }
-.seg-it {
-  flex-shrink: 0; height: 28px; padding: 0 11px; border: 0; border-radius: 6px; background: transparent;
-  color: var(--text-2); font: 400 13px 'Inter', 'Segoe UI', system-ui, sans-serif; cursor: pointer; transition: all .2s;
-}
-.seg-it:hover { color: var(--text) }
-.seg-it.on { background: rgba(216,0,1,.08); color: var(--primary-text); font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,.03), 0 1px 6px -1px rgba(0,0,0,.02) }
-:root[data-theme="dark"] .seg-it.on { background: rgba(216,0,1,.15) }
-.range-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px }
-.range-custom { display: flex; align-items: center; gap: 6px }
-.range-custom input {
-  height: 32px; padding: 4px 8px; border-radius: var(--r); border: 1px solid var(--border);
-  background: var(--surface); color: var(--text); font: 13px 'Inter', 'Segoe UI', system-ui, sans-serif; outline: none;
-}
-.range-custom input:hover { border-color: var(--primary-hover) }
-.range-custom input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(216,0,1,.1) }
-.range-sep { font-size: 12px; color: var(--text-muted) }
+/* ── PERIOD FILTER (Torque's Ant Design RangePicker) ── */
+.ger-filter { margin: -4px 16px 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; flex-shrink: 0 }
 .range-label { font-size: 12px; color: var(--text-muted) }
-.range-label b { font-weight: 600; color: var(--text) }
+.rp { position: relative }
+.rp-input {
+  display: inline-flex; align-items: center; gap: 12px; height: 34px; padding: 4px 11px;
+  border: 1px solid var(--border); border-radius: var(--r); background: var(--surface); color: var(--text);
+  font: 14px 'Inter', 'Segoe UI', system-ui, sans-serif; cursor: pointer; transition: border-color .2s, box-shadow .2s;
+}
+.rp-input:hover { border-color: var(--primary-hover) }
+.rp-input.open { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(216,0,1,.1) }
+.rp-date { min-width: 84px; text-align: left; font-variant-numeric: tabular-nums }
+.rp-input.picking .rp-date.active { color: var(--text-ghost) }
+.rp-arrow, .rp-cal { width: 14px; height: 14px; color: var(--text-ghost); flex-shrink: 0 }
+.rp-pop {
+  position: absolute; top: calc(100% + 4px); left: 0; z-index: 60;
+  background: var(--surface); border-radius: var(--r); padding: 0;
+  box-shadow: 0 6px 16px rgba(0,0,0,.08), 0 3px 6px -4px rgba(0,0,0,.12), 0 9px 28px 8px rgba(0,0,0,.05);
+  display: flex; max-width: calc(100vw - var(--sider-w-min) - 24px); overflow-x: auto;
+}
+:root[data-theme="dark"] .rp-pop { background: #1f1f1f; box-shadow: 0 6px 16px rgba(0,0,0,.6) }
+.rp-panel { width: 288px; flex-shrink: 0 }
+.rp-panel + .rp-panel { border-left: 1px solid var(--border-red) }
+.rp-head { display: flex; align-items: center; height: 40px; padding: 0 8px; border-bottom: 1px solid rgba(5,5,5,.06); font-weight: 600 }
+:root[data-theme="dark"] .rp-head { border-bottom-color: #303030 }
+.rp-head .rp-title { flex: 1; text-align: center; font-size: 14px }
+.rp-nav { width: 24px; height: 24px; border: 0; background: none; color: var(--text-ghost); cursor: pointer; font-size: 14px; line-height: 1; border-radius: 4px }
+.rp-nav:hover { color: var(--text) }
+.rp-nav.hide { visibility: hidden }
+.rp-grid { display: grid; grid-template-columns: repeat(7, 1fr); padding: 8px 12px 12px; row-gap: 4px }
+.rp-wd { height: 32px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--text) }
+.rp-day { position: relative; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; color: var(--text); border: 0; background: none; font-family: inherit }
+.rp-day span { position: relative; z-index: 1; min-width: 26px; height: 26px; line-height: 26px; border-radius: 4px; display: inline-block }
+.rp-day:hover span { background: rgba(0,0,0,.04) }
+:root[data-theme="dark"] .rp-day:hover span { background: rgba(255,255,255,.08) }
+.rp-day.out { color: var(--text-ghost) }
+.rp-day.today span { box-shadow: inset 0 0 0 1px var(--primary) }
+/* range band behind the days, start/end in solid red — as in the Torque calendar */
+.rp-day.in::before { content: ""; position: absolute; inset: 3px 0; background: rgba(216,0,1,.12) }
+:root[data-theme="dark"] .rp-day.in::before { background: #3a0a0a }
+.rp-day.start::before { left: 50% } .rp-day.end::before { right: 50% }
+.rp-day.start.end::before { display: none }
+.rp-day.start span, .rp-day.end span { background: var(--primary); color: #fff }
+@media (max-width: 700px) { .rp-panel + .rp-panel { display: none } }
 
 /* ── KANBAN BOARD (Torque "Acompanhamento"): 280px columns side by side ── */
 .board {
@@ -345,25 +406,6 @@ body {
 .board .ger-empty { padding: 32px 12px }
 .ger-stat-sub { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
 
-/* ── BOTTOM NAV (Torque menu colors) ── */
-.bot-nav {
-  display: flex; height: var(--nav-h);
-  background: var(--surface);
-  border-top: 1px solid var(--border-red);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  flex-shrink: 0;
-}
-.nav-it {
-  flex: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 2px; cursor: pointer; color: var(--text);
-  border: none; background: none; margin: 6px 4px; border-radius: var(--r);
-  font-family: inherit; transition: color .2s, background .2s;
-}
-.nav-it:hover { color: var(--primary-text); background: rgba(216,0,1,.04) }
-.nav-it.on { color: var(--primary-text); background: var(--primary-bg) }
-.nav-it svg { width: 20px; height: 20px }
-.nav-label { font-size: 12px }
 .nav-pip { width: 6px; height: 6px; border-radius: 50%; background: #E8B800 }
 
 @keyframes pulse-sla { 0%,100%{opacity:1} 50%{opacity:.55} }
@@ -432,86 +474,81 @@ body {
 </style>
 
 <div id="app">
-  <!-- Header -->
-  <header class="hdr">
-    <div class="logo">
+  <!-- Sidebar (Torque "Sider": logo, menu, Sair, collapse toggle) -->
+  <aside class="sider" id="sider">
+    <div class="sider-logo">
       <div class="logo-mark">
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Memora Gerencial"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M10 2h4"/><path d="M12 2v3"/></svg>
       </div>
-      Memora <em>Gerencial</em>
+      <span class="sider-title">Memora <em>Gerencial</em></span>
     </div>
-    <div class="hdr-btns">
-      <div id="fbStatus" class="hdr-status">Conectando…</div>
-      <button class="icn-btn" id="themeBtn" onclick="cycleTheme()" title="Ativar modo escuro">
-        <svg id="themeIco" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <nav class="sider-menu" aria-label="Menu">
+      <button class="menu-it on" data-tab="alertas" onclick="goGerTab('alertas')" title="Alertas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="menu-label">Alertas</span>
+        <span class="nav-pip" id="alertPip" style="display:none"></span>
       </button>
-      <button class="icn-btn" onclick="doLogout()" title="Sair do Torque">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <button class="menu-it" data-tab="parados" onclick="goGerTab('parados')" title="Parados">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+        <span class="menu-label">Parados</span>
       </button>
-    </div>
-  </header>
+      <button class="menu-it" data-tab="separacao" onclick="goGerTab('separacao')" title="Separação">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+        <span class="menu-label">Separação</span>
+      </button>
+      <button class="menu-it" data-tab="sku" onclick="goGerTab('sku')" title="Velocidade">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <span class="menu-label">Velocidade</span>
+      </button>
+      <button class="menu-it" onclick="doLogout()" title="Sair">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span class="menu-label">Sair</span>
+      </button>
+    </nav>
+    <button class="sider-toggle" id="siderToggle" onclick="toggleSider()" title="Recolher barra lateral" aria-label="Recolher barra lateral">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+  </aside>
+  <div class="sider-mask" id="siderMask" onclick="toggleSider()"></div>
 
-  <!-- Main -->
-  <main class="main">
-    <div class="tab on" id="tab-gerencial">
-      <div class="sec-head">
-        <h1 class="sec-title">Gerencial</h1>
-        <button class="add-btn" onclick="tqRefresh(true)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.63"/></svg>
-          Atualizar
+  <div class="content">
+    <!-- Header (Torque top bar) -->
+    <header class="hdr">
+      <div id="fbStatus" class="hdr-status">Conectando…</div>
+      <div class="hdr-btns">
+        <button class="icn-btn" id="themeBtn" onclick="cycleTheme()" title="Ativar modo escuro">
+          <svg id="themeIco" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
       </div>
-      <div class="ger-tabs">
-        <button class="ger-tab-btn on" id="gTab-alertas"   onclick="goGerTab('alertas')">Alertas</button>
-        <button class="ger-tab-btn"    id="gTab-parados"   onclick="goGerTab('parados')">Parados</button>
-        <button class="ger-tab-btn"    id="gTab-separacao" onclick="goGerTab('separacao')">Separação</button>
-        <button class="ger-tab-btn"    id="gTab-sku"       onclick="goGerTab('sku')">Velocidade</button>
-      </div>
-      <!-- Period filter (Separação, SKU, Alertas) -->
-      <div class="ger-filter" id="gerFilter">
-        <div class="seg-track" role="group" aria-label="Período">
-          <button class="seg-it" data-p="hoje" onclick="pickPreset('hoje')">Hoje</button>
-          <button class="seg-it" data-p="ontem" onclick="pickPreset('ontem')">Ontem</button>
-          <button class="seg-it" data-p="7d" onclick="pickPreset('7d')">7 dias</button>
-          <button class="seg-it" data-p="mes" onclick="pickPreset('mes')">Este mês</button>
-          <button class="seg-it" data-p="custom" onclick="pickPreset('custom')">Período</button>
-        </div>
-        <div class="range-row">
-          <div class="range-custom" id="rangeCustom" hidden>
-            <input type="date" id="rFrom" aria-label="Data inicial" onchange="pickCustom()">
-            <span class="range-sep">até</span>
-            <input type="date" id="rTo" aria-label="Data final" onchange="pickCustom()">
-          </div>
-          <span class="range-label">Criados em <b id="rangeLabel"></b></span>
-        </div>
-      </div>
-      <div id="gerList"></div>
-    </div>
-  </main>
+    </header>
 
-  <!-- Bottom Nav -->
-  <nav class="bot-nav">
-    <button class="nav-it on" onclick="goGerTab('alertas')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      <span class="nav-label">Alertas</span>
-      <div class="nav-pip" id="alertPip" style="display:none"></div>
-    </button>
-    <button class="nav-it" onclick="goGerTab('parados')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-      <span class="nav-label">Parados</span>
-      <div class="nav-pip" id="paradosPip" style="display:none"></div>
-    </button>
-    <button class="nav-it" onclick="goGerTab('separacao')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
-      <span class="nav-label">Separação</span>
-      <div class="nav-pip" style="display:none"></div>
-    </button>
-    <button class="nav-it" onclick="goGerTab('sku')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <span class="nav-label">Velocidade</span>
-      <div class="nav-pip" style="display:none"></div>
-    </button>
-  </nav>
+    <!-- Main -->
+    <main class="main">
+      <div class="tab on" id="tab-gerencial">
+        <div class="sec-head">
+          <h1 class="sec-title" id="pageTitle">Alertas</h1>
+          <button class="add-btn" onclick="tqRefresh(true)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.63"/></svg>
+            Atualizar
+          </button>
+        </div>
+        <!-- Period filter (Separação, Velocidade, Alertas): Torque's RangePicker -->
+        <div class="ger-filter" id="gerFilter">
+          <div class="rp" id="rp">
+            <button type="button" class="rp-input" id="rpInput" onclick="toggleRangePicker()" aria-haspopup="dialog" aria-expanded="false">
+              <span class="rp-date" id="rpFrom"></span>
+              <svg class="rp-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="14 6 20 12 14 18"/></svg>
+              <span class="rp-date" id="rpTo"></span>
+              <svg class="rp-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
+            </button>
+            <div class="rp-pop" id="rpPop" role="dialog" aria-label="Escolher período" hidden></div>
+          </div>
+          <span class="range-label" id="rangeHint"></span>
+        </div>
+        <div id="gerList"></div>
+      </div>
+    </main>
+  </div>
 
   <div class="toasts" id="toasts"></div>
 
@@ -695,21 +732,32 @@ function cycleTheme(){
   applyTheme(saved)
 })()
 
-/* ── GERENCIAL SUB-NAV ── */
+/* ── NAVIGATION (sidebar menu, as in Torque) ── */
+const PAGE_TITLES = { alertas:'Alertas', parados:'Pedidos parados', separacao:'Separação', sku:'Velocidade' }
+const isNarrow = () => window.matchMedia('(max-width: 700px)').matches
 function goGerTab(tab){
   curGerTab = tab
-  document.querySelectorAll('.ger-tab-btn').forEach(b=>b.classList.remove('on'))
-  document.querySelectorAll('.nav-it').forEach(b=>b.classList.remove('on'))
-  const btn = document.getElementById('gTab-'+tab)
-  if(btn) btn.classList.add('on')
-  // Also highlight bottom nav
-  const navBtns = document.querySelectorAll('.nav-it')
-  const tabOrder = ['alertas','parados','separacao','sku']
-  const idx = tabOrder.indexOf(tab)
-  if(idx>=0 && navBtns[idx]) navBtns[idx].classList.add('on')
+  document.querySelectorAll('.menu-it[data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === tab))
+  document.getElementById('pageTitle').textContent = PAGE_TITLES[tab] || 'Gerencial'
+  if(isNarrow()) setSider(true)          // on a phone the opened bar covers the page: close it after a pick
+  if(rp.open) closeRangePicker()
   renderRangeBar()
   renderGerencial()
 }
+
+function setSider(collapsed){
+  document.getElementById('sider').classList.toggle('collapsed', collapsed)
+  const t = document.getElementById('siderToggle')
+  const label = collapsed ? 'Expandir barra lateral' : 'Recolher barra lateral'
+  t.title = label; t.setAttribute('aria-label', label)
+}
+function toggleSider(){
+  const collapsed = !document.getElementById('sider').classList.contains('collapsed')
+  setSider(collapsed)
+  if(!isNarrow()) S.set('ger_sider_collapsed', collapsed)
+}
+// phones start with the bar collapsed (icons only); larger screens remember the choice
+setSider(isNarrow() ? true : S.get('ger_sider_collapsed', false))
 
 function renderGerencial(){
   const el = document.getElementById('gerList')
@@ -1165,71 +1213,130 @@ async function tqLoadUsers(){
 }
 
 /* ── PERIOD FILTER ── */
-// Separação, SKU and Alertas show orders CREATED in the period; Parados always shows what is stuck now.
-const RANGE_PRESETS = ['hoje','ontem','7d','mes','custom']
+// Separação, Velocidade and Alertas show orders CREATED in the period; Parados always shows what is stuck now.
 const RANGE_MAX_DAYS = 62
 const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
 const parseYmd = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d) }
-function presetRange(p){
-  const t = new Date(); t.setHours(0,0,0,0)
-  const back = n => { const d = new Date(t); d.setDate(d.getDate()-n); return d }
-  if(p==='ontem') return { from: ymd(back(1)), to: ymd(back(1)) }
-  if(p==='7d')    return { from: ymd(back(6)), to: ymd(t) }
-  if(p==='mes')   return { from: ymd(new Date(t.getFullYear(), t.getMonth(), 1)), to: ymd(t) }
-  return { from: ymd(t), to: ymd(t) }
-}
+const todayYmd = () => ymd(new Date())
+// the chosen period is kept for the day; a new day opens on "today", as the Torque panel does
 let tqRange = (() => {
   const saved = S.get('ger_range', null)
-  if(saved && saved.preset==='custom' && saved.from && saved.to) return saved
-  const p = saved && RANGE_PRESETS.includes(saved.preset) ? saved.preset : 'hoje'
-  return { preset:p, ...presetRange(p) }
+  if(saved && saved.day === todayYmd() && saved.from && saved.to) return { from: saved.from, to: saved.to }
+  return { from: todayYmd(), to: todayYmd() }
 })()
-// presets move with the calendar (e.g. "Hoje" tomorrow is tomorrow)
-function currentRange(){ return tqRange.preset==='custom' ? tqRange : { preset:tqRange.preset, ...presetRange(tqRange.preset) } }
+function currentRange(){ return tqRange }
 function rangeBounds(){
   const r = currentRange()
   const from = parseYmd(r.from), to = parseYmd(r.to); to.setDate(to.getDate()+1)
   return { from, to, fromISO: from.toISOString(), toISO: to.toISOString() }
 }
 const inRange = ts => { const b = rangeBounds(); return ts >= b.from.getTime() && ts < b.to.getTime() }
-function rangeLabel(){
-  const r = currentRange(), f = r.from.slice(8,10)+'/'+r.from.slice(5,7), t = r.to.slice(8,10)+'/'+r.to.slice(5,7)
-  return f===t ? f : `${f} – ${t}`
-}
 
 function renderRangeBar(){
   const r = currentRange()
-  document.querySelectorAll('.seg-it').forEach(b => b.classList.toggle('on', b.dataset.p===r.preset))
-  document.getElementById('rangeCustom').hidden = r.preset!=='custom'
-  document.getElementById('rFrom').value = r.from
-  document.getElementById('rTo').value = r.to
-  document.getElementById('rangeLabel').parentElement.innerHTML =
-    (curGerTab==='alertas' ? 'Alertas de ' : 'Pedidos criados em ') + `<b id="rangeLabel">${rangeLabel()}</b>`
+  document.getElementById('rpFrom').textContent = r.from
+  document.getElementById('rpTo').textContent = r.to
+  document.getElementById('rangeHint').textContent = curGerTab==='alertas' ? 'Alertas disparados no período' : 'Pedidos criados no período'
   document.getElementById('gerFilter').hidden = curGerTab==='parados'
 }
-function setRange(next){
-  let { from, to } = next.preset==='custom' ? next : presetRange(next.preset)
+function setRange(from, to){
   if(from > to) [from, to] = [to, from]
   const days = (parseYmd(to) - parseYmd(from)) / 864e5 + 1
   if(days > RANGE_MAX_DAYS){
     const f = parseYmd(to); f.setDate(f.getDate() - RANGE_MAX_DAYS + 1); from = ymd(f)
     toast(`Período limitado a ${RANGE_MAX_DAYS} dias`)
   }
-  tqRange = next.preset==='custom' ? { preset:'custom', from, to } : { preset:next.preset, ...presetRange(next.preset) }
-  S.set('ger_range', tqRange)
+  tqRange = { from, to }
+  S.set('ger_range', { from, to, day: todayYmd() })
   renderRangeBar()
   periodCache.key = ''          // force a fresh fetch for the new period
   renderGerencial()
   tqRefresh()
 }
-function pickPreset(p){
-  if(p==='custom') setRange({ preset:'custom', ...currentRange() })
-  else setRange({ preset:p })
+
+/* ── RANGE PICKER (same behaviour as Torque's: 1st click = start, 2nd click = end) ── */
+const RP_MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
+const RP_WEEK = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
+const rp = { open:false, view:null, start:null, hover:null }
+
+function toggleRangePicker(){ rp.open ? closeRangePicker() : openRangePicker() }
+function openRangePicker(){
+  const f = parseYmd(currentRange().from)
+  rp.view = new Date(f.getFullYear(), f.getMonth(), 1)
+  rp.open = true; rp.start = null; rp.hover = null
+  document.getElementById('rpPop').hidden = false
+  const input = document.getElementById('rpInput')
+  input.classList.add('open'); input.setAttribute('aria-expanded', 'true')
+  drawRangePicker()
 }
-function pickCustom(){
-  const from = document.getElementById('rFrom').value, to = document.getElementById('rTo').value
-  if(from && to) setRange({ preset:'custom', from, to })
+function closeRangePicker(){
+  rp.open = false; rp.start = null; rp.hover = null
+  document.getElementById('rpPop').hidden = true
+  const input = document.getElementById('rpInput')
+  input.classList.remove('open', 'picking'); input.setAttribute('aria-expanded', 'false')
+  renderRangeBar()
 }
+
+function rpPanel(base, showPrev, showNext, a, b){
+  const y = base.getFullYear(), m = base.getMonth()
+  const first = new Date(y, m, 1)
+  const start = new Date(y, m, 1 - first.getDay())     // Sunday before the 1st
+  const today = todayYmd()
+  let cells = RP_WEEK.map(w => `<div class="rp-wd">${w}</div>`).join('')
+  for(let i=0; i<42; i++){
+    const d = new Date(start); d.setDate(start.getDate() + i)
+    const k = ymd(d)
+    const cls = ['rp-day']
+    if(d.getMonth() !== m) cls.push('out')
+    if(k === today) cls.push('today')
+    if(a && b && k >= a && k <= b) cls.push('in')
+    if(k === a) cls.push('start')
+    if(k === b) cls.push('end')
+    cells += `<button type="button" class="${cls.join(' ')}" data-d="${k}"><span>${d.getDate()}</span></button>`
+  }
+  const nav = (n, label, show) => `<button type="button" class="rp-nav${show ? '' : ' hide'}" data-nav="${n}" aria-label="${label}">${n===-12?'«':n===-1?'‹':n===1?'›':'»'}</button>`
+  return `<div class="rp-panel">
+    <div class="rp-head">${nav(-12,'Ano anterior',showPrev)}${nav(-1,'Mês anterior',showPrev)}
+      <div class="rp-title">${y} ${RP_MONTHS[m]}</div>${nav(1,'Próximo mês',showNext)}${nav(12,'Próximo ano',showNext)}</div>
+    <div class="rp-grid">${cells}</div></div>`
+}
+function drawRangePicker(){
+  const r = currentRange()
+  let a = r.from, b = r.to
+  if(rp.start){ a = rp.start; b = rp.hover || rp.start; if(b < a) [a, b] = [b, a] }
+  const narrow = window.matchMedia('(max-width: 700px)').matches
+  const next = new Date(rp.view.getFullYear(), rp.view.getMonth()+1, 1)
+  document.getElementById('rpPop').innerHTML = rpPanel(rp.view, true, narrow, a, b) + rpPanel(next, false, true, a, b)
+  // the field shows the dates being picked, like Torque
+  document.getElementById('rpFrom').textContent = a
+  document.getElementById('rpTo').textContent = b
+}
+
+;(function initRangePicker(){
+  const pop = document.getElementById('rpPop')
+  pop.addEventListener('click', e => {
+    e.stopPropagation()
+    const nav = e.target.closest('[data-nav]')
+    if(nav){ const n = Number(nav.dataset.nav); rp.view = new Date(rp.view.getFullYear(), rp.view.getMonth()+n, 1); drawRangePicker(); return }
+    const day = e.target.closest('[data-d]')
+    if(!day) return
+    if(!rp.start){
+      rp.start = day.dataset.d; rp.hover = null
+      document.getElementById('rpInput').classList.add('picking')
+      drawRangePicker()
+    }else{
+      const from = rp.start, to = day.dataset.d
+      closeRangePicker()
+      setRange(from, to)
+    }
+  })
+  pop.addEventListener('mouseover', e => {
+    const day = e.target.closest('[data-d]')
+    if(rp.start && day && day.dataset.d !== rp.hover){ rp.hover = day.dataset.d; drawRangePicker() }
+  })
+  document.addEventListener('click', e => { if(rp.open && !e.target.closest('#rp')) closeRangePicker() })
+  document.addEventListener('keydown', e => { if(e.key==='Escape' && rp.open) closeRangePicker() })
+})()
 
 /* ── LOAD ── */
 const ORDER_FIELDS = { method:'select', values:['$id','$createdAt','$updatedAt','internalId','displayCode','title',
@@ -1433,8 +1540,6 @@ if(typeof Notification!=='undefined' && Notification.permission==='default'){
   Notification.requestPermission()
 }
 
-// Set initial active nav button
-document.querySelectorAll('.nav-it')[0].classList.add('on')
 renderRangeBar()
 
 tqInit()
