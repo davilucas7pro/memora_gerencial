@@ -263,6 +263,32 @@ body {
 .ger-stat-lbl { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); margin-top: 2px }
 
 @keyframes pulse-sla { 0%,100%{opacity:1} 50%{opacity:.55} }
+
+/* ── Login (Torque) ── */
+[hidden] { display: none !important }
+.login {
+  position: fixed; inset: 0; z-index: 200;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px 16px;
+}
+.login-card {
+  width: min(100%, 380px); display: flex; flex-direction: column; gap: 10px;
+  padding: 22px 20px; border-radius: var(--r-lg);
+  background: var(--surface); border: 1px solid var(--border);
+}
+.login-title { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 800; color: var(--text) }
+.login-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 4px }
+.login-card label { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted) }
+.login-card input {
+  width: 100%; padding: 10px 12px; border-radius: var(--r);
+  border: 1.5px solid var(--border); background: var(--surface-2); color: var(--text);
+  font-family: inherit; font-size: 15px; outline: none; transition: border-color .15s;
+}
+.login-card input:focus { border-color: var(--accent) }
+.login-err { font-size: 13px; color: var(--danger); background: var(--danger-dim); border-radius: var(--r-sm); padding: 8px 10px }
+.login-btn { justify-content: center; padding: 11px 12px; font-size: 15px; margin-top: 6px }
+.login-btn:disabled { opacity: .6 }
 </style>
 
 <div id="app">
@@ -276,6 +302,9 @@ body {
     </div>
     <div class="hdr-btns">
       <div id="fbStatus" style="font-size:11px;color:var(--text-ghost)">Conectando…</div>
+      <button class="icn-btn" onclick="doLogout()" title="Sair do Torque">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
       <button class="icn-btn" onclick="cycleTheme()" title="Alternar tema">
         <svg id="themeIco" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
@@ -289,7 +318,7 @@ body {
     <div class="tab on" id="tab-gerencial">
       <div class="sec-head">
         <h1 class="sec-title">Gerencial</h1>
-        <button class="add-btn" style="padding:6px 11px;font-size:13px" onclick="renderGerencial()">
+        <button class="add-btn" style="padding:6px 11px;font-size:13px" onclick="tqRefresh(true)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.63"/></svg>
           Atualizar
         </button>
@@ -329,22 +358,50 @@ body {
   </nav>
 
   <div class="toasts" id="toasts"></div>
+
+  <!-- Torque login -->
+  <div class="login" id="login" hidden>
+    <form class="login-card" id="loginForm" autocomplete="on">
+      <div class="login-title">Entrar com o Torque</div>
+      <p class="login-sub">Use o mesmo e-mail e senha do painel atacado.fmtorque.com.br.</p>
+      <label for="loginEmail">E-mail</label>
+      <input id="loginEmail" type="email" autocomplete="username" inputmode="email" required>
+      <label for="loginPass">Senha</label>
+      <input id="loginPass" type="password" autocomplete="current-password" required>
+      <div class="login-err" id="loginErr" hidden></div>
+      <button class="add-btn login-btn" type="submit" id="loginBtn">Entrar</button>
+    </form>
+  </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.1/firebase-app-compat.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.1/firebase-database-compat.min.js"></script>
 <script>
 'use strict'
 
-/* ── FIREBASE ── */
-const firebaseConfig = {
-  apiKey: "AIzaSyArRSR87rQzOM5qQCVMA5RUdhumCY71P6c",
-  authDomain: "memo-build.firebaseapp.com",
-  databaseURL: "https://memo-build-default-rtdb.firebaseio.com",
-  storageBucket: "memo-build.firebasestorage.app"
+/* ── TORQUE (Appwrite) ── */
+// Same backend and login as the web panel atacado.fmtorque.com.br.
+// No API key here: the repo is public. Access comes from the signed-in Torque user's session.
+const TQ = {
+  endpoint: 'https://appwrite.fmtorque.com.br/v1',
+  project:  'fm-torque',
+  db:       'main-db',
+  pollMs:   30000
 }
-firebase.initializeApp(firebaseConfig)
-const fbDb = firebase.database()
+// Torque wholesale order status → app status key
+const TQ_STATUS = {
+  IN_ORDER:'em_pedido', ORDER_READY:'pedido_pronto', COLLECTING:'em_coleta',
+  NEEDS_CHANGE:'validar_alteracao', ORDER_CHANGE:'alterar_pedido', COLLECTED:'coletado',
+  IN_EXPEDITION:'em_expedicao', ORDER_PACKAGED:'embalado', NEXT_ROUTE:'proxima_rota',
+  READY_FOR_DELIVERY:'pronto_entrega', IN_ROUTE:'em_rota', DELIVERED:'entregue',
+  DELIVERY_FINISHED:'entrega_finalizada', CHECKED:'concluida', WAITING:'aguardando',
+  PRE_CANCELED:'pre_cancelado', CANCELED:'cancelado'
+}
+// Torque order priority → app delivery type (SLA thresholds live in TIPO_SLA)
+const TQ_TIPO = {
+  URGENCY_1:'urg1_retira', URGENCY_2:'nao_em_loja', DEADLINE_2H:'entrega_2h',
+  DELIVER_SAME_DAY:'entrega_dia', DELIVER_NEXT_DAY:'entrega_outro_dia'
+}
+// Statuses still inside the warehouse flow: fetched whatever their age
+const TQ_OPEN = ['IN_ORDER','ORDER_READY','COLLECTING','NEEDS_CHANGE','ORDER_CHANGE','COLLECTED','IN_EXPEDITION']
 
 /* ── STORAGE ── */
 const S = {
@@ -370,7 +427,10 @@ const TIPO_SLA = {
 const STATUS_LABELS = {
   em_pedido:'Em Pedido', pedido_pronto:'Pedido Pronto', em_coleta:'Em Coleta',
   validar_alteracao:'Validar Alteração', alterar_pedido:'Alterar Pedido',
-  coletado:'Coletado', em_expedicao:'Em Expedição', concluida:'Concluída'
+  coletado:'Coletado', em_expedicao:'Em Expedição', embalado:'Embalado',
+  proxima_rota:'Próxima Rota', pronto_entrega:'Pronto p/ Entrega', em_rota:'Em Rota',
+  entregue:'Entregue', entrega_finalizada:'Entrega Finalizada', concluida:'Conferido',
+  aguardando:'Aguardando', pre_cancelado:'Pré-cancelado', cancelado:'Cancelado'
 }
 const SLA_ACTIVE = new Set(['pedido_pronto','em_coleta','validar_alteracao','alterar_pedido','em_expedicao'])
 
@@ -769,31 +829,190 @@ function checkSlaNotifs(){
   if(pip) pip.style.display = nRecent>0?'block':'none'
 }
 
-/* ── FIREBASE SUBSCRIPTION ── */
-function subscribeData(){
-  fbDb.ref('owner/contacts').on('value', snap=>{
-    contacts = []
-    snap.forEach(child=>{
-      const c = child.val()
-      if(c && c.token) contacts.push({...c, key: child.key})
-    })
-    const fbEl = document.getElementById('fbStatus')
-    if(fbEl) fbEl.textContent = `${contacts.length} contatos`
-    contacts.forEach(c=>subscribeContact(c.token))
-    syncPipelineToAndroid()
-    checkSlaNotifs()
-    renderGerencial()
-  })
+/* ── TORQUE API ── */
+function tqHeaders(){
+  const h = { 'X-Appwrite-Project': TQ.project, 'Content-Type': 'application/json' }
+  // The WebView page is file://, so the session cookie may not stick; Appwrite hands it back in this header instead
+  const fb = S.get('tq_cookie_fallback', '')
+  if(fb) h['X-Fallback-Cookies'] = fb
+  return h
 }
 
-function subscribeContact(token){
-  fbDb.ref(`contacts/${token}/requests`).on('value', snap=>{
-    allRequests[token] = snap.val()||{}
+async function tqFetch(path, opts={}){
+  const res = await fetch(TQ.endpoint + path, {
+    method: opts.method || 'GET',
+    headers: tqHeaders(),
+    credentials: 'include',
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  })
+  const fb = res.headers.get('X-Fallback-Cookies')
+  if(fb) S.set('tq_cookie_fallback', fb)
+  const txt = await res.text()
+  let data = null
+  try{ data = txt ? JSON.parse(txt) : null }catch(e){}
+  if(!res.ok){
+    const err = new Error((data && data.message) || ('HTTP ' + res.status))
+    err.status = res.status
+    throw err
+  }
+  return data
+}
+
+const tqQ = o => 'queries[]=' + encodeURIComponent(JSON.stringify(o))
+
+// All rows matching the queries, paged with a cursor
+async function tqRows(table, queries, pageSize=500){
+  const all = []
+  let cursor = null
+  for(let guard=0; guard<40; guard++){
+    const qs = queries.concat([{ method:'limit', values:[pageSize] }])
+    if(cursor) qs.push({ method:'cursorAfter', values:[cursor] })
+    const r = await tqFetch(`/tablesdb/${TQ.db}/tables/${table}/rows?` + qs.map(tqQ).join('&'))
+    const rows = (r && r.rows) || []
+    all.push(...rows)
+    if(rows.length < pageSize) break
+    cursor = rows[rows.length-1].$id
+  }
+  return all
+}
+
+let branchNames = {}
+async function tqLoadBranches(){
+  try{
+    const rows = await tqRows('branches', [{ method:'select', values:['$id','name'] }], 100)
+    rows.forEach(b => { branchNames[b.$id] = b.name })
+  }catch(e){ /* names are cosmetic: cards fall back to the branch id */ }
+}
+
+// Open orders + everything touched today, with their status history, in the app's request shape
+async function tqLoad(){
+  const today = new Date(); today.setHours(0,0,0,0)
+  const sel = { method:'select', values:['$id','$createdAt','$updatedAt','internalId','displayCode','title',
+    'status','priority','customerNameSnapshot','branchId'] }
+  const [open, touched] = await Promise.all([
+    tqRows('sales_orders_whsl', [{ method:'equal', attribute:'status', values:TQ_OPEN }, sel]),
+    tqRows('sales_orders_whsl', [{ method:'greaterThanEqual', attribute:'$updatedAt', values:[today.toISOString()] }, sel])
+  ])
+  const orders = new Map()
+  open.concat(touched).forEach(o => orders.set(o.$id, o))
+
+  const ids = Array.from(orders.keys())
+  const hist = []
+  for(let i=0; i<ids.length; i+=100){
+    const part = await tqRows('sales_orders_whsl_status_history', [
+      { method:'equal', attribute:'salesOrderWholesaleId', values:ids.slice(i, i+100) },
+      { method:'select', values:['$id','salesOrderWholesaleId','toStatus','arrivedAt'] }
+    ], 2000)
+    hist.push(...part)
+  }
+  const histBy = {}
+  hist.forEach(h => {
+    if(!histBy[h.salesOrderWholesaleId]) histBy[h.salesOrderWholesaleId] = []
+    histBy[h.salesOrderWholesaleId].push({ raw:h.toStatus, changedAt: Date.parse(h.arrivedAt) || 0 })
+  })
+
+  const next = {}
+  orders.forEach(o => {
+    const h = (histBy[o.$id] || []).sort((a,b) => a.changedAt - b.changedAt)
+    // when the order entered its current column = the latest history row into that status
+    let changedAt = 0
+    for(let i=h.length-1; i>=0; i--){ if(h[i].raw===o.status){ changedAt = h[i].changedAt; break } }
+    const branch = o.branchId || 'sem_filial'
+    if(!next[branch]) next[branch] = {}
+    next[branch][o.$id] = {
+      title: [o.internalId || o.displayCode, o.customerNameSnapshot || o.title].filter(Boolean).join(' · '),
+      status: TQ_STATUS[o.status] || String(o.status||'').toLowerCase(),
+      tipo: TQ_TIPO[o.priority] || '',
+      createdAt: Date.parse(o.$createdAt) || 0,
+      statusChangedAt: changedAt,
+      statusHistory: h.map(x => ({ status: TQ_STATUS[x.raw] || String(x.raw||'').toLowerCase(), changedAt: x.changedAt }))
+    }
+  })
+  allRequests = next
+  contacts = Object.keys(next).map(id => ({ token:id, name: branchNames[id] || id }))
+}
+
+let tqTimer = null, tqBusy = false
+async function tqRefresh(manual){
+  if(tqBusy) return
+  tqBusy = true
+  const st = document.getElementById('fbStatus')
+  try{
+    if(!Object.keys(branchNames).length) await tqLoadBranches()
+    await tqLoad()
+    let n = 0
+    Object.values(allRequests).forEach(reqs => Object.values(reqs).forEach(r => { if(SLA_ACTIVE.has(r.status)) n++ }))
+    if(st) st.textContent = `${n} no fluxo · ${fmtTime(Date.now())}`
     syncPipelineToAndroid()
     checkSlaNotifs()
     renderGerencial()
-  })
+    if(manual) toast('Pedidos atualizados')
+  }catch(e){
+    if(e.status===401){ tqStop(); showLogin('Sua sessão no Torque expirou. Entre de novo.'); return }
+    if(st) st.textContent = 'Sem conexão'
+    if(manual) toast('Não foi possível atualizar: ' + e.message)
+  }finally{
+    tqBusy = false
+  }
 }
+
+function tqStart(){
+  document.getElementById('login').hidden = true
+  tqRefresh()
+  clearInterval(tqTimer)
+  tqTimer = setInterval(() => tqRefresh(), TQ.pollMs)
+}
+function tqStop(){ clearInterval(tqTimer); tqTimer = null }
+
+/* ── LOGIN ── */
+function showLogin(msg){
+  const err = document.getElementById('loginErr')
+  err.textContent = msg || ''
+  err.hidden = !msg
+  document.getElementById('login').hidden = false
+  const st = document.getElementById('fbStatus')
+  if(st) st.textContent = 'Desconectado'
+}
+
+async function doLogin(ev){
+  ev.preventDefault()
+  const btn = document.getElementById('loginBtn')
+  const email = document.getElementById('loginEmail').value.trim()
+  const password = document.getElementById('loginPass').value
+  btn.disabled = true; btn.textContent = 'Entrando…'
+  try{
+    await tqFetch('/account/sessions/email', { method:'POST', body:{ email, password } })
+    await tqFetch('/account')
+    document.getElementById('loginPass').value = ''
+    tqStart()
+  }catch(e){
+    showLogin(e.status===401 ? 'E-mail ou senha incorretos.' : 'Não foi possível entrar: ' + e.message)
+  }finally{
+    btn.disabled = false; btn.textContent = 'Entrar'
+  }
+}
+
+async function doLogout(){
+  tqStop()
+  try{ await tqFetch('/account/sessions/current', { method:'DELETE' }) }catch(e){}
+  S.set('tq_cookie_fallback', '')
+  allRequests = {}; contacts = []
+  renderGerencial()
+  showLogin()
+}
+
+async function tqInit(){
+  try{
+    await tqFetch('/account')
+    tqStart()
+  }catch(e){
+    showLogin(e.status===401 ? '' : 'Não foi possível conectar ao Torque. Verifique a internet.')
+  }
+}
+
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState==='visible' && tqTimer) tqRefresh()
+})
 
 /* ── INIT ── */
 if(window.AndroidBridge){
@@ -808,7 +1027,8 @@ if(typeof Notification!=='undefined' && Notification.permission==='default'){
 // Set initial active nav button
 document.querySelectorAll('.nav-it')[0].classList.add('on')
 
-subscribeData()
+document.getElementById('loginForm').addEventListener('submit', doLogin)
+tqInit()
 renderGerencial()
 setInterval(()=>{ checkSlaNotifs() }, 30000)
 document.addEventListener('visibilitychange',()=>{
