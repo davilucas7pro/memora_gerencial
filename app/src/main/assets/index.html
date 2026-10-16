@@ -811,6 +811,7 @@ function renderGerAlertas(el){
 }
 
 /* ── GERENCIAL: PARADOS ── */
+const PARADOS_COLS = ['pedido_pronto','em_coleta','coletado','em_expedicao','validar_alteracao','alterar_pedido']
 function renderGerParados(el){
   const nowMs = Date.now()
   const items = []
@@ -822,11 +823,12 @@ function renderGerParados(el){
       if(!r) return
       const s = r.status||'em_pedido'
       if(s==='concluida') return
-      if(!SLA_ACTIVE.has(s)) return
+      if(!PARADOS_COLS.includes(s)) return
       const changedAt = r.statusChangedAt||r.createdAt||0
       const elapsed   = nowMs - changedAt
-      const cfg       = (r.tipo && TIPO_SLA[r.tipo]) || null
-      const slaState  = !cfg ? 'ok' : elapsed>=cfg.slaMs?'breach':elapsed>=cfg.alertMs?'warn':'ok'
+      // "Coletado" has no SLA rule: it shows the waiting time only (no alert colors, no notification)
+      const cfg       = SLA_ACTIVE.has(s) ? ((r.tipo && TIPO_SLA[r.tipo]) || null) : null
+      const slaState  = !SLA_ACTIVE.has(s) ? 'neutral' : !cfg ? 'ok' : elapsed>=cfg.slaMs?'breach':elapsed>=cfg.alertMs?'warn':'ok'
       items.push({...r, id:reqId, token, contactName, elapsed, slaState, cfg})
     })
   })
@@ -847,9 +849,7 @@ function renderGerParados(el){
     </div>`
   }
   // one column per board status, in the Torque board order
-  const order = ['pedido_pronto','em_coleta','coletado','em_expedicao','validar_alteracao','alterar_pedido']
-    .filter(s => SLA_ACTIVE.has(s))
-  const cols = order.map(s => {
+  const cols = PARADOS_COLS.map(s => {
     const list = items.filter(r => (r.status||'') === s)
     const tone = STATUS_TAG[s] || 't-default'
     return column(STATUS_LABELS[s] || s, tone, EDGE_OF[tone] || '', list.length,
