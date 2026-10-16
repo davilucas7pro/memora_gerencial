@@ -338,6 +338,38 @@ body {
 .login-err { font-size: 13px; color: var(--t-err-fg); background: var(--t-err-bg); border: 1px solid var(--t-err-bd); border-radius: var(--r); padding: 8px 12px; margin-bottom: 16px }
 .login-btn { width: 100% }
 .login-text { font-size: 13px; color: var(--text-muted); text-align: center; margin-bottom: 20px }
+
+/* ── CARD: who lines + tap to open audit ── */
+.ger-card.clickable { cursor: pointer; transition: box-shadow .2s }
+.ger-card.clickable:hover { box-shadow: var(--shadow) }
+.ger-who { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--text-muted) }
+.ger-who svg { width: 10px; height: 10px; flex-shrink: 0 }
+.ger-head-right { display: flex; align-items: center; gap: 8px }
+.ger-link { background: none; border: 0; padding: 0; color: var(--primary-text); font: 600 12px 'Inter', 'Segoe UI', system-ui, sans-serif; cursor: pointer }
+
+/* ── AUDIT MODAL (Torque "Auditoria — …": Ant Design Modal + Timeline) ── */
+.audit-mask { position: fixed; inset: 0; z-index: 250; background: rgba(0,0,0,.45); display: flex; align-items: flex-start; justify-content: center; padding: 56px 12px 24px; overflow-y: auto }
+.audit-box {
+  width: min(100%, 520px); background: var(--surface); border-radius: var(--r-lg);
+  border-top: 3px solid var(--primary); padding: 20px 24px;
+  box-shadow: 0 6px 16px rgba(0,0,0,.08), 0 3px 6px -4px rgba(0,0,0,.12), 0 9px 28px 8px rgba(0,0,0,.05);
+}
+:root[data-theme="dark"] .audit-box { background: #1c1c1c }
+.audit-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 16px }
+.audit-title { font-size: 15px; line-height: 1.5; font-weight: 600; color: var(--text) }
+.audit-close { background: none; border: 0; width: 24px; height: 24px; border-radius: var(--r-sm); color: var(--text-ghost); cursor: pointer; font-size: 18px; line-height: 1; flex-shrink: 0 }
+.audit-close:hover { color: var(--text); background: rgba(0,0,0,.06) }
+.tl { list-style: none }
+.tl li { position: relative; padding: 0 0 20px 26px }
+.tl li::before { content: ""; position: absolute; left: 4px; top: 12px; bottom: -2px; border-left: 2px solid rgba(5,5,5,.06) }
+:root[data-theme="dark"] .tl li::before { border-left-color: rgba(253,253,253,.12) }
+.tl li:last-child { padding-bottom: 0 }
+.tl li:last-child::before { display: none }
+.tl-dot { position: absolute; left: 0; top: 5px; width: 10px; height: 10px; border-radius: 50%; border: 3px solid var(--primary); background: var(--surface) }
+:root[data-theme="dark"] .tl-dot { border-color: #bb0304; background: #1c1c1c }
+.tl-date { display: block; font-size: 13px; font-weight: 600; color: var(--text) }
+.tl-text { font-size: 13px; color: var(--text-muted) }
+.tl-text b { font-weight: 400; color: var(--text) }
 </style>
 
 <div id="app">
@@ -405,6 +437,17 @@ body {
   </nav>
 
   <div class="toasts" id="toasts"></div>
+
+  <!-- Order audit (same as Torque's card menu → Auditoria) -->
+  <div class="audit-mask" id="audit" hidden onclick="if(event.target===this)closeAudit()">
+    <div class="audit-box" role="dialog" aria-modal="true" aria-labelledby="auditTitle">
+      <div class="audit-head">
+        <div class="audit-title" id="auditTitle"></div>
+        <button class="audit-close" onclick="closeAudit()" aria-label="Fechar">×</button>
+      </div>
+      <ul class="tl" id="auditList"></ul>
+    </div>
+  </div>
 
   <!-- Torque login -->
   <div class="login" id="login" hidden>
@@ -496,6 +539,30 @@ const emptyState = msg => `<div class="ger-empty">${EMPTY_SVG}${msg}</div>`
 // Board-style column: colored top edge + uppercase tag + count
 const column = (title, tone, edge, count, body) =>
   `<div class="ger-section ${edge}"><div class="ger-section-title"><span class="tq-tag head ${tone}">${title}</span><span class="ger-count">${count}</span></div>${body}</div>`
+// Card body lines as on the Torque board: bold title, customer (user icon), seller, then branch
+const ICON_USER = '<svg viewBox="64 64 896 896" fill="currentColor" aria-hidden="true"><path d="M858.5 763.6a374 374 0 00-80.6-119.5 375.63 375.63 0 00-119.5-80.6c-.4-.2-.8-.3-1.2-.5C719.5 518 760 444.7 760 362c0-137-111-248-248-248S264 225 264 362c0 82.7 40.5 156 102.8 201.1-.4.2-.8.3-1.2.5-44.8 18.9-85 46-119.5 80.6a375.63 375.63 0 00-80.6 119.5A371.7 371.7 0 00136 901.8a8 8 0 008 8.2h60c4.4 0 7.9-3.5 8-7.8 2-77.2 33-149.5 87.8-204.3 56.7-56.7 132-87.9 212.2-87.9s155.5 31.2 212.2 87.9C779 752.7 810 825 812 902.2c.1 4.4 3.6 7.8 8 7.8h60a8 8 0 008-8.2c-1-47.8-10.9-94.3-29.5-138.2zM512 534c-45.9 0-89.1-17.9-121.6-50.4S340 407.9 340 362c0-45.9 17.9-89.1 50.4-121.6S466.1 190 512 190s89.1 17.9 121.6 50.4S684 316.1 684 362c0 45.9-17.9 89.1-50.4 121.6S557.9 534 512 534z"/></svg>'
+const cardWho = r => `<strong class="ger-name">${esc(r.title)}</strong>
+        ${r.cliente ? `<span class="ger-who">${ICON_USER}${esc(r.cliente)}</span>` : ''}
+        ${r.vendedor ? `<span class="ger-sec">Vendedor: ${esc(r.vendedor)}</span>` : ''}
+        <span class="ger-sec">${esc(r.contactName)}</span>`
+
+/* ── AUDITORIA (status timeline, same wording as Torque) ── */
+const tqStatusLabel = raw => raw ? (STATUS_LABELS[TQ_STATUS[raw]] || raw) : '—'
+const fmtDateTime = ts => new Date(ts).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })
+function openAudit(token, reqId){
+  const r = allRequests[token] && allRequests[token][reqId]
+  if(!r){ toast('Pedido fora da lista atual. Toque em Atualizar e tente de novo.'); return }
+  document.getElementById('auditTitle').textContent = 'Auditoria — ' + r.title
+  const rows = (r.audit || []).slice().sort((a,b) => a.at - b.at)
+  document.getElementById('auditList').innerHTML = rows.length ? rows.map(x => `<li><span class="tl-dot"></span>
+      <span class="tl-date">${x.at ? fmtDateTime(x.at) : '—'}</span>
+      <span class="tl-text">${esc(x.by || 'Alguém')} moveu de <b>${esc(tqStatusLabel(x.from))}</b> para <b>${esc(tqStatusLabel(x.to))}</b></span></li>`).join('')
+    : '<li><span class="tl-text">Nenhuma movimentação registrada.</span></li>'
+  document.getElementById('audit').hidden = false
+}
+function closeAudit(){ document.getElementById('audit').hidden = true }
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeAudit() })
+
 const SLA_ACTIVE = new Set(['pedido_pronto','em_coleta','validar_alteracao','alterar_pedido','em_expedicao'])
 
 /* ── STATE ── */
@@ -583,7 +650,7 @@ function renderGerAlertas(el){
     return `<div class="ger-card ${cls}">
       <div class="ger-card-head">
         ${statusTag(a.status)}
-        <span class="tq-tag strong ${a.isBreach?'t-err':'t-warn'}">${a.isBreach?'SLA estourado':'Em alerta'}</span>
+        <span class="ger-head-right"><span class="tq-tag strong ${a.isBreach?'t-err':'t-warn'}">${a.isBreach?'SLA estourado':'Em alerta'}</span><button class="ger-link" onclick="openAudit('${a.token}','${a.reqId}')">Auditoria</button></span>
       </div>
       <div class="ger-card-body">
         <strong class="ger-name">${esc(a.reqTitle)}</strong>
@@ -641,11 +708,10 @@ function renderGerParados(el){
   const cards = items.map((r,i)=>{
     const s = r.status||'em_pedido'
     const pct = r.cfg ? Math.min(100,(r.elapsed/r.cfg.slaMs)*100) : 0
-    return `<div class="ger-card ${r.slaState}">
+    return `<div class="ger-card ${r.slaState} clickable" onclick="openAudit('${r.token}','${r.id}')">
       <div class="ger-card-head">${statusTag(s)}<span class="ger-rank">#${i+1}</span></div>
       <div class="ger-card-body">
-        <strong class="ger-name">${esc(r.title)}</strong>
-        <span class="ger-sec">${esc(r.contactName)}</span>
+        ${cardWho(r)}
         ${tipoTag(r.tipo)}
         <span class="tq-box ${SLA_TONE[r.slaState]}">Tempo no status: ${fmtDur(r.elapsed)}${r.cfg?` · SLA ${r.cfg.slaMs/60000}m`:''}</span>
         ${r.cfg ? `<div class="ger-sla-bar"><div class="ger-sla-fill" style="width:${pct}%;background:${edge[r.slaState]}"></div></div>` : ''}
@@ -694,11 +760,10 @@ function renderGerSeparacao(el){
   const maxMs = items[0].colMs
   const cards = items.map((r,i)=>{
     const pct = Math.min(100,(r.colMs/maxMs)*100)
-    return `<div class="ger-card neutral">
+    return `<div class="ger-card neutral clickable" onclick="openAudit('${r.token}','${r.id}')">
       <div class="ger-card-head">${statusTag(r.status||'em_pedido')}<span class="ger-rank">#${i+1}</span></div>
       <div class="ger-card-body">
-        <strong class="ger-name">${esc(r.title)}</strong>
-        <span class="ger-sec">${esc(r.contactName)}</span>
+        ${cardWho(r)}
         ${tipoTag(r.tipo)}
         <span class="tq-box t-proc">Tempo em coleta: ${fmtDur(r.colMs)}</span>
         <div class="ger-sla-bar"><div class="ger-sla-fill" style="width:${pct}%;background:var(--edge-info)"></div></div>
@@ -751,11 +816,10 @@ function renderGerSku(el){
   const totalDev = items.reduce((acc,r)=>acc+r.devCount,0)
   const cards = items.map((r,i)=>{
     const pct = Math.min(100,(r.devMs/maxMs)*100)
-    return `<div class="ger-card purple">
+    return `<div class="ger-card purple clickable" onclick="openAudit('${r.token}','${r.id}')">
       <div class="ger-card-head">${statusTag(r.status||'em_pedido')}<span class="ger-rank">#${i+1}</span></div>
       <div class="ger-card-body">
-        <strong class="ger-name">${esc(r.title)}</strong>
-        <span class="ger-sec">${esc(r.contactName)}</span>
+        ${cardWho(r)}
         <div class="ger-tags">${tipoTag(r.tipo)}<span class="tq-tag t-volcano">${r.devCount}x alteração</span></div>
         <span class="tq-box t-volcano">Tempo em alteração: ${fmtDur(r.devMs)}</span>
         <div class="ger-sla-bar"><div class="ger-sla-fill" style="width:${pct}%;background:#722ed1"></div></div>
@@ -928,11 +992,20 @@ async function tqLoadBranches(){
   }catch(e){ /* names are cosmetic: cards fall back to the branch id */ }
 }
 
+// Torque user id → name, for "Vendedor" and the audit trail
+let userNames = {}
+async function tqLoadUsers(){
+  try{
+    const rows = await tqRows('users_profile', [{ method:'select', values:['$id','userId','name'] }], 500)
+    rows.forEach(u => { if(u.userId) userNames[u.userId] = u.name })
+  }catch(e){ /* audit falls back to "Alguém" */ }
+}
+
 // Open orders + everything touched today, with their status history, in the app's request shape
 async function tqLoad(){
   const today = new Date(); today.setHours(0,0,0,0)
   const sel = { method:'select', values:['$id','$createdAt','$updatedAt','internalId','displayCode','title',
-    'status','priority','customerNameSnapshot','branchId'] }
+    'status','priority','customerNameSnapshot','branchId','sellerUserId'] }
   const [open, touched] = await Promise.all([
     tqRows('sales_orders_whsl', [{ method:'equal', attribute:'status', values:TQ_OPEN }, sel]),
     tqRows('sales_orders_whsl', [{ method:'greaterThanEqual', attribute:'$updatedAt', values:[today.toISOString()] }, sel])
@@ -945,14 +1018,14 @@ async function tqLoad(){
   for(let i=0; i<ids.length; i+=100){
     const part = await tqRows('sales_orders_whsl_status_history', [
       { method:'equal', attribute:'salesOrderWholesaleId', values:ids.slice(i, i+100) },
-      { method:'select', values:['$id','salesOrderWholesaleId','toStatus','arrivedAt'] }
+      { method:'select', values:['$id','salesOrderWholesaleId','fromStatus','toStatus','arrivedAt','changedByUserId'] }
     ], 2000)
     hist.push(...part)
   }
   const histBy = {}
   hist.forEach(h => {
     if(!histBy[h.salesOrderWholesaleId]) histBy[h.salesOrderWholesaleId] = []
-    histBy[h.salesOrderWholesaleId].push({ raw:h.toStatus, changedAt: Date.parse(h.arrivedAt) || 0 })
+    histBy[h.salesOrderWholesaleId].push({ raw:h.toStatus, from:h.fromStatus, by:h.changedByUserId, changedAt: Date.parse(h.arrivedAt) || 0 })
   })
 
   const next = {}
@@ -964,12 +1037,16 @@ async function tqLoad(){
     const branch = o.branchId || 'sem_filial'
     if(!next[branch]) next[branch] = {}
     next[branch][o.$id] = {
-      title: [o.internalId || o.displayCode, o.customerNameSnapshot || o.title].filter(Boolean).join(' · '),
+      // same card title as the Torque board (e.g. "LM retifica - AT-B3710")
+      title: o.displayCode || o.title || o.internalId || o.$id,
+      cliente: o.customerNameSnapshot || '',
+      vendedor: userNames[o.sellerUserId] || '',
       status: TQ_STATUS[o.status] || String(o.status||'').toLowerCase(),
       tipo: TQ_TIPO[o.priority] || '',
       createdAt: Date.parse(o.$createdAt) || 0,
       statusChangedAt: changedAt,
-      statusHistory: h.map(x => ({ status: TQ_STATUS[x.raw] || String(x.raw||'').toLowerCase(), changedAt: x.changedAt }))
+      statusHistory: h.map(x => ({ status: TQ_STATUS[x.raw] || String(x.raw||'').toLowerCase(), changedAt: x.changedAt })),
+      audit: h.map(x => ({ at: x.changedAt, from: x.from, to: x.raw, by: userNames[x.by] || '' }))
     }
   })
   allRequests = next
@@ -983,6 +1060,7 @@ async function tqRefresh(manual){
   const st = document.getElementById('fbStatus')
   try{
     if(!Object.keys(branchNames).length) await tqLoadBranches()
+    if(!Object.keys(userNames).length) await tqLoadUsers()
     await tqLoad()
     let n = 0
     Object.values(allRequests).forEach(reqs => Object.values(reqs).forEach(r => { if(SLA_ACTIVE.has(r.status)) n++ }))
