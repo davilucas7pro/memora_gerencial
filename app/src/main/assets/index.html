@@ -289,6 +289,33 @@ body {
 .ger-stat-val { font-size: 22px; line-height: 1.3; font-weight: 600; color: var(--text); margin-top: 2px }
 .ger-stat-row.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) }
 
+/* ── PERIOD FILTER (Ant Design Segmented + DatePicker, Torque overrides) ── */
+.ger-filter { margin: -4px 16px 14px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0 }
+.seg-track {
+  display: flex; gap: 2px; padding: 2px; border-radius: var(--r);
+  background: rgba(0,0,0,.03); overflow-x: auto; scrollbar-width: none; align-self: flex-start; max-width: 100%;
+}
+.seg-track::-webkit-scrollbar { display: none }
+:root[data-theme="dark"] .seg-track { background: rgba(255,255,255,.04) }
+.seg-it {
+  flex-shrink: 0; height: 28px; padding: 0 11px; border: 0; border-radius: 6px; background: transparent;
+  color: var(--text-2); font: 400 13px 'Inter', 'Segoe UI', system-ui, sans-serif; cursor: pointer; transition: all .2s;
+}
+.seg-it:hover { color: var(--text) }
+.seg-it.on { background: rgba(216,0,1,.08); color: var(--primary-text); font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,.03), 0 1px 6px -1px rgba(0,0,0,.02) }
+:root[data-theme="dark"] .seg-it.on { background: rgba(216,0,1,.15) }
+.range-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px }
+.range-custom { display: flex; align-items: center; gap: 6px }
+.range-custom input {
+  height: 32px; padding: 4px 8px; border-radius: var(--r); border: 1px solid var(--border);
+  background: var(--surface); color: var(--text); font: 13px 'Inter', 'Segoe UI', system-ui, sans-serif; outline: none;
+}
+.range-custom input:hover { border-color: var(--primary-hover) }
+.range-custom input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(216,0,1,.1) }
+.range-sep { font-size: 12px; color: var(--text-muted) }
+.range-label { font-size: 12px; color: var(--text-muted) }
+.range-label b { font-weight: 600; color: var(--text) }
+
 /* ── KANBAN BOARD (Torque "Acompanhamento"): 280px columns side by side ── */
 .board {
   display: flex; gap: 12px; align-items: stretch;
@@ -439,6 +466,24 @@ body {
         <button class="ger-tab-btn"    id="gTab-parados"   onclick="goGerTab('parados')">Parados</button>
         <button class="ger-tab-btn"    id="gTab-separacao" onclick="goGerTab('separacao')">Separação</button>
         <button class="ger-tab-btn"    id="gTab-sku"       onclick="goGerTab('sku')">SKU</button>
+      </div>
+      <!-- Period filter (Separação, SKU, Alertas) -->
+      <div class="ger-filter" id="gerFilter">
+        <div class="seg-track" role="group" aria-label="Período">
+          <button class="seg-it" data-p="hoje" onclick="pickPreset('hoje')">Hoje</button>
+          <button class="seg-it" data-p="ontem" onclick="pickPreset('ontem')">Ontem</button>
+          <button class="seg-it" data-p="7d" onclick="pickPreset('7d')">7 dias</button>
+          <button class="seg-it" data-p="mes" onclick="pickPreset('mes')">Este mês</button>
+          <button class="seg-it" data-p="custom" onclick="pickPreset('custom')">Período</button>
+        </div>
+        <div class="range-row">
+          <div class="range-custom" id="rangeCustom" hidden>
+            <input type="date" id="rFrom" aria-label="Data inicial" onchange="pickCustom()">
+            <span class="range-sep">até</span>
+            <input type="date" id="rTo" aria-label="Data final" onchange="pickCustom()">
+          </div>
+          <span class="range-label">Criados em <b id="rangeLabel"></b></span>
+        </div>
       </div>
       <div id="gerList"></div>
     </div>
@@ -661,6 +706,7 @@ function goGerTab(tab){
   const tabOrder = ['alertas','parados','separacao','sku']
   const idx = tabOrder.indexOf(tab)
   if(idx>=0 && navBtns[idx]) navBtns[idx].classList.add('on')
+  renderRangeBar()
   renderGerencial()
 }
 
@@ -675,11 +721,12 @@ function renderGerencial(){
 
 /* ── GERENCIAL: ALERTAS ── */
 function renderGerAlertas(el){
-  if(!slaAlerts.length){
-    el.innerHTML = column('Registros de alerta', 't-default', '', 0, emptyState('Nenhum alerta de SLA registrado'))
+  const list = slaAlerts.filter(a => inRange(a.firedAt))
+  if(!list.length){
+    el.innerHTML = column('Registros de alerta', 't-default', '', 0, emptyState('Nenhum alerta de SLA no período'))
     return
   }
-  const cards = slaAlerts.map(a => {
+  const cards = list.map(a => {
     const cls     = a.isBreach ? 'breach' : 'warn'
     const slaMin  = (a.tipo && TIPO_SLA[a.tipo]) ? TIPO_SLA[a.tipo].slaMs/60000 : null
     const safeId  = a.id.replace(/[^a-zA-Z0-9_]/g,'_')
@@ -702,8 +749,8 @@ function renderGerAlertas(el){
       </div>
     </div>`
   }).join('')
-  const total   = slaAlerts.length
-  const nBreach = slaAlerts.filter(a=>a.isBreach).length
+  const total   = list.length
+  const nBreach = list.filter(a=>a.isBreach).length
   const nWarn   = total - nBreach
   el.innerHTML = `
     <div class="ger-stat-row">
@@ -818,7 +865,7 @@ function renderGerSeparacao(el){
     const contact = contacts.find(c=>c.token===token)
     const contactName = contact ? contact.name : token
     Object.entries(reqs).forEach(([reqId, r])=>{
-      if(r) all.push({ ...r, id:reqId, token, contactName, t: sepTimes(r) })
+      if(r && r.inPeriod) all.push({ ...r, id:reqId, token, contactName, t: sepTimes(r) })
     })
   })
 
@@ -830,7 +877,7 @@ function renderGerSeparacao(el){
     stats.push(`<div class="ger-stat">
       <div class="ger-stat-lbl">Maior ${m.title.charAt(0).toLowerCase() + m.title.slice(1)}</div>
       <div class="ger-stat-val">${top ? fmtDur(top.t[m.key]) : '—'}</div>
-      <div class="ger-stat-sub">${top ? esc(top.title) : 'Sem registros hoje'}</div>
+      <div class="ger-stat-sub">${top ? esc(top.title) : 'Sem registros no período'}</div>
       <div class="ger-stat-sub">Média ${items.length ? fmtDur(Math.round(avg)) : '—'} · ${items.length} pedido${items.length===1?'':'s'}</div>
     </div>`)
     const max = top ? top.t[m.key] : 1
@@ -843,7 +890,7 @@ function renderGerSeparacao(el){
         <div class="ger-sla-bar"><div class="ger-sla-fill" style="width:${Math.min(100, r.t[m.key]/max*100)}%;background:${m.bar}"></div></div>
       </div>
     </div>`).join('')
-    cols.push(column(m.title, m.tone, m.edge, items.length, cards || emptyState('Nenhum pedido nesta etapa hoje')))
+    cols.push(column(m.title, m.tone, m.edge, items.length, cards || emptyState('Nenhum pedido nesta etapa no período')))
   })
 
   el.innerHTML = `<div class="ger-stat-row grid2">${stats.join('')}</div>${board(cols)}`
@@ -858,8 +905,9 @@ function renderGerSku(el){
     const contact = contacts.find(c=>c.token===token)
     const contactName = contact ? contact.name : token
     Object.entries(reqs).forEach(([reqId, r])=>{
-      if(!r) return
+      if(!r || !r.inPeriod) return
       let devMs=0, devCount=0
+      // the history already ends with the current column, counted until now
       const hist = Array.isArray(r.statusHistory) ? r.statusHistory : []
       for(let i=0;i<hist.length;i++){
         if(deviationStatuses.has(hist[i].status)){
@@ -867,10 +915,6 @@ function renderGerSku(el){
           const end=hist[i+1]?(hist[i+1].changedAt||Date.now()):Date.now()
           devMs+=end-start; devCount++
         }
-      }
-      if(deviationStatuses.has(r.status||'')){
-        const start=r.statusChangedAt||0
-        if(start){ devMs+=Date.now()-start; devCount++ }
       }
       if(devMs>0) items.push({...r, id:reqId, token, contactName, devMs, devCount})
     })
@@ -1084,27 +1128,121 @@ async function tqLoadUsers(){
   }catch(e){ /* audit falls back to "Alguém" */ }
 }
 
-// Open orders + everything touched today, with their status history, in the app's request shape
-async function tqLoad(){
-  const today = new Date(); today.setHours(0,0,0,0)
-  const sel = { method:'select', values:['$id','$createdAt','$updatedAt','internalId','displayCode','title',
-    'status','priority','customerNameSnapshot','branchId','sellerUserId'] }
-  const [open, touched] = await Promise.all([
-    tqRows('sales_orders_whsl', [{ method:'equal', attribute:'status', values:TQ_OPEN }, sel]),
-    tqRows('sales_orders_whsl', [{ method:'greaterThanEqual', attribute:'$updatedAt', values:[today.toISOString()] }, sel])
-  ])
-  const orders = new Map()
-  open.concat(touched).forEach(o => orders.set(o.$id, o))
+/* ── PERIOD FILTER ── */
+// Separação, SKU and Alertas show orders CREATED in the period; Parados always shows what is stuck now.
+const RANGE_PRESETS = ['hoje','ontem','7d','mes','custom']
+const RANGE_MAX_DAYS = 62
+const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+const parseYmd = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d) }
+function presetRange(p){
+  const t = new Date(); t.setHours(0,0,0,0)
+  const back = n => { const d = new Date(t); d.setDate(d.getDate()-n); return d }
+  if(p==='ontem') return { from: ymd(back(1)), to: ymd(back(1)) }
+  if(p==='7d')    return { from: ymd(back(6)), to: ymd(t) }
+  if(p==='mes')   return { from: ymd(new Date(t.getFullYear(), t.getMonth(), 1)), to: ymd(t) }
+  return { from: ymd(t), to: ymd(t) }
+}
+let tqRange = (() => {
+  const saved = S.get('ger_range', null)
+  if(saved && saved.preset==='custom' && saved.from && saved.to) return saved
+  const p = saved && RANGE_PRESETS.includes(saved.preset) ? saved.preset : 'hoje'
+  return { preset:p, ...presetRange(p) }
+})()
+// presets move with the calendar (e.g. "Hoje" tomorrow is tomorrow)
+function currentRange(){ return tqRange.preset==='custom' ? tqRange : { preset:tqRange.preset, ...presetRange(tqRange.preset) } }
+function rangeBounds(){
+  const r = currentRange()
+  const from = parseYmd(r.from), to = parseYmd(r.to); to.setDate(to.getDate()+1)
+  return { from, to, fromISO: from.toISOString(), toISO: to.toISOString() }
+}
+const inRange = ts => { const b = rangeBounds(); return ts >= b.from.getTime() && ts < b.to.getTime() }
+function rangeLabel(){
+  const r = currentRange(), f = r.from.slice(8,10)+'/'+r.from.slice(5,7), t = r.to.slice(8,10)+'/'+r.to.slice(5,7)
+  return f===t ? f : `${f} – ${t}`
+}
 
-  const ids = Array.from(orders.keys())
-  const hist = []
-  for(let i=0; i<ids.length; i+=100){
-    const part = await tqRows('sales_orders_whsl_status_history', [
-      { method:'equal', attribute:'salesOrderWholesaleId', values:ids.slice(i, i+100) },
-      { method:'select', values:['$id','salesOrderWholesaleId','fromStatus','toStatus','arrivedAt','changedByUserId'] }
-    ], 2000)
-    hist.push(...part)
+function renderRangeBar(){
+  const r = currentRange()
+  document.querySelectorAll('.seg-it').forEach(b => b.classList.toggle('on', b.dataset.p===r.preset))
+  document.getElementById('rangeCustom').hidden = r.preset!=='custom'
+  document.getElementById('rFrom').value = r.from
+  document.getElementById('rTo').value = r.to
+  document.getElementById('rangeLabel').parentElement.innerHTML =
+    (curGerTab==='alertas' ? 'Alertas de ' : 'Pedidos criados em ') + `<b id="rangeLabel">${rangeLabel()}</b>`
+  document.getElementById('gerFilter').hidden = curGerTab==='parados'
+}
+function setRange(next){
+  let { from, to } = next.preset==='custom' ? next : presetRange(next.preset)
+  if(from > to) [from, to] = [to, from]
+  const days = (parseYmd(to) - parseYmd(from)) / 864e5 + 1
+  if(days > RANGE_MAX_DAYS){
+    const f = parseYmd(to); f.setDate(f.getDate() - RANGE_MAX_DAYS + 1); from = ymd(f)
+    toast(`Período limitado a ${RANGE_MAX_DAYS} dias`)
   }
+  tqRange = next.preset==='custom' ? { preset:'custom', from, to } : { preset:next.preset, ...presetRange(next.preset) }
+  S.set('ger_range', tqRange)
+  renderRangeBar()
+  periodCache.key = ''          // force a fresh fetch for the new period
+  renderGerencial()
+  tqRefresh()
+}
+function pickPreset(p){
+  if(p==='custom') setRange({ preset:'custom', ...currentRange() })
+  else setRange({ preset:p })
+}
+function pickCustom(){
+  const from = document.getElementById('rFrom').value, to = document.getElementById('rTo').value
+  if(from && to) setRange({ preset:'custom', from, to })
+}
+
+/* ── LOAD ── */
+const ORDER_FIELDS = { method:'select', values:['$id','$createdAt','$updatedAt','internalId','displayCode','title',
+  'status','priority','customerNameSnapshot','branchId','sellerUserId'] }
+// orders created in the period + their history, refetched when the period changes, on "Atualizar",
+// or every 5 min while the period includes today (past periods barely change)
+let periodCache = { key:'', orders:[], hist:[], at:0 }
+
+// history of many orders: batches of 100 ids, 4 batches at a time
+async function tqHistory(ids){
+  const batches = []
+  for(let i=0; i<ids.length; i+=100) batches.push(ids.slice(i, i+100))
+  const out = []
+  for(let i=0; i<batches.length; i+=4){
+    const parts = await Promise.all(batches.slice(i, i+4).map(b => tqRows('sales_orders_whsl_status_history', [
+      { method:'equal', attribute:'salesOrderWholesaleId', values:b },
+      { method:'select', values:['$id','salesOrderWholesaleId','fromStatus','toStatus','arrivedAt','changedByUserId'] }
+    ], 2000)))
+    parts.forEach(p => out.push(...p))
+  }
+  return out
+}
+
+async function tqLoad(force){
+  const b = rangeBounds()
+  const key = b.fromISO + '|' + b.toISO
+  const live = b.to.getTime() > Date.now()
+  const stale = force || periodCache.key !== key || (live && Date.now() - periodCache.at > 5*60000)
+
+  // what is stuck now (Parados + notifications): always fresh
+  const open = await tqRows('sales_orders_whsl', [{ method:'equal', attribute:'status', values:TQ_OPEN }, ORDER_FIELDS])
+  if(stale){
+    const st = document.getElementById('fbStatus')
+    if(st) st.textContent = 'Carregando período…'
+    const orders = await tqRows('sales_orders_whsl', [
+      { method:'greaterThanEqual', attribute:'$createdAt', values:[b.fromISO] },
+      { method:'lessThan', attribute:'$createdAt', values:[b.toISO] }, ORDER_FIELDS])
+    const hist = await tqHistory(orders.map(o => o.$id))
+    periodCache = { key, orders, hist, at: Date.now() }
+  }
+  const periodIds = new Set(periodCache.orders.map(o => o.$id))
+  const openHist = await tqHistory(open.map(o => o.$id))
+
+  const orders = new Map()
+  periodCache.orders.forEach(o => orders.set(o.$id, o))
+  open.forEach(o => orders.set(o.$id, o))                     // fresh status wins
+  const openIds = new Set(open.map(o => o.$id))
+  const hist = periodCache.hist.filter(h => !openIds.has(h.salesOrderWholesaleId)).concat(openHist)
+
   const histBy = {}
   hist.forEach(h => {
     if(!histBy[h.salesOrderWholesaleId]) histBy[h.salesOrderWholesaleId] = []
@@ -1127,6 +1265,7 @@ async function tqLoad(){
       status: TQ_STATUS[o.status] || String(o.status||'').toLowerCase(),
       tipo: TQ_TIPO[o.priority] || '',
       createdAt: Date.parse(o.$createdAt) || 0,
+      inPeriod: periodIds.has(o.$id),
       statusChangedAt: changedAt,
       statusHistory: h.map(x => ({ status: TQ_STATUS[x.raw] || String(x.raw||'').toLowerCase(), changedAt: x.changedAt })),
       audit: h.map(x => ({ at: x.changedAt, from: x.from, to: x.raw, by: userNames[x.by] || '' }))
@@ -1136,15 +1275,16 @@ async function tqLoad(){
   contacts = Object.keys(next).map(id => ({ token:id, name: branchNames[id] || id }))
 }
 
-let tqTimer = null, tqBusy = false
+let tqTimer = null, tqBusy = false, tqPending = false
 async function tqRefresh(manual){
-  if(tqBusy) return
+  // a period change during a load runs right after it
+  if(tqBusy){ tqPending = true; return }
   tqBusy = true
   const st = document.getElementById('fbStatus')
   try{
     if(!Object.keys(branchNames).length) await tqLoadBranches()
     if(!Object.keys(userNames).length) await tqLoadUsers()
-    await tqLoad()
+    await tqLoad(manual)
     let n = 0
     Object.values(allRequests).forEach(reqs => Object.values(reqs).forEach(r => { if(SLA_ACTIVE.has(r.status)) n++ }))
     if(st) st.textContent = `${n} no fluxo · ${fmtTime(Date.now())}`
@@ -1158,6 +1298,7 @@ async function tqRefresh(manual){
     if(manual) toast('Não foi possível atualizar: ' + e.message)
   }finally{
     tqBusy = false
+    if(tqPending){ tqPending = false; tqRefresh() }
   }
 }
 
@@ -1225,6 +1366,7 @@ if(typeof Notification!=='undefined' && Notification.permission==='default'){
 
 // Set initial active nav button
 document.querySelectorAll('.nav-it')[0].classList.add('on')
+renderRangeBar()
 
 tqInit()
 renderGerencial()
