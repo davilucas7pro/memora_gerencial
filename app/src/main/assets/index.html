@@ -241,6 +241,7 @@ let contacts     = []
 let notifTs      = S.get('ger_notif_ts', {})
 let alertRecords = S.get('ger_alert_records', [])
 let curTab       = 'alertas'
+let seenTs       = {}   // 'reqId_status' → timestamp quando vimos pela primeira vez nesse status
 
 /* ── HELPERS ── */
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
@@ -308,8 +309,12 @@ function syncPipelineToAndroid() {
       if(!r) return
       const s = r.status||'em_pedido'
       if(!SLA_ACTIVE.has(s) || !r.tipo || !TIPO_SLA[r.tipo]) return
+      const rawTs = r.statusChangedAt||r.createdAt||0
+      const seenKey = reqId+'_'+s
+      if(!seenTs[seenKey]) seenTs[seenKey] = Date.now()
+      const effectiveChangedAt = rawTs > 0 ? rawTs : seenTs[seenKey]
       active.push({ id:reqId, token, title:r.title||reqId, status:s, tipo:r.tipo,
-        statusChangedAt: r.statusChangedAt||r.createdAt||0, createdAt: r.createdAt||0 })
+        statusChangedAt: effectiveChangedAt, createdAt: r.createdAt||0 })
     })
   })
   try { AndroidBridge.savePipelineRequests(JSON.stringify(active)) } catch(e){}
@@ -328,12 +333,15 @@ function checkSlaNotifs() {
       if(!SLA_ACTIVE.has(s) || !r.tipo || !TIPO_SLA[r.tipo]) return
       const cfg = TIPO_SLA[r.tipo]; if(!cfg) return
 
-      const changedAt = r.statusChangedAt||r.createdAt||0
+      const rawChangedAt = r.statusChangedAt||r.createdAt||0
+      const seenKey2 = reqId+'_'+s
+      if(!seenTs[seenKey2]) seenTs[seenKey2] = nowMs
+      const changedAt = rawChangedAt > 0 ? rawChangedAt : seenTs[seenKey2]
       const elapsed   = nowMs - changedAt
       const slaKey    = 'sla_'+reqId
       const lastFired = notifTs[slaKey]||0
 
-      if(elapsed >= cfg.alertMs && lastFired < changedAt) {
+      if(changedAt > 0 && elapsed >= cfg.alertMs && lastFired < changedAt) {
         const elMin    = Math.floor(elapsed/60000)
         const slaMin   = cfg.slaMs/60000
         const isBreach = elapsed >= cfg.slaMs
@@ -368,6 +376,16 @@ function checkSlaNotifs() {
     S.set('ger_notif_ts', notifTs)
     if(window.AndroidBridge) try{ AndroidBridge.saveNotifTs(JSON.stringify(notifTs)) }catch(e){}
   }
+
+  // Limpar seenTs de pedidos que não estão mais ativos (evitar memory leak)
+  const activeKeys = new Set()
+  Object.entries(allRequests).forEach(([,reqs]) => {
+    if(!reqs) return
+    Object.entries(reqs).forEach(([reqId, r]) => {
+      if(r && SLA_ACTIVE.has(r.status||'')) activeKeys.add(reqId+'_'+(r.status||''))
+    })
+  })
+  Object.keys(seenTs).forEach(k => { if(!activeKeys.has(k)) delete seenTs[k] })
 
   // Badge
   const nAlert = Object.values(alertRecords).filter(a => {

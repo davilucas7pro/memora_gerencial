@@ -84,7 +84,7 @@ public class SlaAlarmReceiver extends BroadcastReceiver {
                 String slaKey  = "sla_" + reqId;
                 long lastFired = notifTs.optLong(slaKey, 0);
 
-                if (elapsed >= alertMs && lastFired < changedAt) {
+                if (changedAt > 0 && elapsed >= alertMs && lastFired < changedAt) {
                     long elMin    = elapsed / 60_000L;
                     long slaMin   = slaMs   / 60_000L;
                     boolean breach = elapsed >= slaMs;
