@@ -43,7 +43,8 @@ import java.util.concurrent.TimeUnit;
  * Foreground service that checks the Torque orders every 30 s, with the app open or closed,
  * and notifies when an order sits too long in a warehouse column:
  *   Retira  (Urgente 1 / Urgente 2): alert at 5 min, SLA breach at 10 min
- *   Entrega (Prazo 2h / Entregar no dia): alert at 10 min, SLA breach at 20 min
+ *   Entrega (Prazo 2h / Entregar no dia): alert at 10 min, SLA breach at 15 min
+ * (the SLA breaks 5 minutes after the first alert)
  * It is the single source of SLA notifications and of the records shown in the Alertas tab.
  * Reads with the Torque session cookie the user created on the Torque login page.
  */
@@ -280,7 +281,7 @@ public class SlaMonitorService extends Service {
             case "URGENCY_1":
             case "URGENCY_2":        return new long[]{5 * 60_000L, 10 * 60_000L};
             case "DEADLINE_2H":
-            case "DELIVER_SAME_DAY": return new long[]{10 * 60_000L, 20 * 60_000L};
+            case "DELIVER_SAME_DAY": return new long[]{10 * 60_000L, 15 * 60_000L};
             default:                 return null;
         }
     }
