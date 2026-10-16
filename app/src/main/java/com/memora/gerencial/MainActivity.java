@@ -20,7 +20,9 @@ public class MainActivity extends AppCompatActivity {
 
     static final String CHANNEL_ID   = "memora_ger_notif";
     static final String PREFS_NAME   = "MemoraGerPrefs";
+    private static final int REQ_TORQUE_LOGIN = 40;
     private int notifId = 2000;
+    private WebView web;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
         requestNotificationPermission();
         scheduleAlarm(this);
 
-        WebView web = findViewById(R.id.webview);
+        web = findViewById(R.id.webview);
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
@@ -95,9 +97,33 @@ public class MainActivity extends AppCompatActivity {
                     .getString("alertRecords", "[]");
             }
 
+            /** Open the real Torque login page; its session is then reused by this WebView */
+            @JavascriptInterface
+            public void openTorqueLogin() {
+                runOnUiThread(() -> startActivityForResult(
+                    new Intent(MainActivity.this, TorqueLoginActivity.class), REQ_TORQUE_LOGIN));
+            }
+
+            /** Sign out: drop the Torque session cookie */
+            @JavascriptInterface
+            public void clearTorqueSession() {
+                CookieManager cm = CookieManager.getInstance();
+                cm.removeAllCookies(null);
+                cm.flush();
+            }
+
         }, "AndroidBridge");
 
         web.loadUrl("file:///android_asset/index.html");
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_TORQUE_LOGIN && web != null) {
+            // Signed in (or closed): let the page check the session and start loading orders
+            web.evaluateJavascript("tqInit()", null);
+        }
     }
 
     private void requestNotificationPermission() {

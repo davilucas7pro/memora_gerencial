@@ -337,6 +337,7 @@ body {
 .login-card input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(216,0,1,.1) }
 .login-err { font-size: 13px; color: var(--t-err-fg); background: var(--t-err-bg); border: 1px solid var(--t-err-bd); border-radius: var(--r); padding: 8px 12px; margin-bottom: 16px }
 .login-btn { width: 100% }
+.login-text { font-size: 13px; color: var(--text-muted); text-align: center; margin-bottom: 20px }
 </style>
 
 <div id="app">
@@ -408,15 +409,12 @@ body {
   <!-- Torque login -->
   <div class="login" id="login" hidden>
     <div class="login-brand">Memora Gerencial</div>
-    <form class="login-card" id="loginForm" autocomplete="on">
+    <div class="login-card">
       <div class="login-title">Entrar na sua conta</div>
-      <label for="loginEmail">E-mail</label>
-      <input id="loginEmail" type="email" autocomplete="username" inputmode="email" placeholder="E-mail" required>
-      <label for="loginPass">Senha</label>
-      <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••" required>
+      <p class="login-text">O login é feito na página do Torque, com o mesmo e-mail e senha do atacado.fmtorque.com.br. Se o Torque pedir sua localização, permita.</p>
       <div class="login-err" id="loginErr" hidden></div>
-      <button class="add-btn login-btn" type="submit" id="loginBtn">Entrar</button>
-    </form>
+      <button class="add-btn login-btn" type="button" id="loginBtn" onclick="startTorqueLogin()">Entrar com o Torque</button>
+    </div>
   </div>
 </div>
 
@@ -1020,27 +1018,20 @@ function showLogin(msg){
   if(st) st.textContent = 'Desconectado'
 }
 
-async function doLogin(ev){
-  ev.preventDefault()
-  const btn = document.getElementById('loginBtn')
-  const email = document.getElementById('loginEmail').value.trim()
-  const password = document.getElementById('loginPass').value
-  btn.disabled = true; btn.textContent = 'Entrando…'
-  try{
-    await tqFetch('/account/sessions/email', { method:'POST', body:{ email, password } })
-    await tqFetch('/account')
-    document.getElementById('loginPass').value = ''
-    tqStart()
-  }catch(e){
-    showLogin(e.status===401 ? 'E-mail ou senha incorretos.' : 'Não foi possível entrar: ' + e.message)
-  }finally{
-    btn.disabled = false; btn.textContent = 'Entrar'
+// The Torque server only creates sessions for its own web address, so sign-in happens on the
+// real Torque login page (TorqueLoginActivity); this WebView then reuses the session cookie.
+function startTorqueLogin(){
+  if(window.AndroidBridge && AndroidBridge.openTorqueLogin){
+    AndroidBridge.openTorqueLogin()
+  }else{
+    showLogin('Abra o app Memora Gerencial no celular para entrar.')
   }
 }
 
 async function doLogout(){
   tqStop()
   try{ await tqFetch('/account/sessions/current', { method:'DELETE' }) }catch(e){}
+  if(window.AndroidBridge && AndroidBridge.clearTorqueSession){ try{ AndroidBridge.clearTorqueSession() }catch(e){} }
   S.set('tq_cookie_fallback', '')
   allRequests = {}; contacts = []
   renderGerencial()
@@ -1055,6 +1046,7 @@ async function tqInit(){
     showLogin(e.status===401 ? '' : 'Não foi possível conectar ao Torque. Verifique a internet.')
   }
 }
+window.tqInit = tqInit
 
 document.addEventListener('visibilitychange', () => {
   if(document.visibilityState==='visible' && tqTimer) tqRefresh()
@@ -1073,7 +1065,6 @@ if(typeof Notification!=='undefined' && Notification.permission==='default'){
 // Set initial active nav button
 document.querySelectorAll('.nav-it')[0].classList.add('on')
 
-document.getElementById('loginForm').addEventListener('submit', doLogin)
 tqInit()
 renderGerencial()
 setInterval(()=>{ checkSlaNotifs() }, 30000)
