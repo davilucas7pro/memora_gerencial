@@ -625,7 +625,8 @@ const ICON_USER = '<svg viewBox="64 64 896 896" fill="currentColor" aria-hidden=
 const cardWho = r => `<strong class="ger-name">${esc(r.title)}</strong>
         ${r.cliente ? `<span class="ger-who">${ICON_USER}${esc(r.cliente)}</span>` : ''}
         ${r.vendedor ? `<span class="ger-sec">Vendedor: ${esc(r.vendedor)}</span>` : ''}
-        <span class="ger-sec">${esc(r.contactName)}</span>`
+        <span class="ger-sec">${esc(r.contactName)}</span>
+        ${r.itens ? `<span class="tq-tag">${r.itens} ${r.itens===1 ? 'item' : 'itens'}</span>` : ''}`
 
 /* ── AUDITORIA (status timeline, same wording as Torque) ── */
 const tqStatusLabel = raw => raw ? (STATUS_LABELS[TQ_STATUS[raw]] || raw) : '—'
@@ -1200,7 +1201,7 @@ const ORDER_FIELDS = { method:'select', values:['$id','$createdAt','$updatedAt',
   'status','priority','customerNameSnapshot','branchId','sellerUserId'] }
 // orders created in the period + their history, refetched when the period changes, on "Atualizar",
 // or every 5 min while the period includes today (past periods barely change)
-let periodCache = { key:'', orders:[], hist:[], at:0 }
+let periodCache = { key:'', orders:[], hist:[], items:{}, at:0 }
 
 // history of many orders: batches of 100 ids, 4 batches at a time
 async function tqHistory(ids){
@@ -1217,6 +1218,21 @@ async function tqHistory(ids){
   return out
 }
 
+// number of product lines per order ("30 itens" on the Torque card), same batching as the history
+async function tqItemCounts(ids){
+  const batches = []
+  for(let i=0; i<ids.length; i+=100) batches.push(ids.slice(i, i+100))
+  const counts = {}
+  for(let i=0; i<batches.length; i+=4){
+    const parts = await Promise.all(batches.slice(i, i+4).map(b => tqRows('sales_orders_whsl_items', [
+      { method:'equal', attribute:'salesOrderWholesaleId', values:b },
+      { method:'select', values:['$id','salesOrderWholesaleId'] }
+    ], 5000)))
+    parts.forEach(p => p.forEach(it => { counts[it.salesOrderWholesaleId] = (counts[it.salesOrderWholesaleId] || 0) + 1 }))
+  }
+  return counts
+}
+
 async function tqLoad(force){
   const b = rangeBounds()
   const key = b.fromISO + '|' + b.toISO
@@ -1231,11 +1247,14 @@ async function tqLoad(force){
     const orders = await tqRows('sales_orders_whsl', [
       { method:'greaterThanEqual', attribute:'$createdAt', values:[b.fromISO] },
       { method:'lessThan', attribute:'$createdAt', values:[b.toISO] }, ORDER_FIELDS])
-    const hist = await tqHistory(orders.map(o => o.$id))
-    periodCache = { key, orders, hist, at: Date.now() }
+    const pids = orders.map(o => o.$id)
+    const [hist, items] = await Promise.all([tqHistory(pids), tqItemCounts(pids)])
+    periodCache = { key, orders, hist, items, at: Date.now() }
   }
   const periodIds = new Set(periodCache.orders.map(o => o.$id))
-  const openHist = await tqHistory(open.map(o => o.$id))
+  const openIdList = open.map(o => o.$id)
+  const [openHist, openItems] = await Promise.all([tqHistory(openIdList), tqItemCounts(openIdList)])
+  const itemCount = Object.assign({}, periodCache.items || {}, openItems)
 
   const orders = new Map()
   periodCache.orders.forEach(o => orders.set(o.$id, o))
@@ -1266,6 +1285,7 @@ async function tqLoad(force){
       tipo: TQ_TIPO[o.priority] || '',
       createdAt: Date.parse(o.$createdAt) || 0,
       inPeriod: periodIds.has(o.$id),
+      itens: itemCount[o.$id] || 0,
       statusChangedAt: changedAt,
       statusHistory: h.map(x => ({ status: TQ_STATUS[x.raw] || String(x.raw||'').toLowerCase(), changedAt: x.changedAt })),
       audit: h.map(x => ({ at: x.changedAt, from: x.from, to: x.raw, by: userNames[x.by] || '' }))
