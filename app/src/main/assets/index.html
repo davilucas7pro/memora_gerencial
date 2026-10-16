@@ -164,32 +164,45 @@ body {
   color: var(--text-muted); font-size: 14px; line-height: 1.6;
 }
 
-/* ── CARDS ── */
-.card {
-  margin: 0 16px 8px; padding: 13px 14px;
+/* ── TASK CARDS (torque-style) ── */
+.task-card {
+  padding: 13px 14px;
   border-radius: var(--r-lg);
   background: var(--surface); border: 1px solid var(--border);
   border-left: 3px solid var(--border-2);
   transition: border-color .15s;
 }
-.card.ok     { border-left-color: var(--success) }
-.card.warn   { border-left-color: var(--warn);   background: var(--surface) }
-.card.breach { border-left-color: var(--danger);  background: var(--surface) }
-.card.info   { border-left-color: var(--info) }
-.card.purple { border-left-color: var(--purple) }
-.card-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px }
-.card-name {
+.task-card.ok     { border-left-color: var(--success) }
+.task-card.warn   { border-left-color: var(--warn) }
+.task-card.breach { border-left-color: var(--danger) }
+.task-card.due    { border-left-color: var(--warn) }
+.task-card.over   { border-left-color: var(--danger) }
+.task-card.info   { border-left-color: var(--info) }
+.task-card.purple { border-left-color: var(--purple) }
+.task-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px }
+.task-title {
   font-size: 14px; font-weight: 600; color: var(--text);
   flex: 1; min-width: 0; word-break: break-word;
 }
-.card-time { font-size: 13px; font-weight: 700; flex-shrink: 0; font-variant-numeric: tabular-nums }
-.card-time.ok     { color: var(--success) }
-.card-time.warn   { color: var(--warn) }
-.card-time.breach { color: var(--danger) }
-.card-time.info   { color: var(--info) }
-.card-time.purple { color: var(--purple) }
-.card-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.5 }
+.task-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.5 }
+.badge { font-size: 12px; font-weight: 700; flex-shrink: 0; font-variant-numeric: tabular-nums; padding: 2px 7px; border-radius: 6px; background: var(--surface-2) }
+.badge.ok     { color: var(--success) }
+.badge.warn   { color: var(--warn) }
+.badge.breach { color: var(--danger) }
+.badge.info   { color: var(--info) }
+.badge.purple { color: var(--purple) }
 .card-notif { font-size: 11px; color: var(--text-ghost); margin-top: 3px }
+
+/* backward compat */
+.card { padding: 13px 14px; border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--border-2) }
+.card.ok { border-left-color: var(--success) }
+.card.warn { border-left-color: var(--warn) }
+.card.breach { border-left-color: var(--danger) }
+.card-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px }
+.card-name { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; min-width: 0 }
+.card-time { font-size: 13px; font-weight: 700; flex-shrink: 0 }
+.card-time.ok { color: var(--success) } .card-time.warn { color: var(--warn) } .card-time.breach { color: var(--danger) }
+.card-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.5 }
 .sla-bar { height: 3px; border-radius: 2px; background: var(--surface-2); margin-top: 9px; overflow: hidden }
 .sla-fill { height: 100%; border-radius: 2px; transition: width .3s }
 .rank {
@@ -221,6 +234,40 @@ body {
 }
 .obs-save:hover { background: var(--accent-dim-2) }
 
+
+/* ── STATS (torque-style) ── */
+.stats { display: flex; gap: 8px; padding: 0 16px 10px; flex-shrink: 0 }
+.stat { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 11px 13px }
+.stat-n { font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 800; color: var(--accent); line-height: 1; font-variant-numeric: tabular-nums }
+.stat-n.red { color: var(--danger) }
+.stat-n.grn { color: var(--success) }
+.stat-n.ylw { color: var(--warn) }
+.stat-l { font-size: 12px; color: var(--text-muted); margin-top: 2px }
+
+/* ── CARDS (list style) ── */
+.list { padding: 0 16px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0 }
+
+/* ── EMPTY STATE (torque-style) ── */
+.empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 44px 20px; text-align: center; gap: 10px }
+.empty-ico { font-size: 44px; opacity: .45; line-height: 1 }
+.empty-t { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; color: var(--text-2) }
+.empty-s { font-size: 14px; color: var(--text-muted); max-width: 240px; line-height: 1.6 }
+
+/* ── NAV PIP ── */
+.nav-pip { display: none; width: 4px; height: 4px; border-radius: 50%; background: var(--accent); margin-top: -1px }
+.nav-it.on .nav-pip { display: block }
+
+/* ── ICN BTN (header) ── */
+.icn-btn {
+  width: 36px; height: 36px; border-radius: var(--r);
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--text-muted); display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .15s; flex-shrink: 0;
+}
+.icn-btn:hover { background: var(--surface-2); color: var(--text) }
+.icn-btn:active { transform: scale(.93) }
+.hdr-btns { display: flex; gap: 6px; align-items: center }
+
 /* ── ANIMATIONS ── */
 @keyframes pulse-sla {
   0%,100% { opacity: 1 } 50% { opacity: .65 }
@@ -238,7 +285,12 @@ body {
       </div>
       Memora <em>Gerencial</em>
     </div>
-    <div id="fbStatus">Conectando…</div>
+    <div class="hdr-btns">
+      <div id="fbStatus" style="font-size:11px;color:var(--text-ghost)">Conectando…</div>
+      <button class="icn-btn" onclick="cycleTheme()" title="Alternar tema" id="themeBtn">
+        <svg id="themeIco" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+    </div>
   </div>
 
   <!-- CONTENT -->
@@ -279,14 +331,17 @@ body {
       <div id="alertBadge" class="nav-badge"></div>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <span class="nav-label">Alertas</span>
+      <span class="nav-pip"></span>
     </button>
     <button class="nav-it" id="nav-dashboard" onclick="goTab('dashboard',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
       <span class="nav-label">Dashboard</span>
+      <span class="nav-pip"></span>
     </button>
     <button class="nav-it" id="nav-historico" onclick="goTab('historico',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="12 8 12 12 14 14"/><path d="M3.05 11a9 9 0 1 1 .5 4"/><polyline points="3 16 3 11 8 11"/></svg>
       <span class="nav-label">Histórico</span>
+      <span class="nav-pip"></span>
     </button>
   </div>
 </div>
@@ -354,6 +409,38 @@ function sendNotif(title, body) {
     new Notification(title, { body })
   }
 }
+
+/* ── THEME ── */
+const THEMES = ['dark','light','']
+let _themeIdx = 0
+function cycleTheme() {
+  _themeIdx = (_themeIdx + 1) % THEMES.length
+  const t = THEMES[_themeIdx]
+  if(t) document.documentElement.setAttribute('data-theme', t)
+  else   document.documentElement.removeAttribute('data-theme')
+  const ico = document.getElementById('themeIco')
+  if(ico) {
+    const icons = [
+      // moon (dark)
+      '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+      // sun (light)
+      '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
+      // auto (system)
+      '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'
+    ]
+    ico.innerHTML = icons[_themeIdx]
+  }
+  try { localStorage.setItem('ger_theme', _themeIdx) } catch(e){}
+}
+;(function initTheme(){
+  try {
+    const saved = parseInt(localStorage.getItem('ger_theme')||'0')
+    if(saved && THEMES[saved]) {
+      _themeIdx = saved
+      document.documentElement.setAttribute('data-theme', THEMES[saved])
+    }
+  } catch(e){}
+})()
 
 /* ── NAVIGATION ── */
 function goTab(name, btn) {
@@ -513,7 +600,11 @@ function renderAlertas() {
   if(!el) return
 
   if(!alertRecords.length) {
-    el.innerHTML = `<div class="empty-state">🔔 Nenhum alerta registrado ainda.<br><small>Os alertas aparecem aqui quando pedidos ultrapassam o tempo SLA.</small></div>`
+    el.innerHTML = `<div class="empty">
+      <div class="empty-ico">🔔</div>
+      <div class="empty-t">Sem alertas</div>
+      <div class="empty-s">Os alertas aparecem aqui quando pedidos ultrapassam o tempo SLA.</div>
+    </div>`
     return
   }
 
@@ -526,12 +617,12 @@ function renderAlertas() {
     const icon = a.isBreach ? '🔴' : '⚠️'
     const slaMin = (a.tipo&&TIPO_SLA[a.tipo]) ? TIPO_SLA[a.tipo].slaMs/60000 : null
     const safeId = a.id.replace(/[^a-zA-Z0-9_]/g,'_')
-    return `<div class="card ${cls}">
-      <div class="card-row">
-        <div class="card-name">${icon} ${esc(a.reqTitle)}</div>
-        <div class="card-time ${cls}">${fmtMs(a.elapsedMs)}</div>
+    return `<div class="task-card ${cls}">
+      <div class="task-row">
+        <div class="task-title">${icon} ${esc(a.reqTitle)}</div>
+        <div class="badge ${cls}">${fmtMs(a.elapsedMs)}</div>
       </div>
-      <div class="card-meta">
+      <div class="task-meta">
         <strong>${STATUS_LABELS[a.status]||a.status}</strong> · ${esc(a.contactName)}
         ${a.tipo ? ` · ${TIPO_LABELS[a.tipo]||a.tipo}` : ''}
         ${slaMin ? ` · SLA ${slaMin}min` : ''}
@@ -550,14 +641,14 @@ function renderAlertas() {
   }).join('')
 
   el.innerHTML = `
-    <div class="stat-row">
-      <div class="stat-card"><div class="stat-val" style="color:var(--danger)">${nBreach}</div><div class="stat-lbl">Estourados</div></div>
-      <div class="stat-card"><div class="stat-val" style="color:var(--warn)">${nWarn}</div><div class="stat-lbl">Alertas</div></div>
-      <div class="stat-card"><div class="stat-val" style="color:var(--success)">${nObs}</div><div class="stat-lbl">Justificados</div></div>
+    <div class="stats">
+      <div class="stat"><div class="stat-n red">${nBreach}</div><div class="stat-l">Estourados</div></div>
+      <div class="stat"><div class="stat-n ylw">${nWarn}</div><div class="stat-l">Alertas</div></div>
+      <div class="stat"><div class="stat-n grn">${nObs}</div><div class="stat-l">Justificados</div></div>
     </div>
     <div class="sec-group">
       <div class="sec-label">Registros (${alertRecords.length})</div>
-      ${cards}
+      <div class="list">${cards}</div>
     </div>`
 }
 
@@ -649,13 +740,13 @@ function renderDashboard() {
     const s = r.status||'em_pedido'
     const fillColor = r.state==='breach'?'var(--danger)':r.state==='warn'?'var(--warn)':'var(--success)'
     const pct = r.cfg ? Math.min(100,(r.elapsed/r.cfg.slaMs)*100) : 0
-    return `<div class="card ${r.state}">
-      <div class="card-row">
+    return `<div class="task-card ${r.state}">
+      <div class="task-row">
         <div class="rank">#${i+1}</div>
-        <div class="card-name" style="margin-left:6px">${esc(r.title)}</div>
-        <div class="card-time ${r.state}">${fmtMs(r.elapsed)}</div>
+        <div class="task-title" style="margin-left:6px">${esc(r.title)}</div>
+        <div class="badge ${r.state}">${fmtMs(r.elapsed)}</div>
       </div>
-      <div class="card-meta">
+      <div class="task-meta">
         <strong>${STATUS_LABELS[s]||s}</strong> · ${esc(r.cName)}
         ${r.tipo?` · ${TIPO_LABELS[r.tipo]||r.tipo}`:''}
         ${r.cfg?` · SLA ${r.cfg.slaMs/60000}min`:''}
@@ -664,25 +755,25 @@ function renderDashboard() {
     </div>`
   }
 
-  const renderSepCard = (r, i) => `<div class="card info">
-    <div class="card-row">
+  const renderSepCard = (r, i) => `<div class="task-card info">
+    <div class="task-row">
       <div class="rank">#${i+1}</div>
-      <div class="card-name" style="margin-left:6px">${esc(r.title)}</div>
-      <div class="card-time info">${fmtMs(r.colMs)}</div>
+      <div class="task-title" style="margin-left:6px">${esc(r.title)}</div>
+      <div class="badge info">${fmtMs(r.colMs)}</div>
     </div>
-    <div class="card-meta">${esc(r.cName)}${r.tipo?` · ${TIPO_LABELS[r.tipo]||r.tipo}`:''}</div>
+    <div class="task-meta">${esc(r.cName)}${r.tipo?` · ${TIPO_LABELS[r.tipo]||r.tipo}`:''}</div>
     <div class="sla-bar"><div class="sla-fill" style="width:${Math.min(100,(r.colMs/(separacao[0]?.colMs||1))*100)}%;background:var(--info)"></div></div>
   </div>`
 
   const renderSkuCard = (r, i) => {
     const s = r.status||'em_pedido'
-    return `<div class="card purple">
-      <div class="card-row">
+    return `<div class="task-card purple">
+      <div class="task-row">
         <div class="rank">#${i+1}</div>
-        <div class="card-name" style="margin-left:6px">${esc(r.title)}</div>
-        <div class="card-time purple">${fmtMs(r.devMs)}</div>
+        <div class="task-title" style="margin-left:6px">${esc(r.title)}</div>
+        <div class="badge purple">${fmtMs(r.devMs)}</div>
       </div>
-      <div class="card-meta">
+      <div class="task-meta">
         ${esc(r.cName)}${r.tipo?` · ${TIPO_LABELS[r.tipo]||r.tipo}`:''}
         · <strong>${r.devCount}x desvio</strong> · ${STATUS_LABELS[s]||s}
       </div>
@@ -693,23 +784,27 @@ function renderDashboard() {
   const section = (title, list, fn) => list.length ? `
     <div class="sec-group">
       <div class="sec-label">${title} (${list.length})</div>
-      ${list.slice(0,10).map(fn).join('')}
+      <div class="list">${list.slice(0,10).map(fn).join('')}</div>
     </div>` : ''
 
   el.innerHTML = `
-    <div class="stat-row">
-      <div class="stat-card"><div class="stat-val" style="color:var(--danger)">${nBreach}</div><div class="stat-lbl">SLA Estourado</div></div>
-      <div class="stat-card"><div class="stat-val" style="color:var(--warn)">${nWarn}</div><div class="stat-lbl">Em Alerta</div></div>
-      <div class="stat-card"><div class="stat-val">${active.length}</div><div class="stat-lbl">Em Andamento</div></div>
+    <div class="stats">
+      <div class="stat"><div class="stat-n red">${nBreach}</div><div class="stat-l">SLA Estourado</div></div>
+      <div class="stat"><div class="stat-n ylw">${nWarn}</div><div class="stat-l">Em Alerta</div></div>
+      <div class="stat"><div class="stat-n">${active.length}</div><div class="stat-l">Em Andamento</div></div>
     </div>
-    <div class="stat-row">
-      <div class="stat-card"><div class="stat-val" style="color:var(--info)">${avgSep?fmtMs(avgSep):'—'}</div><div class="stat-lbl">Média Separação</div></div>
-      <div class="stat-card"><div class="stat-val" style="color:var(--purple)">${avgSku?fmtMs(avgSku):'—'}</div><div class="stat-lbl">Média Desvio SKU</div></div>
+    <div class="stats" style="padding-top:0">
+      <div class="stat"><div class="stat-n" style="color:var(--info)">${avgSep?fmtMs(avgSep):'—'}</div><div class="stat-l">Média Separação</div></div>
+      <div class="stat"><div class="stat-n" style="color:var(--purple)">${avgSku?fmtMs(avgSku):'—'}</div><div class="stat-l">Média Desvio SKU</div></div>
     </div>
     ${section('⏸ Mais Parados', parados, renderParadoCard)}
     ${section('✂️ Maior Tempo em Separação', separacao.slice(0,5), renderSepCard)}
     ${section('🔍 Maior Desvio SKU', skuItems.slice(0,5), renderSkuCard)}
-    ${!active.length?'<div class="empty-state">✅ Nenhum pedido ativo no momento</div>':''}`
+    ${!active.length?`<div class="empty">
+      <div class="empty-ico">✅</div>
+      <div class="empty-t">Tudo em dia</div>
+      <div class="empty-s">Nenhum pedido ativo no momento.</div>
+    </div>`:''}`
 }
 
 /* ══════════════════════════════════
@@ -750,7 +845,11 @@ function renderHistorico() {
   done.sort((a,b)=>(b.endTs||0)-(a.endTs||0))
 
   if(!done.length){
-    el.innerHTML = `<div class="empty-state">📦 Nenhum pedido concluído ainda</div>`
+    el.innerHTML = `<div class="empty">
+      <div class="empty-ico">📦</div>
+      <div class="empty-t">Sem histórico</div>
+      <div class="empty-s">Os pedidos concluídos aparecerão aqui.</div>
+    </div>`
     return
   }
 
@@ -761,35 +860,35 @@ function renderHistorico() {
   const cards = done.map(r => {
     const hist = Array.isArray(r.statusHistory)?r.statusHistory:[]
     const histHtml = hist.map(h=>`<span style="color:var(--text-muted)">${STATUS_LABELS[h.status]||h.status}</span>`).join(' → ')
-    return `<div class="card ok">
-      <div class="card-row">
-        <div class="card-name">✅ ${esc(r.title)}</div>
-        <div class="card-time ok">${r.totalMs?fmtMs(r.totalMs):'?'}</div>
+    return `<div class="task-card ok">
+      <div class="task-row">
+        <div class="task-title">✅ ${esc(r.title)}</div>
+        <div class="badge ok">${r.totalMs?fmtMs(r.totalMs):'?'}</div>
       </div>
-      <div class="card-meta">
+      <div class="task-meta">
         ${esc(r.cName)}${r.tipo?` · ${TIPO_LABELS[r.tipo]||r.tipo}`:''}
         ${r.endTs?` · Concluído ${fmtDate(r.endTs)} ${fmtTime(r.endTs)}`:''}
       </div>
-      <div class="card-meta" style="margin-top:4px">
+      <div class="task-meta" style="margin-top:4px">
         ${r.colMs?`✂️ Separação: ${fmtMs(r.colMs)}`:''}
         ${r.devCount?`  🔍 Desvios: ${r.devCount}x (${fmtMs(r.devMs)})`:''}
       </div>
-      ${histHtml?`<div class="card-meta" style="margin-top:4px;font-size:10px">${histHtml}</div>`:''}
+      ${histHtml?`<div class="task-meta" style="margin-top:4px;font-size:10px">${histHtml}</div>`:''}
     </div>`
   }).join('')
 
   el.innerHTML = `
-    <div class="stat-row">
-      <div class="stat-card"><div class="stat-val" style="color:var(--success)">${done.length}</div><div class="stat-lbl">Concluídos</div></div>
-      <div class="stat-card"><div class="stat-val">${avgTotal?fmtMs(Math.round(avgTotal)):'—'}</div><div class="stat-lbl">Tempo Médio</div></div>
-      <div class="stat-card"><div class="stat-val" style="color:var(--danger)">${nDev}</div><div class="stat-lbl">Com Desvio</div></div>
+    <div class="stats">
+      <div class="stat"><div class="stat-n grn">${done.length}</div><div class="stat-l">Concluídos</div></div>
+      <div class="stat"><div class="stat-n">${avgTotal?fmtMs(Math.round(avgTotal)):'—'}</div><div class="stat-l">Tempo Médio</div></div>
+      <div class="stat"><div class="stat-n red">${nDev}</div><div class="stat-l">Com Desvio</div></div>
     </div>
-    <div class="stat-row">
-      <div class="stat-card"><div class="stat-val" style="color:var(--info)">${avgCol?fmtMs(Math.round(avgCol)):'—'}</div><div class="stat-lbl">Média Separação</div></div>
+    <div class="stats" style="padding-top:0">
+      <div class="stat"><div class="stat-n" style="color:var(--info)">${avgCol?fmtMs(Math.round(avgCol)):'—'}</div><div class="stat-l">Média Separação</div></div>
     </div>
     <div class="sec-group">
       <div class="sec-label">Pedidos Concluídos (${done.length})</div>
-      ${cards}
+      <div class="list">${cards}</div>
     </div>`
 }
 
