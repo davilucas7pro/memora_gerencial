@@ -310,6 +310,35 @@ body {
 .c-ok-box   { color: var(--t-ok-fg);   background: var(--t-ok-bg);   border-color: var(--t-ok-bd) }
 .c-warn-box { color: var(--t-warn-fg); background: var(--t-warn-bg); border-color: var(--t-warn-bd) }
 .c-err-box  { color: var(--t-err-fg);  background: var(--t-err-bg);  border-color: var(--t-err-bd) }
+.ger-more { display: block; margin: 4px auto 12px }
+/* ── LIST (Torque "Lista Vendas": Ant Design Table with Torque overrides) ── */
+:root { --table-head: #faf5f5; --table-border: rgba(216,0,1,.08); --table-hover: rgba(216,0,1,.04) }
+:root[data-theme="dark"] { --table-head: #1a1a1a; --table-border: rgba(255,255,255,.08); --table-hover: rgba(216,0,1,.06) }
+.list-tools { display: flex; flex-wrap: wrap; gap: 8px; margin: -4px 16px 12px; flex-shrink: 0 }
+.tq-search {
+  display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 11px; width: min(100%, 360px);
+  border: 1px solid var(--border); border-radius: var(--r); background: var(--surface); color: var(--text-ghost);
+}
+.tq-search:focus-within { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(216,0,1,.1) }
+.tq-search svg { width: 14px; height: 14px; flex-shrink: 0 }
+.tq-search input { flex: 1; min-width: 0; border: 0; outline: none; background: none; color: var(--text); font: 13px 'Inter', 'Segoe UI', system-ui, sans-serif }
+.tq-table-wrap { margin: 0 16px 12px; overflow-x: auto; border: 1px solid var(--card-border); border-radius: var(--r-lg); background: var(--surface); flex-shrink: 0 }
+.tq-table { width: 100%; min-width: 980px; border-collapse: separate; border-spacing: 0; font-size: 13px }
+.tq-table th { background: var(--table-head); color: var(--text); font-weight: 600; text-align: left; padding: 12px; border-bottom: 1px solid var(--table-border); white-space: nowrap }
+.tq-table td { padding: 10px 12px; border-bottom: 1px solid var(--table-border); vertical-align: top; color: var(--text) }
+.tq-table tbody tr:last-child td { border-bottom: 0 }
+.tq-table tbody tr:not(.empty):hover td { background: var(--table-hover); cursor: pointer }
+.tq-table .nowrap { white-space: nowrap }
+.tq-table .strong { font-weight: 600; min-width: 200px }
+.tq-table .obs { white-space: pre-wrap; min-width: 240px; max-width: 360px }
+.pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 6px; margin: 0 16px 16px; font-size: 13px; flex-shrink: 0 }
+.pg-total { color: var(--text-muted); margin-right: 8px }
+.pg-btn { min-width: 32px; height: 32px; padding: 0 6px; border: 1px solid transparent; border-radius: var(--r); background: none; color: var(--text); font: 13px 'Inter', 'Segoe UI', system-ui, sans-serif; cursor: pointer }
+.pg-btn:hover:not(:disabled) { background: rgba(0,0,0,.04) }
+:root[data-theme="dark"] .pg-btn:hover:not(:disabled) { background: rgba(255,255,255,.08) }
+.pg-btn.on { border-color: var(--primary); color: var(--primary-text); font-weight: 600 }
+.pg-btn:disabled { opacity: .35; cursor: default }
+.pg-gap { color: var(--text-ghost); padding: 0 4px }
 .ger-obs-saved { white-space: pre-wrap; font-size: 12px; color: var(--text); background: var(--surface-2); border-left: 3px solid var(--edge-ok); border-radius: var(--r-sm); padding: 6px 8px; margin-bottom: 4px }
 .ger-card-head {
   display: flex; justify-content: space-between; align-items: center; gap: 8px;
@@ -505,6 +534,10 @@ body {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         <span class="menu-label">Alertas</span>
         <span class="nav-pip" id="alertPip" style="display:none"></span>
+      </button>
+      <button class="menu-it" data-tab="justificados" onclick="goGerTab('justificados')" title="Justificados">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span class="menu-label">Justificados</span>
       </button>
       <button class="menu-it" data-tab="parados" onclick="goGerTab('parados')" title="Parados">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
@@ -758,7 +791,7 @@ function cycleTheme(){
 })()
 
 /* ── NAVIGATION (sidebar menu, as in Torque) ── */
-const PAGE_TITLES = { alertas:'Alertas', parados:'Pedidos parados', separacao:'Separação', sku:'Velocidade' }
+const PAGE_TITLES = { alertas:'Alertas', justificados:'Alertas justificados', parados:'Pedidos parados', separacao:'Separação', sku:'Velocidade' }
 const isNarrow = () => window.matchMedia('(max-width: 700px)').matches
 function goGerTab(tab){
   curGerTab = tab
@@ -797,6 +830,7 @@ function renderGerencial(){
   const el = document.getElementById('gerList')
   if(!el) return
   if(curGerTab==='alertas')   renderGerAlertas(el)
+  else if(curGerTab==='justificados') renderJustificados(el)
   else if(curGerTab==='parados')   renderGerParados(el)
   else if(curGerTab==='separacao') renderGerSeparacao(el)
   else if(curGerTab==='sku')       renderGerSku(el)
@@ -841,7 +875,8 @@ function alertCardFacts(a){
 
 function renderGerAlertas(el){
   const open = slaAlerts.filter(a => inRange(a.firedAt))
-  const done = justAlerts.filter(a => inRange(a.firedAt))
+  // justified cards stay here only on the day they were justified; all of them live in the "Justificados" list
+  const done = justAlerts.filter(a => a.resolvedAt && ymd(new Date(a.resolvedAt)) === todayYmd())
   const openCards = open.map(a => {
     const safeId = a.id.replace(/[^a-zA-Z0-9_]/g,'_')
     return `<div class="ger-card ${a.isBreach ? 'breach' : 'warn'}">
@@ -878,9 +913,69 @@ function renderGerAlertas(el){
     ${board([
       column('Registros de alerta', nBreach ? 't-err' : 't-warn', nBreach ? 'c-breach' : 'c-warn', open.length,
         openCards || emptyState('Nenhum alerta pendente no período')),
-      column('Justificados', 't-ok', 'c-ok', done.length, doneCards || emptyState('Nenhum alerta justificado no período'))
+      column('Justificados hoje', 't-ok', 'c-ok', done.length,
+        (doneCards || emptyState('Nenhum alerta justificado hoje')) +
+        `<button class="ger-link ger-more" onclick="goGerTab('justificados')">Ver todos os justificados →</button>`)
     ])}`
 }
+
+/* ── JUSTIFICADOS: list of every justified alert (table, like Torque's "Lista Vendas") ── */
+const LIST_PAGE = 20
+let listQuery = '', listPage = 0
+const SITUACAO = a => a.isBreach ? '<span class="tq-tag strong t-err">SLA estourado</span>' : '<span class="tq-tag strong t-warn">Em alerta</span>'
+function fmtDayTime(ts){ return ts ? `${fmtDate(ts)}/${String(new Date(ts).getFullYear()).slice(2)} ${fmtTime(ts)}` : '—' }
+
+function renderJustificados(el){
+  const q = listQuery.trim().toLowerCase()
+  const rows = justAlerts
+    .filter(a => a.resolvedAt)
+    .filter(a => !q || [a.reqTitle, a.obs, a.contactName].some(v => String(v || '').toLowerCase().includes(q)))
+    .sort((a,b) => b.resolvedAt - a.resolvedAt)
+  const pages = Math.max(1, Math.ceil(rows.length / LIST_PAGE))
+  listPage = Math.min(listPage, pages - 1)
+  const view = rows.slice(listPage * LIST_PAGE, listPage * LIST_PAGE + LIST_PAGE)
+  const body = view.map(a => `<tr onclick="openAudit('${a.token}','${a.reqId}')">
+      <td class="nowrap">${fmtDayTime(a.resolvedAt)}</td>
+      <td class="strong">${esc(a.reqTitle)}</td>
+      <td>${statusTag(a.status)}</td>
+      <td>${a.tipo ? `<span class="tq-tag ${TIPO_TAG[a.tipo]||'t-default'}">${TIPO_LABELS[a.tipo]||esc(a.tipo)}</span>` : '—'}</td>
+      <td>${SITUACAO(a)}</td>
+      <td class="nowrap">${fmtDur(a.elapsedMs)}</td>
+      <td class="nowrap">${fmtDayTime(a.firedAt)}</td>
+      <td class="obs">${esc(a.obs || '')}</td>
+      <td class="nowrap">${esc(a.contactName || '')}</td>
+    </tr>`).join('')
+  const pageBtns = []
+  for(let i=0; i<pages; i++){
+    if(pages > 7 && i > 1 && i < pages-2 && Math.abs(i - listPage) > 1){ if(pageBtns[pageBtns.length-1] !== '…') pageBtns.push('…'); continue }
+    pageBtns.push(i)
+  }
+  el.innerHTML = `
+    <div class="list-tools">
+      <label class="tq-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+        <input id="listSearch" type="search" placeholder="Buscar por pedido, cliente ou observação" value="${esc(listQuery)}"></label>
+    </div>
+    <div class="tq-table-wrap">
+      <table class="tq-table">
+        <thead><tr><th>Justificado em</th><th>Pedido</th><th>Status</th><th>Prioridade</th><th>Situação</th><th>Tempo no status</th><th>Notificado em</th><th>Observação</th><th>Filial</th></tr></thead>
+        <tbody>${body || `<tr class="empty"><td colspan="9">${emptyState(q ? 'Nenhum justificado com essa busca' : 'Nenhum alerta justificado ainda')}</td></tr>`}</tbody>
+      </table>
+    </div>
+    <div class="pager">
+      <span class="pg-total">Total ${rows.length}</span>
+      <button class="pg-btn" ${listPage===0?'disabled':''} onclick="listGo(${listPage-1})" aria-label="Página anterior">‹</button>
+      ${pageBtns.map(p => p==='…' ? '<span class="pg-gap">…</span>' : `<button class="pg-btn${p===listPage?' on':''}" onclick="listGo(${p})">${p+1}</button>`).join('')}
+      <button class="pg-btn" ${listPage>=pages-1?'disabled':''} onclick="listGo(${listPage+1})" aria-label="Próxima página">›</button>
+    </div>`
+  const input = document.getElementById('listSearch')
+  input.addEventListener('input', () => {
+    listQuery = input.value; listPage = 0
+    const pos = input.selectionStart
+    renderJustificados(el)
+    const again = document.getElementById('listSearch'); again.focus(); again.setSelectionRange(pos, pos)
+  })
+}
+function listGo(p){ listPage = Math.max(0, p); renderGerencial() }
 
 /* ── GERENCIAL: PARADOS ── */
 const PARADOS_COLS = ['pedido_pronto','em_coleta','coletado','em_expedicao','validar_alteracao','alterar_pedido']
@@ -1325,8 +1420,10 @@ function renderRangeBar(){
   const r = currentRange()
   document.getElementById('rpFrom').textContent = r.from
   document.getElementById('rpTo').textContent = r.to
-  document.getElementById('rangeHint').textContent = curGerTab==='alertas' ? 'Alertas disparados no período' : 'Pedidos criados no período'
-  document.getElementById('gerFilter').hidden = curGerTab==='parados'
+  document.getElementById('rangeHint').textContent = curGerTab==='alertas' ? 'Alertas disparados no período'
+    : curGerTab==='justificados' ? 'Justificados no período' : 'Pedidos criados no período'
+  // Parados is "right now"; Justificados lists everything ever justified (search instead of period)
+  document.getElementById('gerFilter').hidden = curGerTab==='parados' || curGerTab==='justificados'
 }
 function setRange(from, to){
   if(from > to) [from, to] = [to, from]
