@@ -465,7 +465,7 @@ body {
         <button class="ger-tab-btn on" id="gTab-alertas"   onclick="goGerTab('alertas')">Alertas</button>
         <button class="ger-tab-btn"    id="gTab-parados"   onclick="goGerTab('parados')">Parados</button>
         <button class="ger-tab-btn"    id="gTab-separacao" onclick="goGerTab('separacao')">Separação</button>
-        <button class="ger-tab-btn"    id="gTab-sku"       onclick="goGerTab('sku')">SKU</button>
+        <button class="ger-tab-btn"    id="gTab-sku"       onclick="goGerTab('sku')">Velocidade</button>
       </div>
       <!-- Period filter (Separação, SKU, Alertas) -->
       <div class="ger-filter" id="gerFilter">
@@ -508,7 +508,7 @@ body {
     </button>
     <button class="nav-it" onclick="goGerTab('sku')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <span class="nav-label">SKU</span>
+      <span class="nav-label">Velocidade</span>
       <div class="nav-pip" style="display:none"></div>
     </button>
   </nav>
@@ -897,57 +897,92 @@ function renderGerSeparacao(el){
   el.innerHTML = `<div class="ger-stat-row grid2">${stats.join('')}</div>${board(cols)}`
 }
 
-/* ── GERENCIAL: SKU ── */
+/* ── GERENCIAL: VELOCIDADE (tab id 'sku') ──
+   Same math as Torque's "Métricas estoque → Coleta/Expedição — mais demoradas (velocity)":
+   - each stay in "Em coleta" (or "Em expedição") is one row: from arrival until leftAt / next move
+   - SKUs = distinct product codes of the order
+   - velocity = time ÷ SKUs; worst (slowest) first
+   - responsible = the stay's assignee, else the order's collector/expeditor on the last stay,
+     else who moved it; "Troca" when the order was handed over inside the same column */
+const VEL_TOP = 10
+const ORDER_TYPE = { DELIVERY:['Entrega','t-blue'], TAKEOUT:['Retira','t-gold'], CARRIER:['Transportadora','t-proc'] }
+
+// Torque's duration format: "14h 22min 37s", "57 min 30s", "48s"
+function fmtHms(ms){
+  if(!(ms >= 0) || !isFinite(ms)) return '—'
+  const s = Math.round(ms/1000), h = Math.floor(s/3600), m = Math.floor(s%3600/60), r = s%60
+  if(h > 0) return r > 0 ? `${h}h ${m}min ${r}s` : m > 0 ? `${h}h ${m}min` : `${h}h`
+  return m > 0 ? (r > 0 ? `${m} min ${r}s` : `${m} min`) : `${r}s`
+}
+
+function velStints(r, status, orderAssignee){
+  const ev = r.rawHist || []
+  const idx = []
+  ev.forEach((e, i) => { if(e.raw === status) idx.push(i) })
+  const last = idx[idx.length-1]
+  const out = []
+  idx.forEach(i => {
+    const c = ev[i]
+    if(!c.changedAt) return
+    const next = ev[i+1]
+    const end = c.leftAt || (next ? next.changedAt : 0)
+    const dur = end ? end - c.changedAt : 0
+    if(!(dur > 0)) return                       // still in the column: not measured yet
+    const assignee = (c.assignee || '').trim() || (i === last ? (orderAssignee || '').trim() : (c.by || '').trim())
+    out.push({ durationMs: dur, assignee, handoff: c.from === status, arrivedAt: c.changedAt })
+  })
+  return out
+}
+
+const VEL_PHASES = [
+  { key:'coleta', status:'COLLECTING', title:'Coleta — menor velocidade', short:'Coleta', tone:'t-warn', edge:'c-warn', card:'warn', who:'collectorUserId' },
+  { key:'exped', status:'IN_EXPEDITION', title:'Expedição — menor velocidade', short:'Expedição', tone:'t-proc', edge:'c-info', card:'neutral', who:'expeditionUserId' }
+]
+
 function renderGerSku(el){
-  const items = []
-  const deviationStatuses = new Set(['validar_alteracao','alterar_pedido'])
+  const orders = []
   Object.entries(allRequests).forEach(([token, reqs])=>{
     if(!reqs) return
     const contact = contacts.find(c=>c.token===token)
     const contactName = contact ? contact.name : token
-    Object.entries(reqs).forEach(([reqId, r])=>{
-      if(!r || !r.inPeriod) return
-      let devMs=0, devCount=0
-      // the history already ends with the current column, counted until now
-      const hist = Array.isArray(r.statusHistory) ? r.statusHistory : []
-      for(let i=0;i<hist.length;i++){
-        if(deviationStatuses.has(hist[i].status)){
-          const start=hist[i].changedAt||0
-          const end=hist[i+1]?(hist[i+1].changedAt||Date.now()):Date.now()
-          devMs+=end-start; devCount++
-        }
-      }
-      if(devMs>0) items.push({...r, id:reqId, token, contactName, devMs, devCount})
-    })
+    Object.entries(reqs).forEach(([reqId, r])=>{ if(r && r.inPeriod) orders.push({ ...r, id:reqId, token, contactName }) })
   })
-  items.sort((a,b)=>b.devMs-a.devMs)
 
-  if(!items.length){
-    el.innerHTML = column('Validar / alterar pedido', 't-volcano', 'c-volcano', 0, emptyState('Nenhum pedido com alteração de itens registrada'))
-    return
-  }
-  const avgMs = items.reduce((acc,r)=>acc+r.devMs,0)/items.length
-  const maxMs = items[0].devMs
-  const totalDev = items.reduce((acc,r)=>acc+r.devCount,0)
-  const cards = items.map((r,i)=>{
-    const pct = Math.min(100,(r.devMs/maxMs)*100)
-    return `<div class="ger-card purple clickable" onclick="openAudit('${r.token}','${r.id}')">
-      <div class="ger-card-head">${statusTag(r.status||'em_pedido')}<span class="ger-rank">#${i+1}</span></div>
+  const stats = [], cols = []
+  VEL_PHASES.forEach(ph => {
+    const rows = []
+    orders.forEach(o => velStints(o, ph.status, o[ph.who]).forEach(s => {
+      rows.push({ o, ...s, skus: o.skus, vel: o.skus > 0 ? s.durationMs / o.skus : null })
+    }))
+    const ranked = rows.filter(x => x.vel != null).sort((a,b) => (b.vel - a.vel) || (b.durationMs - a.durationMs))
+    const avg = ranked.length ? ranked.reduce((s,x) => s + x.vel, 0) / ranked.length : 0
+    stats.push(`<div class="ger-stat">
+      <div class="ger-stat-lbl">${ph.short}: média por SKU</div>
+      <div class="ger-stat-val">${ranked.length ? fmtHms(avg) : '—'}</div>
+      <div class="ger-stat-sub">Pior: ${ranked.length ? fmtHms(ranked[0].vel) + '/SKU' : '—'}</div>
+      <div class="ger-stat-sub">${ranked.length} passage${ranked.length===1?'m':'ns'} medida${ranked.length===1?'':'s'}</div>
+    </div>`)
+    const max = ranked.length ? ranked[0].vel : 1
+    const cards = ranked.slice(0, VEL_TOP).map((x,i) => {
+      const t = ORDER_TYPE[x.o.orderType]
+      return `<div class="ger-card ${ph.card} clickable" onclick="openAudit('${x.o.token}','${x.o.id}')">
+      <div class="ger-card-head">${t ? `<span class="tq-tag strong ${t[1]}">${t[0]}</span>` : statusTag(x.o.status)}<span class="ger-rank">#${i+1}</span></div>
       <div class="ger-card-body">
-        ${cardWho(r)}
-        <div class="ger-tags">${tipoTag(r.tipo)}<span class="tq-tag t-volcano">${r.devCount}x alteração</span></div>
-        <span class="tq-box t-volcano">Tempo em alteração: ${fmtDur(r.devMs)}</span>
-        <div class="ger-sla-bar"><div class="ger-sla-fill" style="width:${pct}%;background:#722ed1"></div></div>
+        ${cardWho(x.o)}
+        ${tipoTag(x.o.tipo)}
+        <span class="ger-sec">Responsável: ${esc(userNames[x.assignee] || '—')}</span>
+        <div class="ger-tags">
+          <span class="tq-box ${ph.tone}">Velocity: ${fmtHms(x.vel)}/SKU</span>
+          ${x.handoff ? '<span class="tq-tag t-volcano">Troca</span>' : ''}
+        </div>
+        <span class="ger-sec">Tempo: ${fmtHms(x.durationMs)} · ${x.skus} SKU${x.skus===1?'':'s'}</span>
+        <div class="ger-sla-bar"><div class="ger-sla-fill" style="width:${Math.min(100, x.vel/max*100)}%;background:${ph.key==='coleta' ? 'var(--edge-warn)' : 'var(--edge-info)'}"></div></div>
       </div>
-    </div>`
-  }).join('')
-  el.innerHTML = `
-    <div class="ger-stat-row">
-      <div class="ger-stat"><div class="ger-stat-lbl">Maior tempo</div><div class="ger-stat-val" style="color:var(--t-volcano-fg)">${fmtDur(maxMs)}</div></div>
-      <div class="ger-stat"><div class="ger-stat-lbl">Média</div><div class="ger-stat-val">${fmtDur(Math.round(avgMs))}</div></div>
-      <div class="ger-stat"><div class="ger-stat-lbl">Alterações</div><div class="ger-stat-val">${totalDev}</div></div>
-    </div>
-    ${column('Validar / alterar pedido', 't-volcano', 'c-volcano', items.length, cards)}`
+    </div>` }).join('')
+    cols.push(column(ph.title, ph.tone, ph.edge, ranked.length, cards || emptyState('Nenhuma passagem medida no período')))
+  })
+
+  el.innerHTML = `<div class="ger-stat-row grid2">${stats.join('')}</div>${board(cols)}`
 }
 
 /* ── SAVE OBS ── */
@@ -1198,7 +1233,7 @@ function pickCustom(){
 
 /* ── LOAD ── */
 const ORDER_FIELDS = { method:'select', values:['$id','$createdAt','$updatedAt','internalId','displayCode','title',
-  'status','priority','customerNameSnapshot','branchId','sellerUserId'] }
+  'status','priority','type','customerNameSnapshot','branchId','sellerUserId','collectorUserId','expeditionUserId'] }
 // orders created in the period + their history, refetched when the period changes, on "Atualizar",
 // or every 5 min while the period includes today (past periods barely change)
 let periodCache = { key:'', orders:[], hist:[], items:{}, at:0 }
@@ -1211,25 +1246,33 @@ async function tqHistory(ids){
   for(let i=0; i<batches.length; i+=4){
     const parts = await Promise.all(batches.slice(i, i+4).map(b => tqRows('sales_orders_whsl_status_history', [
       { method:'equal', attribute:'salesOrderWholesaleId', values:b },
-      { method:'select', values:['$id','salesOrderWholesaleId','fromStatus','toStatus','arrivedAt','changedByUserId'] }
+      { method:'select', values:['$id','salesOrderWholesaleId','fromStatus','toStatus','arrivedAt','leftAt','changedByUserId','assigneeUserId'] }
     ], 2000)))
     parts.forEach(p => out.push(...p))
   }
   return out
 }
 
-// number of product lines per order ("30 itens" on the Torque card), same batching as the history
+// per order: product lines ("30 itens" on the Torque card) and distinct product codes
+// ("SKUs" in Torque's Métricas estoque), same batching as the history
 async function tqItemCounts(ids){
   const batches = []
   for(let i=0; i<ids.length; i+=100) batches.push(ids.slice(i, i+100))
-  const counts = {}
+  const lines = {}, codes = {}
   for(let i=0; i<batches.length; i+=4){
     const parts = await Promise.all(batches.slice(i, i+4).map(b => tqRows('sales_orders_whsl_items', [
       { method:'equal', attribute:'salesOrderWholesaleId', values:b },
-      { method:'select', values:['$id','salesOrderWholesaleId'] }
+      { method:'select', values:['$id','salesOrderWholesaleId','productCode'] }
     ], 5000)))
-    parts.forEach(p => p.forEach(it => { counts[it.salesOrderWholesaleId] = (counts[it.salesOrderWholesaleId] || 0) + 1 }))
+    parts.forEach(p => p.forEach(it => {
+      const id = it.salesOrderWholesaleId
+      lines[id] = (lines[id] || 0) + 1
+      const code = String(it.productCode || '').trim()
+      if(code){ if(!codes[id]) codes[id] = new Set(); codes[id].add(code) }
+    }))
   }
+  const counts = {}
+  Object.keys(lines).forEach(id => { counts[id] = { itens: lines[id], skus: codes[id] ? codes[id].size : 0 } })
   return counts
 }
 
@@ -1265,7 +1308,8 @@ async function tqLoad(force){
   const histBy = {}
   hist.forEach(h => {
     if(!histBy[h.salesOrderWholesaleId]) histBy[h.salesOrderWholesaleId] = []
-    histBy[h.salesOrderWholesaleId].push({ raw:h.toStatus, from:h.fromStatus, by:h.changedByUserId, changedAt: Date.parse(h.arrivedAt) || 0 })
+    histBy[h.salesOrderWholesaleId].push({ raw:h.toStatus, from:h.fromStatus, by:h.changedByUserId, assignee:h.assigneeUserId,
+      changedAt: Date.parse(h.arrivedAt) || 0, leftAt: h.leftAt ? Date.parse(h.leftAt) || 0 : 0 })
   })
 
   const next = {}
@@ -1285,7 +1329,12 @@ async function tqLoad(force){
       tipo: TQ_TIPO[o.priority] || '',
       createdAt: Date.parse(o.$createdAt) || 0,
       inPeriod: periodIds.has(o.$id),
-      itens: itemCount[o.$id] || 0,
+      itens: itemCount[o.$id] ? itemCount[o.$id].itens : 0,
+      skus: itemCount[o.$id] ? itemCount[o.$id].skus : 0,
+      orderType: o.type || '',
+      collectorUserId: o.collectorUserId || '',
+      expeditionUserId: o.expeditionUserId || '',
+      rawHist: h,
       statusChangedAt: changedAt,
       statusHistory: h.map(x => ({ status: TQ_STATUS[x.raw] || String(x.raw||'').toLowerCase(), changedAt: x.changedAt })),
       audit: h.map(x => ({ at: x.changedAt, from: x.from, to: x.raw, by: userNames[x.by] || '' }))
