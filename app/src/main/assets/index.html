@@ -1,76 +1,86 @@
 <title>Memora Gerencial</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <style>
 /* ─────────────────────────────────────────────────────
-   DESIGN TOKENS — warm notebook dark-first
+   DESIGN TOKENS — copied from the Torque web panel
+   (atacado.fmtorque.com.br, Ant Design theme: Inter 13px,
+   primary #d80001, light by default, light/dark toggle)
    ───────────────────────────────────────────────────── */
 :root {
-  --bg: #131210;
-  --surface: #1d1b17;
-  --surface-2: #272420;
-  --surface-3: #322f29;
-  --border: #3a3730;
-  --border-2: #4a4740;
-  --accent: #e8920c;
-  --accent-2: #f0a830;
-  --accent-dim: rgba(232,146,12,.13);
-  --accent-dim-2: rgba(232,146,12,.22);
-  --text: #f0ece2;
-  --text-2: #c4bfb0;
-  --text-muted: #8a8474;
-  --text-ghost: #5a5650;
-  --success: #4ade80;
-  --success-dim: rgba(74,222,128,.14);
-  --danger: #f87171;
-  --danger-dim: rgba(248,113,113,.13);
-  --warn: #fbbf24;
-  --warn-dim: rgba(251,191,36,.13);
-  --info: #60a5fa;
-  --info-dim: rgba(96,165,250,.12);
-  --purple: #c084fc;
-  --purple-dim: rgba(192,132,252,.14);
-  --r-sm: 6px; --r: 10px; --r-lg: 14px; --r-xl: 20px;
-  --nav-h: 64px;
-  --head-h: 60px;
-  color-scheme: dark;
-}
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    --bg: #faf8f2; --surface: #ffffff; --surface-2: #f4f1e8;
-    --surface-3: #ece9dc; --border: #e0dace; --border-2: #ccc7b7;
-    --accent: #c07600; --accent-2: #d98800;
-    --accent-dim: rgba(192,118,0,.1); --accent-dim-2: rgba(192,118,0,.18);
-    --text: #1a1714; --text-2: #4a4540; --text-muted: #7a7060;
-    --text-ghost: #b0a898; --success: #16a34a;
-    --success-dim: rgba(22,163,74,.12); --danger: #dc2626;
-    --danger-dim: rgba(220,38,38,.1); --warn: #d97706;
-    --warn-dim: rgba(217,119,6,.1); --info: #2563eb;
-    --info-dim: rgba(37,99,235,.1);
-    --purple: #9333ea; --purple-dim: rgba(147,51,234,.12);
-    color-scheme: light;
-  }
-}
-:root[data-theme="light"] {
-  --bg: #faf8f2; --surface: #ffffff; --surface-2: #f4f1e8;
-  --surface-3: #ece9dc; --border: #e0dace; --border-2: #ccc7b7;
-  --accent: #c07600; --accent-2: #d98800;
-  --accent-dim: rgba(192,118,0,.1); --accent-dim-2: rgba(192,118,0,.18);
-  --text: #1a1714; --text-2: #4a4540; --text-muted: #7a7060;
-  --text-ghost: #b0a898; --success: #16a34a;
-  --success-dim: rgba(22,163,74,.12); --danger: #dc2626;
-  --danger-dim: rgba(220,38,38,.1); --warn: #d97706;
-  --warn-dim: rgba(217,119,6,.1); --info: #2563eb;
-  --info-dim: rgba(37,99,235,.1);
-  --purple: #9333ea; --purple-dim: rgba(147,51,234,.12);
+  --primary: #d80001;
+  --primary-hover: #a50001;
+  --primary-text: #d80001;
+  --primary-bg: rgba(216,0,1,.06);
+  --bg: #f5f0ef;
+  --surface: #ffffff;
+  --surface-2: #faf5f5;
+  --border: #d9d9d9;
+  --border-red: rgba(216,0,1,.15);
+  --card-border: rgba(216,0,1,.15);
+  --text: rgba(0,0,0,.88);
+  --text-2: rgba(0,0,0,.65);
+  --text-muted: rgba(0,0,0,.62);
+  --text-ghost: rgba(0,0,0,.45);
+  --header-bg: rgba(255,255,255,.85);
+  --shadow: 0 1px 6px rgba(216,0,1,.08);
+  --shadow-2: 0 2px 12px rgba(216,0,1,.06);
+  /* card left edge / bar colors (Ant Design base palette) */
+  --edge-default: #d9d9d9;
+  --edge-ok: #52c41a;
+  --edge-warn: #faad14;
+  --edge-breach: #ff4d4f;
+  --edge-info: #1890ff;
+  /* tag presets: text / fill / border */
+  --t-default-fg: rgba(0,0,0,.88); --t-default-bg: #fafafa; --t-default-bd: #d9d9d9;
+  --t-blue-fg: #0958d9;    --t-blue-bg: #e6f4ff;    --t-blue-bd: #91caff;
+  --t-proc-fg: #0958d9;    --t-proc-bg: #e6f4ff;    --t-proc-bd: #91caff;
+  --t-gold-fg: #d48806;    --t-gold-bg: #fffbe6;    --t-gold-bd: #ffe58f;
+  --t-warn-fg: #E8B800;    --t-warn-bg: #fffee6;    --t-warn-bd: #fff58f;
+  --t-ok-fg: #389e0d;      --t-ok-bg: #f6ffed;      --t-ok-bd: #b7eb8f;
+  --t-err-fg: #cf1322;     --t-err-bg: #fff1f0;     --t-err-bd: #ffa39e;
+  --t-volcano-fg: #d4380d; --t-volcano-bg: #fff2e8; --t-volcano-bd: #ffbb96;
+  --t-cyan-fg: #08979c;    --t-cyan-bg: #e6fffb;    --t-cyan-bd: #87e8de;
+  --r-sm: 4px; --r: 8px; --r-lg: 12px;
+  --nav-h: 60px;
+  --head-h: 64px;
   color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --primary-text: #ff7875;
+  --primary-hover: #ffa39e;
+  --primary-bg: rgba(216,0,1,.10);
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --surface-2: #1a1a1a;
+  --border: #424242;
+  --border-red: rgba(216,0,1,.25);
+  --card-border: rgba(216,0,1,.2);
+  --text: rgba(255,255,255,.85);
+  --text-2: rgba(255,255,255,.65);
+  --text-muted: rgba(255,255,255,.68);
+  --text-ghost: rgba(255,255,255,.45);
+  --header-bg: rgba(20,20,20,.85);
+  --shadow: 0 2px 12px rgba(0,0,0,.30);
+  --shadow-2: 0 4px 20px rgba(0,0,0,.40);
+  --t-default-fg: rgba(255,255,255,.85); --t-default-bg: #1d1d1d; --t-default-bd: #424242;
+  --t-blue-fg: #3c89e8;    --t-blue-bg: #111a2c;    --t-blue-bd: #15325b;
+  --t-proc-fg: #0b4ebb;    --t-proc-bg: #111826;    --t-proc-bd: #11284f;
+  --t-gold-fg: #d89614;    --t-gold-bg: #2b2111;    --t-gold-bd: #594214;
+  --t-warn-fg: #c89f03;    --t-warn-bg: #282211;    --t-warn-bd: #54450e;
+  --t-ok-fg: #33890e;      --t-ok-bg: #141d11;      --t-ok-bd: #1f3d12;
+  --t-err-fg: #dc4446;     --t-err-bg: #2c1618;     --t-err-bd: #5b2526;
+  --t-volcano-fg: #e87040; --t-volcano-bg: #2b1611; --t-volcano-bd: #592716;
+  --t-cyan-fg: #13a8a8;    --t-cyan-bg: #112123;    --t-cyan-bd: #144848;
+  color-scheme: dark;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+[hidden] { display: none !important }
 html, body { height: 100%; overflow: hidden }
 body {
-  font-family: 'DM Sans', system-ui, sans-serif;
-  font-size: 15px; line-height: 1.5;
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 13px; line-height: 1.6154;
   background: var(--bg); color: var(--text);
   -webkit-font-smoothing: antialiased;
 }
@@ -81,46 +91,41 @@ body {
   margin: 0 auto; position: relative;
 }
 
-/* ── HEADER ── */
+/* ── HEADER (Torque top bar) ── */
 .hdr {
   display: flex; align-items: center;
-  justify-content: space-between;
-  padding: 0 14px; height: var(--head-h);
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
+  justify-content: space-between; gap: 8px;
+  padding: 0 16px; height: var(--head-h);
+  background: var(--header-bg);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border-red);
   flex-shrink: 0;
   position: sticky;
   top: env(safe-area-inset-top, 0px);
   z-index: 10;
 }
 .logo {
-  font-family: 'Outfit', sans-serif;
-  font-size: 18px; font-weight: 800;
-  color: var(--accent); letter-spacing: -.5px;
-  display: flex; align-items: center; gap: 8px;
+  font-size: 15px; font-weight: 600; color: var(--text);
+  display: flex; align-items: center; gap: 10px;
   flex-shrink: 0;
 }
-.logo-mark {
-  width: 34px; height: 34px; border-radius: 9px;
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; box-shadow: 0 2px 8px rgba(232,146,12,.35);
-}
-.logo-mark svg { width: 18px; height: 18px; color: #fff }
-.logo em { color: var(--text); font-style: normal; font-weight: 500; font-size: 16px }
-.hdr-btns { display: flex; gap: 6px; align-items: center }
+.logo-mark { width: 32px; height: 32px; border-radius: var(--r); overflow: hidden; flex-shrink: 0; background: var(--primary) }
+.logo-mark { display: flex; align-items: center; justify-content: center }
+.logo-mark svg { width: 20px; height: 20px }
+.logo em { color: var(--primary-text); font-style: normal; font-weight: 600 }
+.hdr-btns { display: flex; gap: 4px; align-items: center; min-width: 0 }
+.hdr-status { font-size: 12px; color: var(--text-ghost); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 4px }
 .icn-btn {
-  width: 36px; height: 36px; border-radius: var(--r);
-  border: 1px solid var(--border);
-  background: var(--surface); color: var(--text-muted);
+  width: 32px; height: 32px; border-radius: var(--r);
+  border: 0; background: transparent; color: var(--text);
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: all .15s; flex-shrink: 0;
+  cursor: pointer; transition: background .2s; flex-shrink: 0;
 }
-.icn-btn:hover { background: var(--surface-2); color: var(--text) }
-.icn-btn:active { transform: scale(.93) }
-.icn-btn.lit { color: var(--accent); border-color: var(--accent) }
+.icn-btn:hover { background: rgba(0,0,0,.06) }
+:root[data-theme="dark"] .icn-btn:hover { background: rgba(255,255,255,.08) }
+.icn-btn:active { background: rgba(0,0,0,.15) }
 
-/* ── TABS ── */
+/* ── CONTENT ── */
 .main { flex: 1; overflow: hidden; position: relative }
 .tab {
   display: none; flex-direction: column;
@@ -128,167 +133,210 @@ body {
   padding-bottom: calc(var(--nav-h) + 12px);
 }
 .tab.on { display: flex }
-.tab::-webkit-scrollbar { width: 3px }
-.tab::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px }
+.tab::-webkit-scrollbar { width: 6px }
+.tab::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px }
 
-/* ── BOTTOM NAV ── */
+/* ── PAGE TITLE (Torque h2) ── */
+.sec-head {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 20px 16px 12px;
+  flex-shrink: 0; flex-wrap: wrap; gap: 8px;
+}
+.sec-title { font-size: 28px; line-height: 36px; font-weight: 600; color: var(--text) }
+
+/* ── BUTTONS (Ant Design, Torque overrides: radius 8, weight 600) ── */
+.add-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 32px; padding: 4px 15px;
+  background: var(--primary); color: #fff;
+  border: 1px solid transparent; border-radius: var(--r);
+  font: 600 13px/1 'Inter', 'Segoe UI', system-ui, sans-serif;
+  box-shadow: 0 2px 0 rgba(216,0,1,.1);
+  cursor: pointer; transition: background .2s;
+  white-space: nowrap; flex-shrink: 0;
+}
+.add-btn:hover { background: var(--primary-hover) }
+.add-btn:active { background: #7a0001 }
+.add-btn svg { width: 14px; height: 14px }
+.add-btn:disabled { opacity: .6; cursor: default }
+
+/* ── TOASTS (Ant Design message) ── */
+.toasts {
+  position: fixed;
+  top: calc(var(--head-h) + 8px + env(safe-area-inset-top, 0px));
+  left: 50%; transform: translateX(-50%);
+  z-index: 300; display: flex; flex-direction: column; align-items: center;
+  gap: 8px; pointer-events: none;
+  width: min(calc(100% - 32px), 400px);
+}
+.toast {
+  background: var(--surface); color: var(--text);
+  border-radius: var(--r); padding: 9px 12px;
+  font-size: 13px;
+  box-shadow: 0 6px 16px rgba(0,0,0,.08), 0 3px 6px -4px rgba(0,0,0,.12), 0 9px 28px 8px rgba(0,0,0,.05);
+  animation: tin .2s ease-out forwards;
+  pointer-events: all;
+}
+@keyframes tin { from { opacity:0; transform:translateY(-8px) } to { opacity:1; transform:none } }
+
+/* ── TABS (Ant Design Tabs, Torque ink bar) ── */
+.ger-tabs { display: flex; border-bottom: 1px solid var(--border-red); margin: 0 16px 16px; gap: 24px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; flex-shrink: 0 }
+.ger-tabs::-webkit-scrollbar { display: none }
+.ger-tab-btn {
+  padding: 10px 0; font-size: 13px; font-weight: 400;
+  color: var(--text); background: none; border: none;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  cursor: pointer; font-family: inherit; transition: color .2s; white-space: nowrap;
+}
+.ger-tab-btn:hover { color: var(--primary-hover) }
+.ger-tab-btn.on { color: var(--primary-text); border-bottom-color: var(--primary); font-weight: 500 }
+
+/* ── TAGS (Ant Design Tag presets as Torque uses them) ── */
+.tq-tag {
+  display: inline-block; font-size: 10px; line-height: 19.8px; font-weight: 400;
+  padding: 0 7px; border-radius: var(--r-sm); border: 1px solid; white-space: nowrap;
+  color: var(--t-default-fg); background: var(--t-default-bg); border-color: var(--t-default-bd);
+}
+.tq-tag.strong { font-weight: 600 }
+.tq-tag.head { font-size: 11px; font-weight: 600; text-transform: uppercase }
+.tq-tag.boxed { padding: 2px 4px; line-height: 16px; border-color: transparent; white-space: normal }
+.t-default { color: var(--t-default-fg); background: var(--t-default-bg); border-color: var(--t-default-bd) }
+.t-blue    { color: var(--t-blue-fg);    background: var(--t-blue-bg);    border-color: var(--t-blue-bd) }
+.t-proc    { color: var(--t-proc-fg);    background: var(--t-proc-bg);    border-color: var(--t-proc-bd) }
+.t-gold    { color: var(--t-gold-fg);    background: var(--t-gold-bg);    border-color: var(--t-gold-bd) }
+.t-warn    { color: var(--t-warn-fg);    background: var(--t-warn-bg);    border-color: var(--t-warn-bd) }
+.t-ok      { color: var(--t-ok-fg);      background: var(--t-ok-bg);      border-color: var(--t-ok-bd) }
+.t-err     { color: var(--t-err-fg);     background: var(--t-err-bg);     border-color: var(--t-err-bd) }
+.t-volcano { color: var(--t-volcano-fg); background: var(--t-volcano-bg); border-color: var(--t-volcano-bd) }
+.t-cyan    { color: var(--t-cyan-fg);    background: var(--t-cyan-bg);    border-color: var(--t-cyan-bd) }
+.tq-tag.boxed.t-default, .tq-tag.boxed.t-blue, .tq-tag.boxed.t-proc, .tq-tag.boxed.t-gold, .tq-tag.boxed.t-ok,
+.tq-tag.boxed.t-warn, .tq-tag.boxed.t-err, .tq-tag.boxed.t-volcano, .tq-tag.boxed.t-cyan { border-color: transparent }
+/* "Tempo no status" style info box (bordered, bold) */
+.tq-box { display: inline-block; font-size: 10px; line-height: 16px; font-weight: 600; padding: 1px 4px; border-radius: var(--r-sm); border: 1px solid }
+
+/* ── COLUMN (Torque board column: colored top edge, tag + count head) ── */
+.ger-section { margin: 0 16px 16px; border-radius: var(--r-lg); border-top: 3px solid var(--edge-default) }
+.ger-section.c-ok { border-top-color: var(--edge-ok) }
+.ger-section.c-warn { border-top-color: var(--edge-warn) }
+.ger-section.c-breach { border-top-color: var(--edge-breach) }
+.ger-section.c-info { border-top-color: var(--edge-info) }
+.ger-section.c-volcano { border-top-color: #fa541c }
+.ger-section.c-purple { border-top-color: #722ed1 }
+.ger-section-title {
+  display: flex; justify-content: space-between; align-items: center; gap: 4px;
+  min-height: 37px; padding: 0 12px; margin-bottom: 8px;
+  border-bottom: 1px solid var(--border-red);
+}
+.ger-count { font-size: 11px; color: var(--text-muted) }
+
+/* ── EMPTY (Ant Design Empty) ── */
+.ger-empty { text-align: center; padding: 48px 24px; color: var(--text-ghost); font-size: 13px }
+.ger-empty svg { display: block; margin: 0 auto 8px; width: 64px; height: 41px }
+
+/* ── ORDER CARD (Torque wholesale order card) ── */
+.ger-card {
+  margin: 0 8px 8px; border-radius: var(--r-lg);
+  background: var(--surface); border: 1px solid var(--card-border);
+  border-left: 4px solid var(--edge-default);
+}
+.ger-card.ok      { border-left-color: var(--edge-ok) }
+.ger-card.warn    { border-left-color: var(--edge-warn) }
+.ger-card.breach  { border-left-color: var(--edge-breach) }
+.ger-card.neutral { border-left-color: var(--edge-info) }
+.ger-card.purple  { border-left-color: #722ed1 }
+.ger-card-head {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  min-height: 37px; padding: 0 12px; border-bottom: 1px solid var(--card-border);
+}
+.ger-card-body { padding: 6px 12px 10px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px }
+.ger-rank { font-size: 11px; color: var(--text-muted) }
+.ger-name { font-size: 12px; font-weight: 600; color: var(--text); min-width: 0 }
+.ger-sec { font-size: 10px; color: var(--text-muted) }
+.ger-tags { display: flex; flex-wrap: wrap; gap: 4px }
+.ger-sla-bar { align-self: stretch; height: 6px; border-radius: 100px; background: rgba(0,0,0,.06); margin-top: 4px; overflow: hidden }
+:root[data-theme="dark"] .ger-sla-bar { background: rgba(255,255,255,.12) }
+.ger-sla-fill { height: 100%; border-radius: 100px; transition: width .3s }
+.ger-notif-time { font-size: 10px; color: var(--text-muted) }
+.ger-obs-wrap { align-self: stretch; margin-top: 6px }
+.ger-obs-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px }
+.ger-obs-ta {
+  width: 100%; padding: 4px 11px;
+  border: 1px solid var(--border); border-radius: var(--r);
+  background: var(--surface); color: var(--text);
+  font-family: inherit; font-size: 13px; line-height: 1.6154; resize: vertical;
+  min-height: 54px; outline: none; transition: border-color .2s, box-shadow .2s;
+}
+.ger-obs-ta:hover { border-color: var(--primary-hover) }
+.ger-obs-ta:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(216,0,1,.1) }
+.ger-obs-save {
+  margin-top: 6px; height: 24px; padding: 0 7px; border-radius: var(--r-sm);
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--text); font: 600 12px/1 'Inter', 'Segoe UI', system-ui, sans-serif;
+  cursor: pointer; transition: all .2s;
+}
+.ger-obs-save:hover { color: var(--primary-hover); border-color: var(--primary-hover) }
+
+/* ── STATISTICS (Ant Design Card + Statistic) ── */
+.ger-stat-row { display: flex; gap: 8px; margin: 0 16px 16px; flex-wrap: wrap }
+.ger-stat {
+  flex: 1 1 0; min-width: 96px; padding: 12px; border-radius: var(--r-lg);
+  background: var(--surface); border: 1px solid var(--card-border); box-shadow: var(--shadow);
+}
+.ger-stat-lbl { font-size: 13px; color: var(--text-muted) }
+.ger-stat-val { font-size: 22px; line-height: 1.3; font-weight: 600; color: var(--text); margin-top: 2px }
+
+/* ── BOTTOM NAV (Torque menu colors) ── */
 .bot-nav {
   display: flex; height: var(--nav-h);
   background: var(--surface);
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--border-red);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   flex-shrink: 0;
 }
 .nav-it {
   flex: 1; display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  gap: 3px; cursor: pointer; color: var(--text-muted);
-  transition: color .15s; border: none; background: none;
-  padding: 8px 4px;
+  gap: 2px; cursor: pointer; color: var(--text);
+  border: none; background: none; margin: 6px 4px; border-radius: var(--r);
+  font-family: inherit; transition: color .2s, background .2s;
 }
-.nav-it.on { color: var(--accent) }
-.nav-it svg { width: 22px; height: 22px }
-.nav-label { font-size: 11px; font-weight: 500 }
-.nav-pip {
-  width: 4px; height: 4px; border-radius: 50%;
-  background: var(--accent); margin-top: -2px;
-}
-
-/* ── SECTION HEADER ── */
-.sec-head {
-  display: flex; align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px 10px;
-  flex-shrink: 0;
-  flex-wrap: wrap; gap: 8px;
-}
-.sec-title {
-  font-family: 'Outfit', sans-serif;
-  font-size: 22px; font-weight: 800;
-  color: var(--text); letter-spacing: -.4px;
-}
-
-/* ── BUTTONS ── */
-.add-btn {
-  display: flex; align-items: center; gap: 4px;
-  padding: 7px 12px;
-  background: var(--accent); color: #fff;
-  border: none; border-radius: var(--r);
-  font-size: 13px; font-weight: 600;
-  font-family: 'DM Sans', sans-serif;
-  cursor: pointer; transition: all .15s;
-  white-space: nowrap; flex-shrink: 0;
-}
-.add-btn:hover { background: var(--accent-2) }
-.add-btn:active { transform: scale(.96) }
-.add-btn svg { width: 14px; height: 14px }
-
-/* ── TOASTS ── */
-.toasts {
-  position: fixed;
-  top: calc(var(--head-h) + 8px + env(safe-area-inset-top, 0px));
-  left: 50%; transform: translateX(-50%);
-  z-index: 300; display: flex; flex-direction: column;
-  gap: 6px; pointer-events: none;
-  width: min(calc(100% - 24px), 400px);
-}
-.toast {
-  background: var(--surface-3); border: 1px solid var(--border-2);
-  border-radius: var(--r-lg); padding: 11px 14px;
-  font-size: 14px; color: var(--text);
-  box-shadow: 0 4px 20px rgba(0,0,0,.35);
-  animation: tin .28s cubic-bezier(.34,1.56,.64,1) forwards;
-  display: flex; align-items: center; gap: 10px;
-  pointer-events: all;
-}
-@keyframes tin {
-  from { opacity:0; transform:translateY(-6px) scale(.96) }
-  to   { opacity:1; transform:translateY(0)    scale(1)   }
-}
-
-/* ── Gerencial tab ── */
-.ger-tabs { display: flex; gap: 0; border-bottom: 1.5px solid var(--border); margin-bottom: 14px; padding: 0 16px }
-.ger-tab-btn {
-  flex: 1; padding: 9px 4px 8px; font-size: 11px; font-weight: 700;
-  color: var(--text-muted); background: none; border: none;
-  border-bottom: 2px solid transparent; margin-bottom: -1.5px;
-  cursor: pointer; font-family: inherit; letter-spacing: .03em; transition: all .15s;
-}
-.ger-tab-btn.on { color: var(--accent-2); border-bottom-color: var(--accent-2) }
-.ger-section { margin-bottom: 20px }
-.ger-section-title { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-muted); padding: 0 16px 8px }
-.ger-empty { text-align: center; padding: 48px 24px; color: var(--text-muted); font-size: 14px }
-.ger-card {
-  margin: 0 16px 8px; padding: 12px 14px; border-radius: var(--r);
-  background: var(--surface); border: 1px solid var(--border);
-  border-left: 3px solid var(--border-2);
-}
-.ger-card.ok     { border-left-color: var(--success) }
-.ger-card.warn   { border-left-color: #f59e0b; animation: pulse-sla 1.8s ease-in-out infinite }
-.ger-card.breach { border-left-color: var(--danger); animation: pulse-sla 0.9s ease-in-out infinite }
-.ger-card.neutral { border-left-color: var(--info); animation: none }
-.ger-card-clickable { cursor: pointer }
-.ger-row  { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px }
-.ger-name { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; min-width: 0 }
-.ger-time { font-size: 13px; font-weight: 700; flex-shrink: 0 }
-.ger-time.ok     { color: var(--success) }
-.ger-time.warn   { color: #f59e0b }
-.ger-time.breach { color: var(--danger) }
-.ger-time.neutral { color: var(--info) }
-.ger-meta { font-size: 11px; color: var(--text-muted); margin-top: 4px }
-.ger-sla-bar { height: 3px; border-radius: 2px; background: var(--surface-2); margin-top: 8px; overflow: hidden }
-.ger-sla-fill { height: 100%; border-radius: 2px; transition: width .3s }
-.ger-notif-time { font-size: 11px; color: var(--text-muted); margin-top: 3px }
-.ger-obs-wrap { margin-top: 8px }
-.ger-obs-label { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px }
-.ger-obs-ta {
-  width: 100%; box-sizing: border-box; padding: 7px 9px;
-  border: 1.5px solid var(--border); border-radius: var(--r);
-  background: var(--surface-2); color: var(--text);
-  font-family: inherit; font-size: 12px; line-height: 1.4; resize: vertical;
-  min-height: 52px; outline: none; transition: border-color .15s;
-}
-.ger-obs-ta:focus { border-color: var(--accent) }
-.ger-obs-save {
-  margin-top: 5px; padding: 4px 12px; border-radius: 20px;
-  border: 1.5px solid var(--accent); background: var(--accent-dim);
-  color: var(--accent-2); font-size: 11px; font-weight: 700;
-  cursor: pointer; font-family: inherit; transition: all .15s;
-}
-.ger-obs-save:active { opacity: .7 }
-.ger-rank { font-size: 18px; font-weight: 800; color: var(--text-muted); flex-shrink: 0; min-width: 24px }
-.ger-stat-row { display: flex; gap: 10px; margin: 0 16px 14px; flex-wrap: wrap }
-.ger-stat { flex: 1 1 auto; min-width: 0; padding: 10px 14px; border-radius: var(--r); background: var(--surface); border: 1px solid var(--border) }
-.ger-stat-val { font-size: 22px; font-weight: 800; color: var(--text) }
-.ger-stat-lbl { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); margin-top: 2px }
+.nav-it:hover { color: var(--primary-text); background: rgba(216,0,1,.04) }
+.nav-it.on { color: var(--primary-text); background: var(--primary-bg) }
+.nav-it svg { width: 20px; height: 20px }
+.nav-label { font-size: 12px }
+.nav-pip { width: 6px; height: 6px; border-radius: 50%; background: #E8B800 }
 
 @keyframes pulse-sla { 0%,100%{opacity:1} 50%{opacity:.55} }
+.ger-card.breach .tq-box { animation: pulse-sla .9s ease-in-out infinite }
+.ger-card.warn .tq-box { animation: pulse-sla 1.8s ease-in-out infinite }
+@media (prefers-reduced-motion: reduce) { .tq-box { animation: none !important } }
 
-/* ── Login (Torque) ── */
-[hidden] { display: none !important }
+/* ── LOGIN (Torque "Entrar na sua conta") ── */
 .login {
   position: fixed; inset: 0; z-index: 200;
   background: var(--bg);
-  display: flex; align-items: center; justify-content: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;
   padding: 24px 16px;
 }
+.login-brand { font-size: 16px; color: var(--text) }
 .login-card {
-  width: min(100%, 380px); display: flex; flex-direction: column; gap: 10px;
-  padding: 22px 20px; border-radius: var(--r-lg);
-  background: var(--surface); border: 1px solid var(--border);
+  width: min(100%, 400px); display: flex; flex-direction: column;
+  padding: 32px 24px 24px; border-radius: var(--r-lg);
+  background: var(--surface); box-shadow: var(--shadow-2);
 }
-.login-title { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 800; color: var(--text) }
-.login-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 4px }
-.login-card label { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted) }
+.login-title { font-size: 20px; line-height: 28px; font-weight: 600; color: var(--primary-text); text-align: center; margin-bottom: 24px }
+.login-card label { font-size: 13px; color: var(--text); padding-bottom: 8px }
 .login-card input {
-  width: 100%; padding: 10px 12px; border-radius: var(--r);
-  border: 1.5px solid var(--border); background: var(--surface-2); color: var(--text);
-  font-family: inherit; font-size: 15px; outline: none; transition: border-color .15s;
+  width: 100%; height: 32px; padding: 4px 11px; margin-bottom: 20px; border-radius: var(--r);
+  border: 1px solid var(--border); background: var(--surface); color: var(--text);
+  font-family: inherit; font-size: 13px; outline: none; transition: border-color .2s, box-shadow .2s;
 }
-.login-card input:focus { border-color: var(--accent) }
-.login-err { font-size: 13px; color: var(--danger); background: var(--danger-dim); border-radius: var(--r-sm); padding: 8px 10px }
-.login-btn { justify-content: center; padding: 11px 12px; font-size: 15px; margin-top: 6px }
-.login-btn:disabled { opacity: .6 }
+.login-card input::placeholder { color: var(--text-ghost) }
+.login-card input:hover { border-color: var(--primary-hover) }
+.login-card input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(216,0,1,.1) }
+.login-err { font-size: 13px; color: var(--t-err-fg); background: var(--t-err-bg); border: 1px solid var(--t-err-bd); border-radius: var(--r); padding: 8px 12px; margin-bottom: 16px }
+.login-btn { width: 100% }
 </style>
 
 <div id="app">
@@ -296,19 +344,17 @@ body {
   <header class="hdr">
     <div class="logo">
       <div class="logo-mark">
-        <img src="data:image/png;base64,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" alt="logo" style="width:34px;height:34px;border-radius:9px;display:block;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Memora Gerencial"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M10 2h4"/><path d="M12 2v3"/></svg>
       </div>
       Memora <em>Gerencial</em>
     </div>
     <div class="hdr-btns">
-      <div id="fbStatus" style="font-size:11px;color:var(--text-ghost)">Conectando…</div>
-      <button class="icn-btn" onclick="doLogout()" title="Sair do Torque">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <div id="fbStatus" class="hdr-status">Conectando…</div>
+      <button class="icn-btn" id="themeBtn" onclick="cycleTheme()" title="Ativar modo escuro">
+        <svg id="themeIco" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
-      <button class="icn-btn" onclick="cycleTheme()" title="Alternar tema">
-        <svg id="themeIco" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        </svg>
+      <button class="icn-btn" onclick="doLogout()" title="Sair do Torque">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </button>
     </div>
   </header>
@@ -318,16 +364,16 @@ body {
     <div class="tab on" id="tab-gerencial">
       <div class="sec-head">
         <h1 class="sec-title">Gerencial</h1>
-        <button class="add-btn" style="padding:6px 11px;font-size:13px" onclick="tqRefresh(true)">
+        <button class="add-btn" onclick="tqRefresh(true)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.63"/></svg>
           Atualizar
         </button>
       </div>
       <div class="ger-tabs">
-        <button class="ger-tab-btn on" id="gTab-alertas"   onclick="goGerTab('alertas')">🔔 Alertas</button>
-        <button class="ger-tab-btn"    id="gTab-parados"   onclick="goGerTab('parados')">⏸ Parados</button>
-        <button class="ger-tab-btn"    id="gTab-separacao" onclick="goGerTab('separacao')">✂️ Separação</button>
-        <button class="ger-tab-btn"    id="gTab-sku"       onclick="goGerTab('sku')">🔍 SKU</button>
+        <button class="ger-tab-btn on" id="gTab-alertas"   onclick="goGerTab('alertas')">Alertas</button>
+        <button class="ger-tab-btn"    id="gTab-parados"   onclick="goGerTab('parados')">Parados</button>
+        <button class="ger-tab-btn"    id="gTab-separacao" onclick="goGerTab('separacao')">Separação</button>
+        <button class="ger-tab-btn"    id="gTab-sku"       onclick="goGerTab('sku')">SKU</button>
       </div>
       <div id="gerList" style="padding-bottom:40px"></div>
     </div>
@@ -361,13 +407,13 @@ body {
 
   <!-- Torque login -->
   <div class="login" id="login" hidden>
+    <div class="login-brand">Memora Gerencial</div>
     <form class="login-card" id="loginForm" autocomplete="on">
-      <div class="login-title">Entrar com o Torque</div>
-      <p class="login-sub">Use o mesmo e-mail e senha do painel atacado.fmtorque.com.br.</p>
+      <div class="login-title">Entrar na sua conta</div>
       <label for="loginEmail">E-mail</label>
-      <input id="loginEmail" type="email" autocomplete="username" inputmode="email" required>
+      <input id="loginEmail" type="email" autocomplete="username" inputmode="email" placeholder="E-mail" required>
       <label for="loginPass">Senha</label>
-      <input id="loginPass" type="password" autocomplete="current-password" required>
+      <input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••" required>
       <div class="login-err" id="loginErr" hidden></div>
       <button class="add-btn login-btn" type="submit" id="loginBtn">Entrar</button>
     </form>
@@ -388,7 +434,7 @@ const TQ = {
 }
 // Torque wholesale order status → app status key
 const TQ_STATUS = {
-  IN_ORDER:'em_pedido', ORDER_READY:'pedido_pronto', COLLECTING:'em_coleta',
+  IN_ORDER:'em_pedido', ORDER_READY:'pedido_pronto', READY_TO_COLLECT:'pedido_pronto', COLLECTING:'em_coleta',
   NEEDS_CHANGE:'validar_alteracao', ORDER_CHANGE:'alterar_pedido', COLLECTED:'coletado',
   IN_EXPEDITION:'em_expedicao', ORDER_PACKAGED:'embalado', NEXT_ROUTE:'proxima_rota',
   READY_FOR_DELIVERY:'pronto_entrega', IN_ROUTE:'em_rota', DELIVERED:'entregue',
@@ -401,7 +447,7 @@ const TQ_TIPO = {
   DELIVER_SAME_DAY:'entrega_dia', DELIVER_NEXT_DAY:'entrega_outro_dia'
 }
 // Statuses still inside the warehouse flow: fetched whatever their age
-const TQ_OPEN = ['IN_ORDER','ORDER_READY','COLLECTING','NEEDS_CHANGE','ORDER_CHANGE','COLLECTED','IN_EXPEDITION']
+const TQ_OPEN = ['IN_ORDER','ORDER_READY','READY_TO_COLLECT','COLLECTING','NEEDS_CHANGE','ORDER_CHANGE','COLLECTED','IN_EXPEDITION']
 
 /* ── STORAGE ── */
 const S = {
@@ -410,13 +456,15 @@ const S = {
 }
 
 /* ── SLA CONFIG ── */
+// Priority labels and tag colors exactly as the Torque board shows them
 const TIPO_LABELS = {
-  urg1_retira:       '🚀 Ret. Urg.1',
-  nao_em_loja:       '🏪 Não em Loja',
-  entrega_2h:        '⚡ Entrega 2h',
-  entrega_dia:       '📦 Entrega Dia',
-  entrega_outro_dia: '🗓️ Outro Dia'
+  urg1_retira:       'Urgente 1 (Esta na loja)',
+  nao_em_loja:       'Urgente 2 (Não esta na loja)',
+  entrega_2h:        'Prazo 2h',
+  entrega_dia:       'Entregar no dia',
+  entrega_outro_dia: 'Entregar no outro dia'
 }
+const TIPO_TAG = { urg1_retira:'t-err', nao_em_loja:'t-blue', entrega_2h:'t-warn', entrega_dia:'t-ok', entrega_outro_dia:'t-proc' }
 const TIPO_SLA = {
   urg1_retira:       { alertMs:  5*60000, slaMs: 10*60000 },
   nao_em_loja:       { alertMs:  5*60000, slaMs: 10*60000 },
@@ -424,14 +472,32 @@ const TIPO_SLA = {
   entrega_dia:       { alertMs: 10*60000, slaMs: 20*60000 },
   entrega_outro_dia: null
 }
+// Status labels and tag colors exactly as the Torque board shows them
 const STATUS_LABELS = {
-  em_pedido:'Em Pedido', pedido_pronto:'Pedido Pronto', em_coleta:'Em Coleta',
-  validar_alteracao:'Validar Alteração', alterar_pedido:'Alterar Pedido',
-  coletado:'Coletado', em_expedicao:'Em Expedição', embalado:'Embalado',
-  proxima_rota:'Próxima Rota', pronto_entrega:'Pronto p/ Entrega', em_rota:'Em Rota',
-  entregue:'Entregue', entrega_finalizada:'Entrega Finalizada', concluida:'Conferido',
-  aguardando:'Aguardando', pre_cancelado:'Pré-cancelado', cancelado:'Cancelado'
+  em_pedido:'Em pedido', pedido_pronto:'Pedido pronto', em_coleta:'Em coleta',
+  validar_alteracao:'Validar alteração', alterar_pedido:'Alterar pedido',
+  coletado:'Coletado', em_expedicao:'Em expedição', embalado:'Pronto',
+  proxima_rota:'Próxima rota', pronto_entrega:'Pronto para entrega', em_rota:'Em rota',
+  entregue:'Entregue', entrega_finalizada:'Entrega finalizada', concluida:'Conferido',
+  aguardando:'Aguardando', pre_cancelado:'Pre Cancelado', cancelado:'Cancelado'
 }
+const STATUS_TAG = {
+  em_pedido:'t-default', pedido_pronto:'t-proc', em_coleta:'t-warn', coletado:'t-ok',
+  validar_alteracao:'t-err', alterar_pedido:'t-volcano', em_expedicao:'t-proc', embalado:'t-ok',
+  proxima_rota:'t-default', pronto_entrega:'t-cyan', em_rota:'t-proc', entregue:'t-default',
+  entrega_finalizada:'t-ok', concluida:'t-ok', aguardando:'t-warn', pre_cancelado:'t-volcano', cancelado:'t-err'
+}
+const statusTag = s => `<span class="tq-tag strong ${STATUS_TAG[s]||'t-default'}">${STATUS_LABELS[s]||esc(s)}</span>`
+const tipoTag = t => t ? `<span class="tq-tag boxed ${TIPO_TAG[t]||'t-default'}">Prioridade: ${TIPO_LABELS[t]||esc(t)}</span>` : ''
+// SLA state → tag/box color
+const SLA_TONE = { ok:'t-ok', warn:'t-warn', breach:'t-err', neutral:'t-proc' }
+// Same duration format as Torque's "Tempo no status: 2h 27m"
+const fmtDur = ms => { const m = Math.max(0, Math.floor(ms/60000)), h = Math.floor(m/60); return h > 0 ? `${h}h ${m%60}m` : `${m}m` }
+const EMPTY_SVG = '<svg viewBox="0 0 64 41" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0 1)" fill="none" fill-rule="evenodd"><ellipse fill="currentColor" opacity=".12" cx="32" cy="33" rx="32" ry="7"/><g fill-rule="nonzero" stroke="currentColor" opacity=".45"><path d="M55 12.76L44.854 1.258C44.367.474 43.656 0 42.907 0H21.093c-.749 0-1.46.474-1.947 1.257L9 12.761V22h46v-9.24z"/><path d="M41.613 15.931c0-1.605.994-2.93 2.227-2.931H55v18.137C55 33.26 53.68 35 52.05 35h-40.1C10.32 35 9 33.259 9 31.137V13h11.16c1.233 0 2.227 1.323 2.227 2.928v.022c0 1.605 1.005 2.901 2.237 2.901h14.752c1.232 0 2.237-1.308 2.237-2.913v-.007z"/></g></g></svg>'
+const emptyState = msg => `<div class="ger-empty">${EMPTY_SVG}${msg}</div>`
+// Board-style column: colored top edge + uppercase tag + count
+const column = (title, tone, edge, count, body) =>
+  `<div class="ger-section ${edge}"><div class="ger-section-title"><span class="tq-tag head ${tone}">${title}</span><span class="ger-count">${count}</span></div>${body}</div>`
 const SLA_ACTIVE = new Set(['pedido_pronto','em_coleta','validar_alteracao','alterar_pedido','em_expedicao'])
 
 /* ── STATE ── */
@@ -462,33 +528,24 @@ function sendNotif(title, body) {
   }
 }
 
-/* ── THEME ── */
-const THEMES = ['dark','light','']
-let _themeIdx = 0
-function cycleTheme(){
-  _themeIdx = (_themeIdx+1) % THEMES.length
-  const t = THEMES[_themeIdx]
-  if(t) document.documentElement.setAttribute('data-theme', t)
-  else   document.documentElement.removeAttribute('data-theme')
+/* ── THEME (light by default, light/dark toggle — same as Torque) ── */
+const ICON_MOON = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'
+const ICON_SUN  = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'
+function applyTheme(mode){
+  document.documentElement.setAttribute('data-theme', mode)
   const ico = document.getElementById('themeIco')
-  if(ico){
-    const icons = [
-      '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
-      '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
-      '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'
-    ]
-    ico.innerHTML = icons[_themeIdx]
-  }
-  try{ localStorage.setItem('ger_theme', _themeIdx) }catch(e){}
+  if(ico) ico.innerHTML = mode==='dark' ? ICON_SUN : ICON_MOON
+  const btn = document.getElementById('themeBtn')
+  if(btn) btn.title = mode==='dark' ? 'Ativar modo claro' : 'Ativar modo escuro'
+  try{ localStorage.setItem('ger_theme', mode) }catch(e){}
+}
+function cycleTheme(){
+  applyTheme(document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark')
 }
 ;(function initTheme(){
-  try{
-    const saved = parseInt(localStorage.getItem('ger_theme')||'0')
-    if(saved && THEMES[saved]){
-      _themeIdx = saved
-      document.documentElement.setAttribute('data-theme', THEMES[saved])
-    }
-  }catch(e){}
+  let saved = 'light'
+  try{ const v = localStorage.getItem('ger_theme'); if(v==='dark' || v==='light') saved = v }catch(e){}
+  applyTheme(saved)
 })()
 
 /* ── GERENCIAL SUB-NAV ── */
@@ -518,31 +575,29 @@ function renderGerencial(){
 /* ── GERENCIAL: ALERTAS ── */
 function renderGerAlertas(el){
   if(!slaAlerts.length){
-    el.innerHTML = `<div class="ger-empty">🔔 Nenhum alerta SLA registrado ainda</div>`
+    el.innerHTML = column('Registros de alerta', 't-default', '', 0, emptyState('Nenhum alerta de SLA registrado'))
     return
   }
   const cards = slaAlerts.map(a => {
-    const cls   = a.isBreach ? 'breach' : 'warn'
-    const icon  = a.isBreach ? '🔴' : '⚠️'
-    const timeStr = fmtTime(a.firedAt)
-    const dateStr = fmtDate(a.firedAt)
+    const cls     = a.isBreach ? 'breach' : 'warn'
     const slaMin  = (a.tipo && TIPO_SLA[a.tipo]) ? TIPO_SLA[a.tipo].slaMs/60000 : null
     const safeId  = a.id.replace(/[^a-zA-Z0-9_]/g,'_')
     return `<div class="ger-card ${cls}">
-      <div class="ger-row">
-        <div class="ger-name">${icon} ${esc(a.reqTitle)}</div>
-        <div class="ger-time ${cls}">${fmtMs(a.elapsedMs)}</div>
+      <div class="ger-card-head">
+        ${statusTag(a.status)}
+        <span class="tq-tag strong ${a.isBreach?'t-err':'t-warn'}">${a.isBreach?'SLA estourado':'Em alerta'}</span>
       </div>
-      <div class="ger-meta">
-        <strong>${STATUS_LABELS[a.status]||a.status}</strong> · ${esc(a.contactName)}
-        ${a.tipo ? ` · ${TIPO_LABELS[a.tipo]||a.tipo}` : ''}
-        ${slaMin ? ` · SLA ${slaMin}min` : ''}
-      </div>
-      <div class="ger-notif-time">🔔 Notificado em ${dateStr} às ${timeStr}</div>
-      <div class="ger-obs-wrap">
-        <div class="ger-obs-label">Observação / Justificativa</div>
-        <textarea class="ger-obs-ta" id="obs-${safeId}" rows="2" placeholder="Ex: separador estava ocupado em outro pedido…">${esc(a.obs||'')}</textarea>
-        <button class="ger-obs-save" onclick="saveAlertObs('${a.id}',document.getElementById('obs-${safeId}').value);toast('Observação salva')">Salvar obs.</button>
+      <div class="ger-card-body">
+        <strong class="ger-name">${esc(a.reqTitle)}</strong>
+        <span class="ger-sec">${esc(a.contactName)}</span>
+        ${tipoTag(a.tipo)}
+        <span class="tq-box ${SLA_TONE[cls]}">Tempo no status: ${fmtDur(a.elapsedMs)}${slaMin?` · SLA ${slaMin}m`:''}</span>
+        <span class="ger-notif-time">Notificado em ${fmtDate(a.firedAt)} às ${fmtTime(a.firedAt)}</span>
+        <div class="ger-obs-wrap">
+          <div class="ger-obs-label">Observação / justificativa</div>
+          <textarea class="ger-obs-ta" id="obs-${safeId}" rows="2" placeholder="Ex: separador estava ocupado em outro pedido…">${esc(a.obs||'')}</textarea>
+          <button class="ger-obs-save" onclick="saveAlertObs('${a.id}',document.getElementById('obs-${safeId}').value);toast('Observação salva')">Salvar observação</button>
+        </div>
       </div>
     </div>`
   }).join('')
@@ -551,14 +606,11 @@ function renderGerAlertas(el){
   const nWarn   = total - nBreach
   el.innerHTML = `
     <div class="ger-stat-row">
-      <div class="ger-stat"><div class="ger-stat-val" style="color:var(--danger)">${nBreach}</div><div class="ger-stat-lbl">SLA Estourado</div></div>
-      <div class="ger-stat"><div class="ger-stat-val" style="color:#f59e0b">${nWarn}</div><div class="ger-stat-lbl">Em Alerta</div></div>
-      <div class="ger-stat"><div class="ger-stat-val">${total}</div><div class="ger-stat-lbl">Total Registros</div></div>
+      <div class="ger-stat"><div class="ger-stat-lbl">SLA estourado</div><div class="ger-stat-val" style="color:var(--t-err-fg)">${nBreach}</div></div>
+      <div class="ger-stat"><div class="ger-stat-lbl">Em alerta</div><div class="ger-stat-val" style="color:var(--t-warn-fg)">${nWarn}</div></div>
+      <div class="ger-stat"><div class="ger-stat-lbl">Total</div><div class="ger-stat-val">${total}</div></div>
     </div>
-    <div class="ger-section">
-      <div class="ger-section-title">Registros de Alerta (${total})</div>
-      ${cards}
-    </div>`
+    ${column('Registros de alerta', nBreach?'t-err':'t-warn', nBreach?'c-breach':'c-warn', total, cards)}`
 }
 
 /* ── GERENCIAL: PARADOS ── */
@@ -584,29 +636,28 @@ function renderGerParados(el){
   items.sort((a,b)=>b.elapsed-a.elapsed)
 
   if(!items.length){
-    el.innerHTML = `<div class="ger-empty">✅ Nenhum pedido parado no pipeline</div>`
+    el.innerHTML = column('Pedidos parados', 't-ok', 'c-ok', 0, emptyState('Nenhum pedido parado no fluxo'))
     return
   }
-  const fmt = ms => { const m=Math.floor(ms/60000); return m+'min' }
+  const edge = { ok:'var(--edge-ok)', warn:'var(--edge-warn)', breach:'var(--edge-breach)' }
   const cards = items.map((r,i)=>{
     const s = r.status||'em_pedido'
-    const fillColor = r.slaState==='breach'?'var(--danger)':r.slaState==='warn'?'#f59e0b':'var(--success)'
     const pct = r.cfg ? Math.min(100,(r.elapsed/r.cfg.slaMs)*100) : 0
     return `<div class="ger-card ${r.slaState}">
-      <div class="ger-row">
-        <div class="ger-rank">#${i+1}</div>
-        <div class="ger-name" style="margin-left:6px">${esc(r.title)}</div>
-        <div class="ger-time ${r.slaState}">${fmt(r.elapsed)}</div>
+      <div class="ger-card-head">${statusTag(s)}<span class="ger-rank">#${i+1}</span></div>
+      <div class="ger-card-body">
+        <strong class="ger-name">${esc(r.title)}</strong>
+        <span class="ger-sec">${esc(r.contactName)}</span>
+        ${tipoTag(r.tipo)}
+        <span class="tq-box ${SLA_TONE[r.slaState]}">Tempo no status: ${fmtDur(r.elapsed)}${r.cfg?` · SLA ${r.cfg.slaMs/60000}m`:''}</span>
+        ${r.cfg ? `<div class="ger-sla-bar"><div class="ger-sla-fill" style="width:${pct}%;background:${edge[r.slaState]}"></div></div>` : ''}
       </div>
-      <div class="ger-meta">
-        <strong>${STATUS_LABELS[s]||s}</strong> · ${esc(r.contactName)}
-        ${r.tipo ? ` · ${TIPO_LABELS[r.tipo]||r.tipo}` : ''}
-        ${r.cfg ? ` · SLA ${r.cfg.slaMs/60000}min` : ''}
-      </div>
-      ${r.cfg ? `<div class="ger-sla-bar"><div class="ger-sla-fill" style="width:${pct}%;background:${fillColor}"></div></div>` : ''}
     </div>`
   }).join('')
-  el.innerHTML = `<div class="ger-section"><div class="ger-section-title">Pedidos mais parados (${items.length})</div>${cards}</div>`
+  const nBreach = items.filter(r=>r.slaState==='breach').length
+  const nWarn = items.filter(r=>r.slaState==='warn').length
+  const tone = nBreach ? ['t-err','c-breach'] : nWarn ? ['t-warn','c-warn'] : ['t-ok','c-ok']
+  el.innerHTML = column('Pedidos mais parados', tone[0], tone[1], items.length, cards)
 }
 
 /* ── GERENCIAL: SEPARAÇÃO ── */
@@ -638,31 +689,31 @@ function renderGerSeparacao(el){
   items.sort((a,b)=>b.colMs-a.colMs)
 
   if(!items.length){
-    el.innerHTML = `<div class="ger-empty">✂️ Nenhum pedido com tempo de separação registrado</div>`
+    el.innerHTML = column('Em coleta', 't-warn', 'c-warn', 0, emptyState('Nenhum pedido com tempo de separação registrado'))
     return
   }
-  const fmt = ms => { const m=Math.floor(ms/60000), s=Math.floor((ms%60000)/1000); return m>0?`${m}min`:s+'s' }
   const avgMs = items.reduce((acc,r)=>acc+r.colMs,0)/items.length
   const maxMs = items[0].colMs
   const cards = items.map((r,i)=>{
     const pct = Math.min(100,(r.colMs/maxMs)*100)
     return `<div class="ger-card neutral">
-      <div class="ger-row">
-        <div class="ger-rank">#${i+1}</div>
-        <div class="ger-name" style="margin-left:6px">${esc(r.title)}</div>
-        <div class="ger-time neutral">${fmt(r.colMs)}</div>
+      <div class="ger-card-head">${statusTag(r.status||'em_pedido')}<span class="ger-rank">#${i+1}</span></div>
+      <div class="ger-card-body">
+        <strong class="ger-name">${esc(r.title)}</strong>
+        <span class="ger-sec">${esc(r.contactName)}</span>
+        ${tipoTag(r.tipo)}
+        <span class="tq-box t-proc">Tempo em coleta: ${fmtDur(r.colMs)}</span>
+        <div class="ger-sla-bar"><div class="ger-sla-fill" style="width:${pct}%;background:var(--edge-info)"></div></div>
       </div>
-      <div class="ger-meta">${esc(r.contactName)}${r.tipo?` · ${TIPO_LABELS[r.tipo]||r.tipo}`:''}</div>
-      <div class="ger-sla-bar"><div class="ger-sla-fill" style="width:${pct}%;background:var(--info)"></div></div>
     </div>`
   }).join('')
   el.innerHTML = `
     <div class="ger-stat-row">
-      <div class="ger-stat"><div class="ger-stat-val" style="color:var(--info)">${fmt(maxMs)}</div><div class="ger-stat-lbl">Maior tempo</div></div>
-      <div class="ger-stat"><div class="ger-stat-val">${fmt(Math.round(avgMs))}</div><div class="ger-stat-lbl">Média</div></div>
-      <div class="ger-stat"><div class="ger-stat-val">${items.length}</div><div class="ger-stat-lbl">Pedidos</div></div>
+      <div class="ger-stat"><div class="ger-stat-lbl">Maior tempo</div><div class="ger-stat-val" style="color:var(--t-blue-fg)">${fmtDur(maxMs)}</div></div>
+      <div class="ger-stat"><div class="ger-stat-lbl">Média</div><div class="ger-stat-val">${fmtDur(Math.round(avgMs))}</div></div>
+      <div class="ger-stat"><div class="ger-stat-lbl">Pedidos</div><div class="ger-stat-val">${items.length}</div></div>
     </div>
-    <div class="ger-section"><div class="ger-section-title">Tempo em Separação (em_coleta)</div>${cards}</div>`
+    ${column('Tempo em coleta', 't-warn', 'c-warn', items.length, cards)}`
 }
 
 /* ── GERENCIAL: SKU ── */
@@ -694,37 +745,32 @@ function renderGerSku(el){
   items.sort((a,b)=>b.devMs-a.devMs)
 
   if(!items.length){
-    el.innerHTML = `<div class="ger-empty">🔍 Nenhum pedido com desvio de SKU registrado</div>`
+    el.innerHTML = column('Validar / alterar pedido', 't-volcano', 'c-volcano', 0, emptyState('Nenhum pedido com alteração de itens registrada'))
     return
   }
-  const fmt = ms => { const m=Math.floor(ms/60000), s=Math.floor((ms%60000)/1000); return m>0?`${m}min`:s+'s' }
   const avgMs = items.reduce((acc,r)=>acc+r.devMs,0)/items.length
   const maxMs = items[0].devMs
   const totalDev = items.reduce((acc,r)=>acc+r.devCount,0)
   const cards = items.map((r,i)=>{
     const pct = Math.min(100,(r.devMs/maxMs)*100)
-    const s = r.status||'em_pedido'
-    return `<div class="ger-card neutral">
-      <div class="ger-row">
-        <div class="ger-rank">#${i+1}</div>
-        <div class="ger-name" style="margin-left:6px">${esc(r.title)}</div>
-        <div class="ger-time neutral">${fmt(r.devMs)}</div>
+    return `<div class="ger-card purple">
+      <div class="ger-card-head">${statusTag(r.status||'em_pedido')}<span class="ger-rank">#${i+1}</span></div>
+      <div class="ger-card-body">
+        <strong class="ger-name">${esc(r.title)}</strong>
+        <span class="ger-sec">${esc(r.contactName)}</span>
+        <div class="ger-tags">${tipoTag(r.tipo)}<span class="tq-tag t-volcano">${r.devCount}x alteração</span></div>
+        <span class="tq-box t-volcano">Tempo em alteração: ${fmtDur(r.devMs)}</span>
+        <div class="ger-sla-bar"><div class="ger-sla-fill" style="width:${pct}%;background:#722ed1"></div></div>
       </div>
-      <div class="ger-meta">
-        ${esc(r.contactName)}${r.tipo?` · ${TIPO_LABELS[r.tipo]||r.tipo}`:''}
-        · <strong>${r.devCount}x desvio</strong>
-        · status atual: ${STATUS_LABELS[s]||s}
-      </div>
-      <div class="ger-sla-bar"><div class="ger-sla-fill" style="width:${pct}%;background:var(--purple)"></div></div>
     </div>`
   }).join('')
   el.innerHTML = `
     <div class="ger-stat-row">
-      <div class="ger-stat"><div class="ger-stat-val" style="color:var(--purple)">${fmt(maxMs)}</div><div class="ger-stat-lbl">Maior desvio</div></div>
-      <div class="ger-stat"><div class="ger-stat-val">${fmt(Math.round(avgMs))}</div><div class="ger-stat-lbl">Média</div></div>
-      <div class="ger-stat"><div class="ger-stat-val">${totalDev}</div><div class="ger-stat-lbl">Total desvios</div></div>
+      <div class="ger-stat"><div class="ger-stat-lbl">Maior tempo</div><div class="ger-stat-val" style="color:var(--t-volcano-fg)">${fmtDur(maxMs)}</div></div>
+      <div class="ger-stat"><div class="ger-stat-lbl">Média</div><div class="ger-stat-val">${fmtDur(Math.round(avgMs))}</div></div>
+      <div class="ger-stat"><div class="ger-stat-lbl">Alterações</div><div class="ger-stat-val">${totalDev}</div></div>
     </div>
-    <div class="ger-section"><div class="ger-section-title">Velocidade de SKU — pedidos com desvio</div>${cards}</div>`
+    ${column('Validar / alterar pedido', 't-volcano', 'c-volcano', items.length, cards)}`
 }
 
 /* ── SAVE OBS ── */

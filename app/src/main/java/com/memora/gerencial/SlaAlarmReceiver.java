@@ -41,7 +41,7 @@ public class SlaAlarmReceiver extends BroadcastReceiver {
         // SLA config: { alertMs, slaMs } per tipo
         // Retirada: 5min / 10min | Entrega: 10min / 20min
         String[]  tipoKeys  = {"urg1_retira","nao_em_loja","entrega_2h","entrega_dia"};
-        String[]  tipoNames = {"Ret. Urg.1","Não em Loja","Entrega 2h","Entrega Dia"};
+        String[]  tipoNames = {"Urgente 1 (Esta na loja)","Urgente 2 (Não esta na loja)","Prazo 2h","Entregar no dia"};
         long[][]  slaCfg    = {
             { 5*60_000L, 10*60_000L },
             { 5*60_000L, 10*60_000L },
@@ -117,11 +117,11 @@ public class SlaAlarmReceiver extends BroadcastReceiver {
 
     private String statusLabel(String s) {
         switch (s) {
-            case "pedido_pronto":     return "Pedido Pronto";
-            case "em_coleta":         return "Em Coleta";
-            case "validar_alteracao": return "Validar Alteração";
-            case "alterar_pedido":    return "Alterar Pedido";
-            case "em_expedicao":      return "Em Expedição";
+            case "pedido_pronto":     return "Pedido pronto";
+            case "em_coleta":         return "Em coleta";
+            case "validar_alteracao": return "Validar alteração";
+            case "alterar_pedido":    return "Alterar pedido";
+            case "em_expedicao":      return "Em expedição";
             default:                  return s;
         }
     }
