@@ -742,7 +742,7 @@ function openAudit(token, reqId){
 function closeAudit(){ document.getElementById('audit').hidden = true }
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeAudit() })
 
-const SLA_ACTIVE = new Set(['pedido_pronto','em_coleta','validar_alteracao','alterar_pedido','em_expedicao'])
+const SLA_ACTIVE = new Set(['pedido_pronto','em_coleta','coletado','validar_alteracao','alterar_pedido','em_expedicao'])
 
 /* ── STATE ── */
 let allRequests  = {}
@@ -1017,7 +1017,6 @@ function renderGerParados(el){
       if(!PARADOS_COLS.includes(s)) return
       const changedAt = r.statusChangedAt||r.createdAt||0
       const elapsed   = nowMs - changedAt
-      // "Coletado" has no SLA rule: it shows the waiting time only (no alert colors, no notification)
       const cfg       = SLA_ACTIVE.has(s) ? ((r.tipo && TIPO_SLA[r.tipo]) || null) : null
       const slaState  = !SLA_ACTIVE.has(s) ? 'neutral' : !cfg ? 'ok' : elapsed>=cfg.slaMs?'breach':elapsed>=cfg.alertMs?'warn':'ok'
       items.push({...r, id:reqId, token, contactName, elapsed, slaState, cfg})

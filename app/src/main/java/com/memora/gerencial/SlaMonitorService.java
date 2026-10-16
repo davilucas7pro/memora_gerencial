@@ -59,7 +59,7 @@ public class SlaMonitorService extends Service {
     static final String PROJECT = "fm-torque";
 
     /** Columns where time counts (same as the app's SLA_ACTIVE) */
-    static final String[] OPEN = {"ORDER_READY", "READY_TO_COLLECT", "COLLECTING", "NEEDS_CHANGE", "ORDER_CHANGE", "IN_EXPEDITION"};
+    static final String[] OPEN = {"ORDER_READY", "READY_TO_COLLECT", "COLLECTING", "COLLECTED", "NEEDS_CHANGE", "ORDER_CHANGE", "IN_EXPEDITION"};
 
     private HandlerThread thread;
     private Handler handler;
@@ -329,6 +329,7 @@ public class SlaMonitorService extends Service {
             case "ORDER_READY":
             case "READY_TO_COLLECT": return "Pedido pronto";
             case "COLLECTING":       return "Em coleta";
+            case "COLLECTED":        return "Coletado";
             case "NEEDS_CHANGE":     return "Validar alteração";
             case "ORDER_CHANGE":     return "Alterar pedido";
             case "IN_EXPEDITION":    return "Em expedição";
@@ -342,6 +343,7 @@ public class SlaMonitorService extends Service {
             case "ORDER_READY":
             case "READY_TO_COLLECT": return "pedido_pronto";
             case "COLLECTING":       return "em_coleta";
+            case "COLLECTED":        return "coletado";
             case "NEEDS_CHANGE":     return "validar_alteracao";
             case "ORDER_CHANGE":     return "alterar_pedido";
             case "IN_EXPEDITION":    return "em_expedicao";
