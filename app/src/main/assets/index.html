@@ -128,12 +128,26 @@ body {
 .sider-toggle svg { width: 16px; height: 16px; transition: transform .2s }
 .sider.collapsed .sider-toggle svg { transform: rotate(180deg) }
 .sider-mask { display: none }
-/* phones: the collapsed bar keeps its place; opened, it slides over the page */
+.sider-logo-img { width: 104px; height: auto; display: block }
+.sider.collapsed .sider-logo-img { width: 46px }
+/* Torque's mobile menu button: bordered box with three lines, top left */
+.hdr-left { display: flex; align-items: center; gap: 12px; min-width: 0 }
+.hdr-menu {
+  display: none; width: 44px; height: 44px; flex-shrink: 0; align-items: center; justify-content: center;
+  border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); cursor: pointer;
+}
+.hdr-menu svg { width: 18px; height: 18px }
+/* phones: no bar on screen; the menu button opens it over the page (as Torque does) */
 @media (max-width: 700px) {
-  .sider { position: absolute; top: 0; bottom: 0; left: 0; box-shadow: 6px 0 16px rgba(0,0,0,.2) }
-  .sider.collapsed { box-shadow: none }
-  .content { margin-left: var(--sider-w-min) }
-  .sider:not(.collapsed) + .sider-mask { display: block; position: absolute; inset: 0; z-index: 25; background: rgba(0,0,0,.45) }
+  .sider {
+    position: fixed; top: 0; bottom: 0; left: 0; width: var(--sider-w);
+    transform: translateX(-100%); transition: transform .25s; box-shadow: none;
+  }
+  .sider.open { transform: none; box-shadow: 6px 0 16px rgba(0,0,0,.25) }
+  .content { margin-left: 0 }
+  .sider.open + .sider-mask { display: block; position: fixed; inset: 0; z-index: 25; background: rgba(0,0,0,.45) }
+  .hdr-menu { display: flex }
+  .hdr { padding-left: 12px }
 }
 
 /* ── HEADER (Torque top bar) ── */
@@ -477,10 +491,7 @@ body {
   <!-- Sidebar (Torque "Sider": logo, menu, Sair, collapse toggle) -->
   <aside class="sider" id="sider">
     <div class="sider-logo">
-      <div class="logo-mark">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Memora Gerencial"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M10 2h4"/><path d="M12 2v3"/></svg>
-      </div>
-      <span class="sider-title">Memora <em>Gerencial</em></span>
+      <img class="sider-logo-img" src="logo_nova.png" alt="Nova Moto Peças">
     </div>
     <nav class="sider-menu" aria-label="Menu">
       <button class="menu-it on" data-tab="alertas" onclick="goGerTab('alertas')" title="Alertas">
@@ -514,7 +525,12 @@ body {
   <div class="content">
     <!-- Header (Torque top bar) -->
     <header class="hdr">
-      <div id="fbStatus" class="hdr-status">Conectando…</div>
+      <div class="hdr-left">
+        <button class="hdr-menu" onclick="openDrawer()" aria-label="Abrir menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4.5" cy="6" r="1" fill="currentColor"/><circle cx="4.5" cy="12" r="1" fill="currentColor"/><circle cx="4.5" cy="18" r="1" fill="currentColor"/></svg>
+        </button>
+        <div id="fbStatus" class="hdr-status">Conectando…</div>
+      </div>
       <div class="hdr-btns">
         <button class="icn-btn" id="themeBtn" onclick="cycleTheme()" title="Ativar modo escuro">
           <svg id="themeIco" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -565,7 +581,7 @@ body {
 
   <!-- Torque login -->
   <div class="login" id="login" hidden>
-    <div class="login-brand">Memora Gerencial</div>
+    <div class="login-brand"><img src="logo_nova.png" alt="Nova Moto Peças" style="width:140px;height:auto;display:block;margin:0 auto 8px">Memora Gerencial</div>
     <div class="login-card">
       <div class="login-title">Entrar na sua conta</div>
       <p class="login-text">O login é feito na página do Torque, com o mesmo e-mail e senha do atacado.fmtorque.com.br. Se o Torque pedir sua localização, permita.</p>
@@ -739,25 +755,34 @@ function goGerTab(tab){
   curGerTab = tab
   document.querySelectorAll('.menu-it[data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === tab))
   document.getElementById('pageTitle').textContent = PAGE_TITLES[tab] || 'Gerencial'
-  if(isNarrow()) setSider(true)          // on a phone the opened bar covers the page: close it after a pick
+  closeDrawer()                          // on a phone the menu covers the page: close it after a pick
   if(rp.open) closeRangePicker()
   renderRangeBar()
   renderGerencial()
 }
 
+// Larger screens: the bar sits on the left and collapses to icons (choice remembered).
+// Phones: no bar on screen; the ☰ button opens it over the page, like the Torque panel.
 function setSider(collapsed){
   document.getElementById('sider').classList.toggle('collapsed', collapsed)
   const t = document.getElementById('siderToggle')
-  const label = collapsed ? 'Expandir barra lateral' : 'Recolher barra lateral'
+  const label = isNarrow() ? 'Fechar menu' : collapsed ? 'Expandir barra lateral' : 'Recolher barra lateral'
   t.title = label; t.setAttribute('aria-label', label)
 }
+function openDrawer(){ document.getElementById('sider').classList.add('open') }
+function closeDrawer(){ document.getElementById('sider').classList.remove('open') }
 function toggleSider(){
+  if(isNarrow()){ closeDrawer(); return }
   const collapsed = !document.getElementById('sider').classList.contains('collapsed')
   setSider(collapsed)
-  if(!isNarrow()) S.set('ger_sider_collapsed', collapsed)
+  S.set('ger_sider_collapsed', collapsed)
 }
-// phones start with the bar collapsed (icons only); larger screens remember the choice
-setSider(isNarrow() ? true : S.get('ger_sider_collapsed', false))
+function applySiderMode(){
+  closeDrawer()
+  setSider(isNarrow() ? false : S.get('ger_sider_collapsed', false))   // the phone menu always opens full
+}
+applySiderMode()
+window.matchMedia('(max-width: 700px)').addEventListener('change', applySiderMode)
 
 function renderGerencial(){
   const el = document.getElementById('gerList')
