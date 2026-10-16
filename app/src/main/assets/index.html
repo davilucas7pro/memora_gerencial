@@ -371,6 +371,9 @@ body {
   cursor: pointer; transition: all .2s;
 }
 .ger-obs-save:hover { color: var(--primary-hover); border-color: var(--primary-hover) }
+.ger-obs-actions { display: flex; gap: 8px; flex-wrap: wrap }
+.ger-obs-del { color: var(--t-err-fg) }
+.ger-obs-del.confirm { background: var(--primary); border-color: var(--primary); color: #fff }
 
 /* ── STATISTICS (Ant Design Card + Statistic) ── */
 .ger-stat-row { display: flex; gap: 8px; margin: 0 16px 16px; flex-wrap: wrap }
@@ -904,7 +907,10 @@ function renderGerAlertas(el){
         <div class="ger-obs-wrap">
           <div class="ger-obs-label">Observação / justificativa</div>
           <textarea class="ger-obs-ta" id="obs-${safeId}" rows="2" placeholder="Ex: separador estava ocupado em outro pedido…"></textarea>
-          <button class="ger-obs-save" onclick="saveAlertObs('${a.id}',document.getElementById('obs-${safeId}').value)">Salvar e justificar</button>
+          <div class="ger-obs-actions">
+            <button class="ger-obs-save" onclick="saveAlertObs('${a.id}',document.getElementById('obs-${safeId}').value)">Salvar e justificar</button>
+            <button class="ger-obs-save ger-obs-del" onclick="deleteAlert('${a.id}',this)">Apagar</button>
+          </div>
         </div>
       </div>
     </div>`
@@ -1243,6 +1249,27 @@ function saveAlertObs(alertId, obs){
     S.set('ger_alert_justified', justAlerts)
   }
   toast('Observação salva — alerta movido para Justificados')
+  updateAlertPip()
+  renderGerencial()
+}
+
+// Remove an open alert without justifying it (duplicates). First tap arms the button, second tap deletes.
+function deleteAlert(alertId, btn){
+  if(btn && !btn.classList.contains('confirm')){
+    btn.classList.add('confirm'); btn.textContent = 'Confirmar exclusão'
+    setTimeout(() => { if(btn.isConnected){ btn.classList.remove('confirm'); btn.textContent = 'Apagar' } }, 4000)
+    return
+  }
+  if(window.AndroidBridge && AndroidBridge.deleteAlert){
+    let ok = false
+    try{ ok = AndroidBridge.deleteAlert(alertId) }catch(e){}
+    if(!ok){ toast('Não foi possível apagar o alerta. Tente de novo.'); return }
+    loadAlertStores()
+  }else{
+    slaAlerts = slaAlerts.filter(a => a.id !== alertId)
+    S.set('ger_alert_records', slaAlerts)
+  }
+  toast('Alerta apagado')
   updateAlertPip()
   renderGerencial()
 }

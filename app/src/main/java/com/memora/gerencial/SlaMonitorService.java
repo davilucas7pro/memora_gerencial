@@ -204,7 +204,16 @@ public class SlaMonitorService extends Service {
         if (!newRecords.isEmpty()) {
             synchronized (LOCK) {   // the page may be moving a record to "Justificados" at the same time
                 JSONArray records = new JSONArray(prefs.getString("alertRecords", "[]"));
-                for (JSONObject r : newRecords) records = prepend(records, r, 200);
+                for (JSONObject r : newRecords) {
+                    // one open alert per order: the newest replaces any older unjustified one
+                    String reqId = r.optString("reqId");
+                    JSONArray keep = new JSONArray();
+                    for (int i = 0; i < records.length(); i++) {
+                        JSONObject a = records.getJSONObject(i);
+                        if (!reqId.equals(a.optString("reqId"))) keep.put(a);
+                    }
+                    records = prepend(keep, r, 200);
+                }
                 prefs.edit().putString("alertRecords", records.toString()).commit();
             }
         }
@@ -246,6 +255,25 @@ public class SlaMonitorService extends Service {
                 found.put("resolvedAt", System.currentTimeMillis());
                 JSONArray done = prepend(new JSONArray(p.getString("alertJustified", "[]")), found, 1000);
                 p.edit().putString("alertRecords", keep.toString()).putString("alertJustified", done.toString()).commit();
+                return true;
+            } catch (Exception e) { e.printStackTrace(); return false; }
+        }
+    }
+
+    /** Drop an open alert without justifying it (e.g. a duplicate) */
+    static boolean deleteAlert(Context c, String alertId) {
+        synchronized (LOCK) {
+            try {
+                SharedPreferences p = c.getSharedPreferences(MainActivity.PREFS_NAME, MODE_PRIVATE);
+                JSONArray open = new JSONArray(p.getString("alertRecords", "[]"));
+                JSONArray keep = new JSONArray();
+                boolean found = false;
+                for (int i = 0; i < open.length(); i++) {
+                    JSONObject a = open.getJSONObject(i);
+                    if (!found && alertId.equals(a.optString("id"))) found = true; else keep.put(a);
+                }
+                if (!found) return false;
+                p.edit().putString("alertRecords", keep.toString()).commit();
                 return true;
             } catch (Exception e) { e.printStackTrace(); return false; }
         }

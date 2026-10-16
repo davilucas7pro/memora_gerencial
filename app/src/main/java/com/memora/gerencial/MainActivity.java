@@ -108,6 +108,12 @@ public class MainActivity extends AppCompatActivity {
                 return SlaMonitorService.resolveAlert(MainActivity.this, alertId, obs);
             }
 
+            /** Remove an open alert without justifying it */
+            @JavascriptInterface
+            public boolean deleteAlert(String alertId) {
+                return SlaMonitorService.deleteAlert(MainActivity.this, alertId);
+            }
+
             @JavascriptInterface
             public String getJustifiedAlerts() {
                 return getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
