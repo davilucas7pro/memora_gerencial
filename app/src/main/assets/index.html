@@ -394,6 +394,7 @@ body {
 .rp-input:hover { border-color: var(--primary-hover) }
 .rp-input.open { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(216,0,1,.1) }
 .rp-date { min-width: 84px; text-align: left; font-variant-numeric: tabular-nums }
+.rp-input.empty .rp-date { color: var(--text-ghost) }
 .rp-input.picking .rp-date.active { color: var(--text-ghost) }
 .rp-arrow, .rp-cal { width: 14px; height: 14px; color: var(--text-ghost); flex-shrink: 0 }
 .rp-pop {
@@ -799,8 +800,24 @@ function goGerTab(tab){
   document.getElementById('pageTitle').textContent = PAGE_TITLES[tab] || 'Gerencial'
   closeDrawer()                          // on a phone the menu covers the page: close it after a pick
   if(rp.open) closeRangePicker()
+  clearRange()                           // every page opens without a period
   renderRangeBar()
   renderGerencial()
+  if(tqNeeds().open && tqTimer) tqRefresh()   // Parados: fresh data right away
+}
+
+// Separação / Velocidade before a period is picked, or while it loads
+function periodGate(el){
+  if(!tqRange){
+    el.innerHTML = emptyState('Escolha a data inicial e a final no calendário acima para ver os tempos.<br>Nada é carregado antes disso.')
+    return true
+  }
+  const b = rangeBounds()
+  if(periodCache.key !== b.fromISO + '|' + b.toISO){
+    el.innerHTML = emptyState('Carregando os pedidos do período…')
+    return true
+  }
+  return false
 }
 
 // Larger screens: the bar sits on the left and collapses to icons (choice remembered).
@@ -874,7 +891,8 @@ function alertCardFacts(a){
 }
 
 function renderGerAlertas(el){
-  const open = slaAlerts.filter(a => inRange(a.firedAt))
+  // every alert still open, whatever its date, until it is justified
+  const open = slaAlerts.slice()
   // justified cards stay here only on the day they were justified; all of them live in the "Justificados" list
   const done = justAlerts.filter(a => a.resolvedAt && ymd(new Date(a.resolvedAt)) === todayYmd())
   const openCards = open.map(a => {
@@ -1078,6 +1096,7 @@ const SEP_METRICS = [
 const SEP_TOP = 10
 
 function renderGerSeparacao(el){
+  if(periodGate(el)) return
   const all = []
   Object.entries(allRequests).forEach(([token, reqs])=>{
     if(!reqs) return
@@ -1158,6 +1177,7 @@ const VEL_PHASES = [
 ]
 
 function renderGerSku(el){
+  if(periodGate(el)) return
   const orders = []
   Object.entries(allRequests).forEach(([token, reqs])=>{
     if(!reqs) return
@@ -1402,28 +1422,25 @@ const RANGE_MAX_DAYS = 62
 const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
 const parseYmd = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d) }
 const todayYmd = () => ymd(new Date())
-// the chosen period is kept for the day; a new day opens on "today", as the Torque panel does
-let tqRange = (() => {
-  const saved = S.get('ger_range', null)
-  if(saved && saved.day === todayYmd() && saved.from && saved.to) return { from: saved.from, to: saved.to }
-  return { from: todayYmd(), to: todayYmd() }
-})()
+// Only Separação and Velocidade use a period. It starts EMPTY every time one of them is opened:
+// nothing is fetched or shown until a period is picked (saves battery, data and memory).
+const PERIOD_TABS = ['separacao','sku']
+let tqRange = null
 function currentRange(){ return tqRange }
 function rangeBounds(){
-  const r = currentRange()
-  const from = parseYmd(r.from), to = parseYmd(r.to); to.setDate(to.getDate()+1)
+  if(!tqRange) return null
+  const from = parseYmd(tqRange.from), to = parseYmd(tqRange.to); to.setDate(to.getDate()+1)
   return { from, to, fromISO: from.toISOString(), toISO: to.toISOString() }
 }
-const inRange = ts => { const b = rangeBounds(); return ts >= b.from.getTime() && ts < b.to.getTime() }
+const RP_EMPTY = ['Data inicial', 'Data final']
 
 function renderRangeBar(){
   const r = currentRange()
-  document.getElementById('rpFrom').textContent = r.from
-  document.getElementById('rpTo').textContent = r.to
-  document.getElementById('rangeHint').textContent = curGerTab==='alertas' ? 'Alertas disparados no período'
-    : curGerTab==='justificados' ? 'Justificados no período' : 'Pedidos criados no período'
-  // Parados is "right now"; Justificados lists everything ever justified (search instead of period)
-  document.getElementById('gerFilter').hidden = curGerTab==='parados' || curGerTab==='justificados'
+  document.getElementById('rpFrom').textContent = r ? r.from : RP_EMPTY[0]
+  document.getElementById('rpTo').textContent = r ? r.to : RP_EMPTY[1]
+  document.getElementById('rpInput').classList.toggle('empty', !r)
+  document.getElementById('rangeHint').textContent = r ? 'Pedidos criados no período' : 'Escolha o período para ver os tempos'
+  document.getElementById('gerFilter').hidden = !PERIOD_TABS.includes(curGerTab)
 }
 function setRange(from, to){
   if(from > to) [from, to] = [to, from]
@@ -1433,11 +1450,17 @@ function setRange(from, to){
     toast(`Período limitado a ${RANGE_MAX_DAYS} dias`)
   }
   tqRange = { from, to }
-  S.set('ger_range', { from, to, day: todayYmd() })
   renderRangeBar()
   periodCache.key = ''          // force a fresh fetch for the new period
   renderGerencial()
   tqRefresh()
+}
+// leaving a period page drops its period and its data
+function clearRange(){
+  if(!tqRange && !periodCache.key) return
+  tqRange = null
+  periodCache = { key:'', orders:[], hist:[], items:{}, at:0 }
+  Object.values(allRequests).forEach(reqs => Object.keys(reqs).forEach(id => { if(!reqs[id].isOpen) delete reqs[id] }))
 }
 
 /* ── RANGE PICKER (same behaviour as Torque's: 1st click = start, 2nd click = end) ── */
@@ -1447,7 +1470,7 @@ const rp = { open:false, view:null, start:null, hover:null }
 
 function toggleRangePicker(){ rp.open ? closeRangePicker() : openRangePicker() }
 function openRangePicker(){
-  const f = parseYmd(currentRange().from)
+  const f = currentRange() ? parseYmd(currentRange().from) : new Date()
   rp.view = new Date(f.getFullYear(), f.getMonth(), 1)
   rp.open = true; rp.start = null; rp.hover = null
   document.getElementById('rpPop').hidden = false
@@ -1488,14 +1511,14 @@ function rpPanel(base, showPrev, showNext, a, b){
 }
 function drawRangePicker(){
   const r = currentRange()
-  let a = r.from, b = r.to
+  let a = r ? r.from : null, b = r ? r.to : null
   if(rp.start){ a = rp.start; b = rp.hover || rp.start; if(b < a) [a, b] = [b, a] }
   const narrow = window.matchMedia('(max-width: 700px)').matches
   const next = new Date(rp.view.getFullYear(), rp.view.getMonth()+1, 1)
   document.getElementById('rpPop').innerHTML = rpPanel(rp.view, true, narrow, a, b) + rpPanel(next, false, true, a, b)
   // the field shows the dates being picked, like Torque
-  document.getElementById('rpFrom').textContent = a
-  document.getElementById('rpTo').textContent = b
+  document.getElementById('rpFrom').textContent = a || RP_EMPTY[0]
+  document.getElementById('rpTo').textContent = b || RP_EMPTY[1]
 }
 
 ;(function initRangePicker(){
@@ -1569,14 +1592,29 @@ async function tqItemCounts(ids){
   return counts
 }
 
-async function tqLoad(force){
-  const b = rangeBounds()
-  const key = b.fromISO + '|' + b.toISO
-  const live = b.to.getTime() > Date.now()
-  const stale = force || periodCache.key !== key || (live && Date.now() - periodCache.at > 5*60000)
+// What the open page needs from Torque:
+// - Parados: the orders in the flow now (also on a computer, where the page itself raises the alerts)
+// - Separação / Velocidade: the orders created in the chosen period (nothing until one is chosen)
+// - Alertas / Justificados on the phone: nothing — they read what the background monitor saved
+function tqNeeds(){
+  return {
+    open: curGerTab === 'parados' || !window.AndroidBridge,
+    period: PERIOD_TABS.includes(curGerTab) && !!tqRange
+  }
+}
 
-  // what is stuck now (Parados + notifications): always fresh
-  const open = await tqRows('sales_orders_whsl', [{ method:'equal', attribute:'status', values:TQ_OPEN }, ORDER_FIELDS])
+// returns false when the open page needed nothing from Torque
+async function tqLoad(force){
+  const need = tqNeeds()
+  if(!need.open && !need.period) return false
+  const b = rangeBounds()
+  const key = b ? b.fromISO + '|' + b.toISO : ''
+  const stale = need.period && (force || periodCache.key !== key || (b.to.getTime() > Date.now() && Date.now() - periodCache.at > 5*60000))
+
+  const open = need.open
+    ? await tqRows('sales_orders_whsl', [{ method:'equal', attribute:'status', values:TQ_OPEN }, ORDER_FIELDS])
+    : []
+  if(!need.period) periodCache = { key:'', orders:[], hist:[], items:{}, at:0 }
   if(stale){
     const st = document.getElementById('fbStatus')
     if(st) st.textContent = 'Carregando período…'
@@ -1622,6 +1660,7 @@ async function tqLoad(force){
       tipo: TQ_TIPO[o.priority] || '',
       createdAt: Date.parse(o.$createdAt) || 0,
       inPeriod: periodIds.has(o.$id),
+      isOpen: openIds.has(o.$id),
       itens: itemCount[o.$id] ? itemCount[o.$id].itens : 0,
       skus: itemCount[o.$id] ? itemCount[o.$id].skus : 0,
       orderType: o.type || '',
@@ -1635,6 +1674,7 @@ async function tqLoad(force){
   })
   allRequests = next
   contacts = Object.keys(next).map(id => ({ token:id, name: branchNames[id] || id }))
+  return true
 }
 
 let tqTimer = null, tqBusy = false, tqPending = false
@@ -1646,10 +1686,14 @@ async function tqRefresh(manual){
   try{
     if(!Object.keys(branchNames).length) await tqLoadBranches()
     if(!Object.keys(userNames).length) await tqLoadUsers()
-    await tqLoad(manual)
-    let n = 0
-    Object.values(allRequests).forEach(reqs => Object.values(reqs).forEach(r => { if(SLA_ACTIVE.has(r.status)) n++ }))
-    if(st) st.textContent = `${n} no fluxo · ${fmtTime(Date.now())}`
+    const loaded = await tqLoad(manual)
+    if(loaded){
+      let n = 0
+      Object.values(allRequests).forEach(reqs => Object.values(reqs).forEach(r => { if(r.isOpen && SLA_ACTIVE.has(r.status)) n++ }))
+      if(st) st.textContent = tqNeeds().open ? `${n} no fluxo · ${fmtTime(Date.now())}` : `Atualizado às ${fmtTime(Date.now())}`
+    }else if(st && /Conectando|Desconectado|Sem conexão/.test(st.textContent)){
+      st.textContent = 'Conectado'
+    }
     syncPipelineToAndroid()
     checkSlaNotifs()
     renderGerencial()
